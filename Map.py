@@ -6,6 +6,12 @@ class Map():
         super().__init__()
         self.mapData = {}
         self.continents = {}
+        self.positionData = {}
+
+    def getContinentOfIndex(self, index):
+        for key, value in self.continents.items():
+            if(index in value):
+                return key
 
     def readMapData(self, filePath):
         currentContinent = ""
@@ -30,8 +36,10 @@ class Map():
                 data = line.split(":")
                 index = int(data[0].strip())
                 connections = [int(x.strip()) for x in data[1].split(",")]
+                position = tuple([int(x.strip()) for x in data[2].split(",")])
                 self.mapData[index] = connections
                 self.continents[currentContinent].append(index)
+                self.positionData[index] = position
             except IndexError:
                 print(f"Malform line in mapdata: '{line}'", file=sys.stderr)
                 continue
