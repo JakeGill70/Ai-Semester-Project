@@ -7,6 +7,8 @@ class Map():
         self.mapData = {}
         self.continents = {}
         self.positionData = {}
+        self.owners = {}
+        self.armies = {}
         # TODO: Make these readable from the MapData instead of hardcoded
         self.continentColors = {
             "North America": (255, 255, 0),  # Yellow
@@ -16,6 +18,19 @@ class Map():
             "Asia": (0, 0, 255),  # Blue
             "Australia": (255, 0, 255)  # Pink
         }
+
+    def placeArmy(self, playerName, amount, territoryId):
+        if(self.owners[territoryId]):
+            if(self.owners[territoryId] != playerName):
+                raise Exception(f"Player '{playerName}' is \
+                        trying to place {amount} armies \
+                        at {territoryId} controlled by \
+                        {self.owners[territoryId]}")
+            else:
+                self.armies[territoryId] += amount
+        else:
+            self.owners[territoryId] = playerName
+            self.armies[territoryId] += amount
 
     def getContinentOfIndex(self, index):
         for key, value in self.continents.items():
@@ -49,6 +64,8 @@ class Map():
                 self.mapData[index] = connections
                 self.continents[currentContinent].append(index)
                 self.positionData[index] = position
+                self.owners[index] = ""
+                self.armies[index] = 0
             except IndexError:
                 print(f"Malform line in mapdata: '{line}'", file=sys.stderr)
                 continue
