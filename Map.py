@@ -1,14 +1,11 @@
 import sys
+from Territory import Territory
 
 
 class Map():
     def __init__(self):
         super().__init__()
-        self.mapData = {}
-        self.continents = {}
-        self.positionData = {}
-        self.owners = {}
-        self.armies = {}
+        self.territories = {}
         # TODO: Make these readable from the MapData instead of hardcoded
         self.continentColors = {
             "North America": (255, 255, 0),  # Yellow
@@ -19,23 +16,22 @@ class Map():
             "Australia": (255, 0, 255)  # Pink
         }
 
+    def getPositions(self):
+        positions = {}
+        for territory in self.territories:
+            positions[territory.index] = territory.position
+        return positions
+
     def placeArmy(self, playerName, amount, territoryId):
-        if(self.owners[territoryId]):
-            if(self.owners[territoryId] != playerName):
-                raise Exception(f"Player '{playerName}' is \
+        territory = self.territories[territoryId]
+        if(territory.owner and territory.owner != playerName):
+            raise Exception(f"Player '{playerName}' is \
                         trying to place {amount} armies \
                         at {territoryId} controlled by \
                         {self.owners[territoryId]}")
-            else:
-                self.armies[territoryId] += amount
         else:
-            self.owners[territoryId] = playerName
-            self.armies[territoryId] += amount
-
-    def getContinentOfIndex(self, index):
-        for key, value in self.continents.items():
-            if(index in value):
-                return key
+            territory.army += amount
+            territory.owner = playerName
 
     def readMapData(self, filePath):
         currentContinent = ""
@@ -49,7 +45,6 @@ class Map():
             if(line.strip().startswith("continent")):
                 try:
                     currentContinent = line.split("=")[1].strip()
-                    self.continents[currentContinent] = []
                     continue
                 except IndexError:
                     print(f"Malform line in mapdata: '{line}'", file=sys.stderr)
@@ -61,20 +56,17 @@ class Map():
                 index = int(data[0].strip())
                 connections = [int(x.strip()) for x in data[1].split(",")]
                 position = tuple([int(x.strip()) for x in data[2].split(",")])
-                self.mapData[index] = connections
-                self.continents[currentContinent].append(index)
-                self.positionData[index] = position
-                self.owners[index] = ""
-                self.armies[index] = 0
+                self.territories[index] = Territory(index, connections, currentContinent, position)
             except IndexError:
                 print(f"Malform line in mapdata: '{line}'", file=sys.stderr)
                 continue
         f.close()
 
         # Verify all connections are bi-directional
-        for index, connections in self.mapData.items():
-            for i in connections:
-                if(index not in self.mapData[i]):
+        for territory in self.territories.values():
+            for connectingIndex in territory.connections:
+                connectingTerritory = self.territories[connectingIndex]
+                if(territory.index not in connectingTerritory.connections):
                     print(
                         f"Uni-directional connection found. {index} is connected to {i}, but {i} is not connected to {index}",
                         file=sys.stderr)
