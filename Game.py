@@ -12,6 +12,7 @@ class Game():
     def __init__(self):
         self.width = 800
         self.height = 600
+        self.font = None
 
     def drawCircle(self, screen, color, x, y, radius=20):
         pygame.draw.circle(screen, color, (x, y), radius)
@@ -99,6 +100,14 @@ class Game():
 
         return positions
 
+    def drawInfo(self, screen, positions, map):
+        for index, connections in map.mapData.items():
+            info = map.owners[index] + ":" + str(map.armies[index])
+            label = self.font.render(info, False, (255, 255, 255, 255), (0, 0, 0, 120))
+            pos = map.positionData[index]
+            size = self.font.size(info)
+            screen.blit(label, (pos[0]-size[0]/2, pos[1]-size[1]/2))
+
     def drawNodes(self, screen, positions, map, nodeSize):
         for index in map.mapData.keys():
             color = self.getColor(index, map)
@@ -120,17 +129,23 @@ class Game():
 
     def drawMap(self, screen, map):
 
-        nodeRadius = 12
+        nodeRadius = 20
         # rm positions = self.getRandomPositions(nodeRadius*2) # Multiply by 2 seems to space everything out well
         positions = map.positionData
         self.drawNodes(screen, positions, map, nodeRadius)
         self.drawConnections(screen, positions, map)
+        self.drawInfo(screen, positions, map)
 
         pygame.display.update()
 
     def showWindow(self, map):
 
         screen = pygame.display.set_mode((self.width, self.height))
+
+        if(not self.font):
+            pygame.font.init()  # you have to call this at the start,
+            # if you want to use this module.
+            self.font = pygame.font.SysFont('monospace', 14)
 
         self.drawMap(screen, map)
 
@@ -145,4 +160,9 @@ class Game():
 game = Game()
 map = Map()
 map.readMapData("MapData.txt")
+
+for x in map.mapData.keys():
+    owner = random.choice(["A", "B", "C", "D"])
+    amt = random.randint(2, 99)
+    map.placeArmy(owner, amt, x)
 game.showWindow(map)
