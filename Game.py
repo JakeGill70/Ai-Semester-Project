@@ -5,20 +5,13 @@ import random
 import math
 import time
 from collections import deque
+from Interpolation import Interpolation
 
 
 class Game():
     def __init__(self):
         self.width = 800
         self.height = 600
-        self.continentColors = {
-            "North America": (255, 255, 0),  # Yellow
-            "South America": (255, 0, 0),  # Red
-            "Europe": (200, 200, 200),  # Grey
-            "Africa": (0, 255, 0),  # Green
-            "Asia": (0, 0, 255),  # Blue
-            "Australia": (255, 0, 255)  # Pink
-        }
 
     def drawCircle(self, screen, color, x, y, radius=20):
         pygame.draw.circle(screen, color, (x, y), radius)
@@ -26,13 +19,19 @@ class Game():
     def drawLine(self, screen, color, posA, posB, width=3):
         pygame.draw.line(screen, color, posA, posB, width)
 
-    def getRandomPositionAboutCircle(self, x, y, radius=50):
-        angle = random.random()*math.pi*2
-        cx = math.cos(angle) * radius
-        cy = math.sin(angle) * radius
-        x += cx
-        y += cy
-        return (x, y)
+    def drawLine_blended(self, screen, colorA, colorB, posA, posB, interpolationSteps=10, thickness=2):
+        for x in range(1, interpolationSteps):
+            p = x/interpolationSteps
+            p_less = p - (1/interpolationSteps)
+            color = Interpolation.interpolateTuple(colorA, colorB, p)
+
+            start = Interpolation.interpolateTuple(posA, posB, p_less)
+            end = Interpolation.interpolateTuple(posA, posB, p)
+            self.drawLine(screen, color, start, end, thickness)
+
+    def getColor(self, index, map):
+        continent = map.getContinentOfIndex(index)
+        return map.continentColors[continent]
 
     def getDistance(self, posA, posB):
         x1 = posA[0]
@@ -42,6 +41,14 @@ class Game():
         x = (x2-x1)*(x2-x1)
         y = (y2-y1)*(y2-y1)
         return math.sqrt(x+y)
+
+    def getRandomPositionAboutCircle(self, x, y, radius=50):
+        angle = random.random()*math.pi*2
+        cx = math.cos(angle) * radius
+        cy = math.sin(angle) * radius
+        x += cx
+        y += cy
+        return (x, y)
 
     def addToPositions(self, addedIndex, index, positions, nodeRadius):
         isTouching = True
@@ -69,11 +76,7 @@ class Game():
             maxRadius += 5
         positions[index] = tmpPos
 
-    def getColor(self, index, map):
-        continent = map.getContinentOfIndex(index)
-        return self.continentColors[continent]
-
-    def getPositions(self, nodeRadius):
+    def getRandomPositions(self, nodeRadius):
         # Use BFS to add nodes to the game board
         # Create psudeo-random positions for each node
         startingNode = 16
@@ -101,22 +104,6 @@ class Game():
             color = self.getColor(index, map)
             self.drawCircle(screen, color, positions[index][0], positions[index][1], nodeSize)
 
-    def interpolate(self, a, b, p):
-        a *= 1.0-p
-        b *= p
-        return a+b
-
-    def interpolateTuple(self, a, b, p):
-        if(len(a) != len(b)):
-            print(f"Tuples '{a}' and '{b}' are not the same size")
-            return
-
-        values = []
-        for i in range(len(a)):
-            values.append(self.interpolate(a[i], b[i], p))
-
-        return tuple(values)
-
     def drawConnections(self, screen, positions, map):
         for index, connections in map.mapData.items():
             for connectingIndex in connections:
@@ -125,24 +112,17 @@ class Game():
                 posA = positions[index]
                 posB = positions[connectingIndex]
 
+                # Colors of two nodes are the same, just draw the line
                 if(colorA == colorB):
                     self.drawLine(screen, colorA, posA, posB, 2)
-                    continue
-
-                interpolationsteps = 10
-                for x in range(1, interpolationsteps):
-                    p = x/interpolationsteps
-                    p_less = p - (1/interpolationsteps)
-                    color = self.interpolateTuple(colorA, colorB, p)
-
-                    start = self.interpolateTuple(posA, posB, p_less)
-                    end = self.interpolateTuple(posA, posB, p)
-                    self.drawLine(screen, color, start, end, 2)
+                else:
+                    self.drawLine_blended(screen, colorA, colorB, posA, posB)
 
     def drawMap(self, screen, map):
 
         nodeRadius = 12
-        positions = map.positionData  # self.getPositions(20)
+        # rm positions = self.getRandomPositions(nodeRadius*2) # Multiply by 2 seems to space everything out well
+        positions = map.positionData
         self.drawNodes(screen, positions, map, nodeRadius)
         self.drawConnections(screen, positions, map)
 
@@ -155,23 +135,11 @@ class Game():
         self.drawMap(screen, map)
 
         isDrawingMap = True
-
-        count = 0
-
         while(isDrawingMap):
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     isDrawingMap = False
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    pygame.draw.rect(screen, (0, 0, 0), (0, 0, self.width, self.height))
-                    # print(event.pos)
-                    #self.drawMap(screen, map)
-                    print(f"{count}:{str(map.mapData[count])[1:-1]}:{event.pos[0]},{event.pos[1]}")
-                    count += 1
-
-        # myfont = pygame.font.SysFont("monospace", 75)
 
 
 game = Game()

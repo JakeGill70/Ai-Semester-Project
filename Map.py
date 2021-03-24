@@ -7,6 +7,15 @@ class Map():
         self.mapData = {}
         self.continents = {}
         self.positionData = {}
+        # TODO: Make these readable from the MapData instead of hardcoded
+        self.continentColors = {
+            "North America": (255, 255, 0),  # Yellow
+            "South America": (255, 0, 0),  # Red
+            "Europe": (200, 200, 200),  # Grey
+            "Africa": (0, 255, 0),  # Green
+            "Asia": (0, 0, 255),  # Blue
+            "Australia": (255, 0, 255)  # Pink
+        }
 
     def getContinentOfIndex(self, index):
         for key, value in self.continents.items():
