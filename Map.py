@@ -22,6 +22,9 @@ class Map():
             positions[territory.index] = territory.position
         return positions
 
+    def getTerritoriesByPlayer(self, playerName):
+        return [x for x in self.territories.values() if x == playerName]
+
     def placeArmy(self, playerName, amount, territoryId):
         territory = self.territories[territoryId]
         if(territory.owner and territory.owner != playerName):

@@ -84,14 +84,3 @@ class Game():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     isDrawingMap = False
-
-
-game = Game()
-map = Map()
-map.readMapData("MapData.txt")
-
-for x in map.territories.keys():
-    owner = random.choice(["A", "B", "C", "D"])
-    amt = random.randint(2, 99)
-    map.placeArmy(owner, amt, x)
-game.showWindow(map)
