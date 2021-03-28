@@ -40,7 +40,7 @@ class Agent:
                                  and map.territories[ti].owner != ""]
         return adjacentTerritoryData
 
-    def pickTerritory(self, possibleTerritoryData, map):
+    def pickTerritoryForPlacement(self, possibleTerritoryData, map):
         score = 0
         bestScore = -1
         bestIndex = -1
@@ -97,12 +97,15 @@ class Agent:
 
         return bestIndex
 
+    def placeUnit(self, map):
+        controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
+        territoryIndex = self.pickTerritoryForPlacement(controlledTerritoryIndices, map)
+        map.placeArmy(self.name, 1, territoryIndex)
+
     def placeUnitSetup(self, map):
         emptyTerritoriesIndices = map.getTerritoriesByPlayer("")
         if(emptyTerritoriesIndices):
-            territoryIndex = self.pickTerritory(emptyTerritoriesIndices, map)
+            territoryIndex = self.pickTerritoryForPlacement(emptyTerritoriesIndices, map)
             map.placeArmy(self.name, 1, territoryIndex)
         else:
-            controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
-            territoryIndex = self.pickTerritory(controlledTerritoryIndices, map)
-            map.placeArmy(self.name, 1, territoryIndex)
+            placeUnit(map)
