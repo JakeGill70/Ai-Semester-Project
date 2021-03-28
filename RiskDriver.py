@@ -2,28 +2,25 @@ from Map import Map
 import random
 from Game import Game
 from Territory import Territory
+from Agent import Agent
+
+
+def setupGameBoard(agentList, initialUnits, map):
+    agentListSize = len(agentList)
+    initialUnits *= agentListSize
+    agentIndex = 0
+    for i in range(initialUnits):
+        agentList[agentIndex].placeUnitSetup(map)
+        agentIndex += 1
+        agentIndex = agentIndex % agentListSize
+
 
 game = Game()
 map = Map()
 map.readMapData("MapData.txt")
 
-players = ["A", "B", "C", "D"]
-count = 30
+agents = [Agent("Jake"), Agent("Xander"), Agent("Sabrina"), Agent("Rusty")]
 
-c = 0
-
-for i in range(count):
-    for player in players:
-        emptyTerritories = map.getTerritoriesByPlayer("")
-        myTerritories = map.getTerritoriesByPlayer(player)
-        selectedTerritory = None
-        if(len(emptyTerritories) > 0):
-            selectedTerritory = random.choice(emptyTerritories)
-        else:
-            selectedTerritory = random.choice(myTerritories)
-        map.placeArmy(player, 1, selectedTerritory.index)
-        c += 1
-
-print(c)
+setupGameBoard(agents, 30, map)
 
 game.showWindow(map)
