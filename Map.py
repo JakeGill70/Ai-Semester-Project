@@ -23,7 +23,7 @@ class Map():
         return positions
 
     def getTerritoriesByPlayer(self, playerName):
-        return [x for x in self.territories.values() if x == playerName]
+        return [x for x in self.territories.values() if x.owner == playerName]
 
     def placeArmy(self, playerName, amount, territoryId):
         territory = self.territories[territoryId]
