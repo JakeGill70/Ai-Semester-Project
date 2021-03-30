@@ -9,10 +9,10 @@ class AttackSystem:
         self.knownSuccessEstimates = []
         self.knownRemainingEstimates = []
 
-        self.readAttackRemainingStatistics()
-        self.readAttackSuccessStatistics()
+        self.readAttackRemainingStatistics("AttackRemainingStatistics.csv")
+        self.readAttackSuccessStatistics("AttackSuccessStatistics.csv")
 
-    def readAttackRemainingStatistics(self, filePath="AttackRemainingStatistics.csv"):
+    def readAttackRemainingStatistics(self, filePath):
         '''
             CSV generated from the floor of the average remaining 
             units in 1000 battle simulations run by this program
@@ -30,7 +30,7 @@ class AttackSystem:
 
         self.knownRemainingEstimates = data
 
-    def readAttackSuccessStatistics(self, filePath="AttackSuccessStatistics.csv"):
+    def readAttackSuccessStatistics(self, filePath):
         '''
             CSV generated from this dataset:
             http://www.cs.man.ac.uk/~iain/riskstats.php
