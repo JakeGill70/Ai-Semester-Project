@@ -32,7 +32,7 @@ class Game():
 
     def drawInfo(self, screen, map):
         for territory in map.territories.values():
-            info = f"{territory.owner}:{territory.army}"
+            info = str(territory)
             label = self.font.render(info, False, (255, 255, 255, 255), (0, 0, 0, 120))
             pos = territory.position
             size = self.font.size(info)
