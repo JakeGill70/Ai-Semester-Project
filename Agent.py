@@ -13,9 +13,9 @@ class Agent:
         self.characteristics = {
             "Placement": {
                 "Anywhere": AgentCharacteristic(3, "Placing a unit anywhere"),
-                "Enemy Adjacent": AgentCharacteristic(5, "Placing a unit on a country connected to a country controlled by a different player"),
-                "Border Adjacent": AgentCharacteristic(8, "Placing a unit in a country that borders a country in a different continent"),
-                "Connection Bias": AgentCharacteristic(1, "Placing a unit on a country with connections to multiple other countries, +value per connection"),
+                "Enemy Adjacent": AgentCharacteristic(5, "Placing a unit on a territory connected to a territory controlled by a different player"),
+                "Border Adjacent": AgentCharacteristic(8, "Placing a unit in a territory that borders a country in a different continent"),
+                "Connection Bias": AgentCharacteristic(1, "Placing a unit on a territory with connections to multiple other countries, +value per connection"),
                 "Placement Bias Multiplier": AgentCharacteristic(0.5, "Placing a unit where there already are other units, *value per army")
             },
             "Preference": {
@@ -86,14 +86,14 @@ class Agent:
             # Score multipliers
             # Diminishing Return Multiplier
             diminishingReturnMultiplier = pow(
-                self.characteristics["Placement"]["Diminishing Returns"].value, territoryData.army)
-            score *= self.characteristics["Placement"]["Diminishing Returns"].value
+                self.characteristics["Placement"]["Placement Bias Multiplier"].value, territoryData.army)
+            score *= diminishingReturnMultiplier
 
             if(score > bestScore):
                 bestScore = score
                 bestIndex = territoryData.index
 
-            print(f"Index: {territoryData.index}, Score: {score}, BestIndex: {bestIndex}")
+            #print(f"Index: {territoryData.index}, Score: {score}, BestIndex: {bestIndex}")
 
         return bestIndex
 
@@ -108,4 +108,4 @@ class Agent:
             territoryIndex = self.pickTerritoryForPlacement(emptyTerritoriesIndices, map)
             map.placeArmy(self.name, 1, territoryIndex)
         else:
-            placeUnit(map)
+            self.placeUnit(map)
