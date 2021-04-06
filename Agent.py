@@ -14,7 +14,8 @@ class Agent:
             "Placement": {
                 "Anywhere": AgentCharacteristic(3, "Placing a unit anywhere"),
                 "Enemy Adjacent": AgentCharacteristic(5, "Placing a unit on a territory connected to a territory controlled by a different player"),
-                "Border Adjacent": AgentCharacteristic(8, "Placing a unit in a territory that borders a country in a different continent"),
+                "Ally Adjacent": AgentCharacteristic(8, "Placing a unit on a territory connected to a territory controlled by the same player"),
+                "Border Adjacent": AgentCharacteristic(13, "Placing a unit in a territory that borders a country in a different continent"),
                 "Connection Bias": AgentCharacteristic(1, "Placing a unit on a territory with connections to multiple other countries, +value per connection"),
                 "Placement Bias Multiplier": AgentCharacteristic(0.5, "Placing a unit where there already are other units, *value per army")
             },
@@ -40,6 +41,12 @@ class Agent:
                                  and map.territories[ti].owner != ""]
         return adjacentTerritoryData
 
+    def getTerritoryDataAllyAdjacent(self, territoryIndex, map):
+        territoryData = map.territories[territoryIndex]
+        adjacentTerritoryData = [map.territories[ti] for ti in territoryData.connections
+                                 if map.territories[ti].owner == self.name]
+        return adjacentTerritoryData
+
     def pickTerritoryForPlacement(self, possibleTerritoryData, map):
         score = 0
         bestScore = -1
@@ -51,7 +58,9 @@ class Agent:
             enemyAdjacentsData = self.getTerritoryDataEnemyAdjacent(territoryData.index, map)
             score += self.characteristics["Placement"]["Enemy Adjacent"].value if self.getTerritoryDataEnemyAdjacent(
                 territoryData.index, map) else 0
-            score += self.characteristics["Placement"]["Border Adjacent"].value if self.getTerritoryDataEnemyAdjacent(
+            score += self.characteristics["Placement"]["Ally Adjacent"].value if self.getTerritoryDataAllyAdjacent(
+                territoryData.index, map) else 0
+            score += self.characteristics["Placement"]["Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(
                 territoryData.index, map) else 0
             score += self.characteristics["Placement"]["Connection Bias"].value * len(territoryData.connections)
 
