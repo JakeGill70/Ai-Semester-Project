@@ -1,4 +1,5 @@
 from collections import namedtuple
+import math
 
 
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
@@ -32,7 +33,8 @@ class Agent:
                 "Destroy Bias": AgentCharacteristic(1, "Estimated amount of defending units destroyed, +1 value per unit"),
                 "Remain Bias": AgentCharacteristic(-1, "Estimated amount of attacking units destroyed, -1 value per unit"),
                 "Safe Threshold": AgentCharacteristic(0.95, "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky"),
-                "Minimal Success Chance": AgentCharacteristic(0.5, "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable")
+                "Minimal Success Chance": AgentCharacteristic(0.5, "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable"),
+                "Minimal Remaining Percent": AgentCharacteristic(0.1, "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack")
             },
             "Preference": {
                 "Larger": AgentCharacteristic(1, "Preference to attack larger players"),
@@ -133,6 +135,7 @@ class Agent:
         for territory in controlledTerritoriesThatCanAttack:
             enemyConnections = [map.territories[index]
                                 for index in territory.connections if map.territories[index].owner != self.name]
+
             for enemyTerritory in enemyConnections:
                 # Get attack estimate
                 attackEstimate = atkSys.getAttackEstimate(territory.army, enemyTerritory.army)
@@ -183,6 +186,40 @@ class Agent:
 
         # Return the best option found
         return AttackSelection(bestAttackingTerritory.index, bestDefendingTerritory.index, bestAttackEstimate)
+
+    def attackTerritory(self, pickTerritoryResult, map, atkSys):
+        if(not pickTerritoryResult):
+            # rm print(f"{self.name} chose not to attack this turn")
+            return
+
+        attackingTerritory = map.territories[pickTerritoryResult.attackIndex]
+        defendingTerritory = map.territories[pickTerritoryResult.defendIndex]
+
+        attackingArmies = attackingTerritory.army - 1  # Keep one remaining on the territory
+        defendingArmies = defendingTerritory.army
+
+        minimumAmountRemaining = math.floor(
+            attackingArmies * self.characteristics["Attack"]["Minimal Remaining Percent"].value)
+
+        # Actually perform the attack
+        attackResult = atkSys.attack(attackingArmies, defendingArmies, minimumAmountRemaining)
+
+        # rm print(f"Attacking ({defendingTerritory}) from ({attackingTerritory}) was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}")
+
+        # Keep any remaining armies
+        # Don't forget about the 1 that wasn't allowed to leave
+        attackingTerritory.army = attackResult.attackers + 1
+
+        # Let the defenders keep their remaining armies
+        defendingTerritory.army = attackResult.defenders
+
+        # If the attack was successful, change ownership
+        attackSuccessful = (attackResult.defenders == 0)
+        if(attackSuccessful):
+            defendingTerritory.owner = self.name
+            # Take an attacking army and place it on the new territory
+            defendingTerritory.army = 1
+            attackingTerritory.army -= 1
 
     def placeUnit(self, map):
         controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
