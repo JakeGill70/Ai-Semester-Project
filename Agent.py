@@ -201,7 +201,7 @@ class Agent:
     def attackTerritory(self, pickTerritoryResult, map, atkSys):
         if(not pickTerritoryResult):
             # rm print(f"{self.name} chose not to attack this turn")
-            return
+            return None
 
         attackingTerritory = map.territories[pickTerritoryResult.attackIndex]
         defendingTerritory = map.territories[pickTerritoryResult.defendIndex]
@@ -217,6 +217,7 @@ class Agent:
 
         # rm print(f"Attacking ({defendingTerritory}) from ({attackingTerritory}) was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}")
 
+        # FIXME: Shouldn't this really be handled by the map object, not the agent?
         # Keep any remaining armies
         # Don't forget about the 1 that wasn't allowed to leave
         attackingTerritory.army = attackResult.attackers + 1
@@ -232,10 +233,13 @@ class Agent:
             defendingTerritory.army = 1
             attackingTerritory.army -= 1
 
+        return attackResult
+
     def placeUnit(self, map):
         controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
         territoryIndex = self.pickTerritoryForPlacement(controlledTerritoryIndices, map)
         map.placeArmy(self.name, 1, territoryIndex)
+        return territoryIndex
 
     def placeUnitSetup(self, map):
         emptyTerritoriesIndices = map.getTerritoriesByPlayer("")

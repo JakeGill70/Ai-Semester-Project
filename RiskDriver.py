@@ -16,6 +16,17 @@ def setupGameBoard(agentList, initialUnits, map):
         agentIndex = agentIndex % agentListSize
 
 
+def attackUntilUnfavorable(agent, map, atkSys):
+    while(True):
+        pickTerritoryResult = agent.pickTerritoryForAttack(map, atkSys)
+        attackResult = agent.attackTerritory(pickTerritoryResult, map, atkSys)
+        if(attackResult):
+            print(f"{agent.name}'s attack from #{pickTerritoryResult.attackIndex} to #{pickTerritoryResult.defendIndex} was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}.")
+        else:
+            print(f"{agent.name} decided to stop attacking.")
+            break
+
+
 game = Game()
 map = Map()
 map.readMapData("MapData.txt")
@@ -29,5 +40,49 @@ setupGameBoard(agents, 30, map)
 pickTerritoryResult = agents[0].pickTerritoryForAttack(map, atkSys)
 agents[0].attackTerritory(pickTerritoryResult, map, atkSys)
 
+MAX_TURN_COUNT = 20
+GRAPH_UPDATE_FREQUENCY = 10
+turnCount = 0
+agentIndex = -1
+while(turnCount < MAX_TURN_COUNT):
+    turnCount += 1
+    agentIndex = (agentIndex + 1) % len(agents)
+    print(f"=====================")
+    print(f"    Turn: {turnCount} : {agents[agentIndex].name}")
+    print(f"=====================")
+    # Place Units
+    newUnits = map.getNewUnitCountForPlayer(agents[agentIndex].name)
+    for i in range(newUnits):
+        placementIndex = agents[agentIndex].placeUnit(map)
+        print(f"{agents[agentIndex].name} placed a unit at #{placementIndex}.")
+    # Attack
+    attackUntilUnfavorable(agents[agentIndex], map, atkSys)
 
+    # Period update
+    if(turnCount % GRAPH_UPDATE_FREQUENCY == 0):
+        game.showWindow(map)
+
+    # Remove defeated players
+    agentsToRemove = []
+    for agent in agents:
+        if(len(map.getTerritoriesByPlayer(agent.name)) == 0):
+            print(f"{agent.name} has been defeated by {agents[agentIndex].name}!")
+            agentsToRemove.append(agent)
+            game.showWindow(map)
+            # input()
+    for agent in agentsToRemove:
+        agents.remove(agent)
+
+    # Check for winner
+    if(len(agents) == 1):
+        print(f"{agents[0].name} is the winner!")
+        break
+
+if(turnCount >= MAX_TURN_COUNT):
+    print(f"Max turn limit reached, determining winner based on territory, using army count as tie breaker.")
+    # TODO: Do like this print statement says :P
+    print(f"Tied winners: {[x.name for x in agents]}")
+
+
+print("Presenting final map")
 game.showWindow(map)
