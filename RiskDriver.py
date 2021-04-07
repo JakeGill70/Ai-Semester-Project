@@ -37,8 +37,8 @@ agents = [Agent("Jake"), Agent("Xander"), Agent("Sabrina"), Agent("Rusty")]
 
 setupGameBoard(agents, 30, map)
 
-pickTerritoryResult = agents[0].pickTerritoryForAttack(map, atkSys)
-agents[0].attackTerritory(pickTerritoryResult, map, atkSys)
+print("Presenting initial map")
+game.showWindow(map)
 
 MAX_TURN_COUNT = 20
 GRAPH_UPDATE_FREQUENCY = 10
