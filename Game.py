@@ -67,7 +67,7 @@ class Game():
 
         pygame.display.update()
 
-    def showWindow(self, map):
+    def showWindow(self, map, autoCloseTimer=None):
 
         screen = pygame.display.set_mode((self.width, self.height))
 
@@ -78,9 +78,15 @@ class Game():
 
         self.drawMap(screen, map)
 
+        startTime = time.time()
+
         isDrawingMap = True
         while(isDrawingMap):
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    isDrawingMap = False
+
+            if(autoCloseTimer):
+                if(time.time() >= startTime+autoCloseTimer):
                     isDrawingMap = False
