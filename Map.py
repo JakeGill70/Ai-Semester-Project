@@ -96,12 +96,12 @@ class Map():
         asCount = len([x for x in self.getTerritoriesByContinent("Asia") if x.owner == playerName])
         auCount = len([x for x in self.getTerritoriesByContinent("Australia") if x.owner == playerName])
 
-        unitCount += 5 if naCount == self.continentCount("North America") else 0
-        unitCount += 2 if saCount == self.continentCount("South America") else 0
-        unitCount += 5 if euCount == self.continentCount("Europe") else 0
-        unitCount += 3 if afCount == self.continentCount("Africa") else 0
-        unitCount += 7 if asCount == self.continentCount("Asia") else 0
-        unitCount += 2 if auCount == self.continentCount("Australia") else 0
+        unitCount += 5 if naCount == self.continentCount["North America"] else 0
+        unitCount += 2 if saCount == self.continentCount["South America"] else 0
+        unitCount += 5 if euCount == self.continentCount["Europe"] else 0
+        unitCount += 3 if afCount == self.continentCount["Africa"] else 0
+        unitCount += 7 if asCount == self.continentCount["Asia"] else 0
+        unitCount += 2 if auCount == self.continentCount["Australia"] else 0
 
         return unitCount
 
@@ -114,6 +114,8 @@ class Map():
 
         # Continent bonuses
         unitCount += self.getContinentBonus(playerName)
+
+        return unitCount
 
     def getTerritoriesByContinent(self, continentName):
         return [x for x in self.territories.values() if x.continent == continentName]
