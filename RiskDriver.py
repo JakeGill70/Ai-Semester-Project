@@ -40,7 +40,7 @@ setupGameBoard(agents, 30, map)
 print("Presenting initial map")
 game.showWindow(map)
 
-MAX_TURN_COUNT = 20
+MAX_TURN_COUNT = 1000
 GRAPH_UPDATE_FREQUENCY = 10
 turnCount = 0
 agentIndex = -1
@@ -60,7 +60,7 @@ while(turnCount < MAX_TURN_COUNT):
 
     # Period update
     if(turnCount % GRAPH_UPDATE_FREQUENCY == 0):
-        game.showWindow(map)
+        game.showWindow(map, 0.1)
 
     # Remove defeated players
     agentsToRemove = []

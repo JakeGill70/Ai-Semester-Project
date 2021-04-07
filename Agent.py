@@ -24,7 +24,7 @@ class Agent:
                 "Ally Adjacent": AgentCharacteristic(8, "Placing a unit on a territory connected to a territory controlled by the same player"),
                 "Border Adjacent": AgentCharacteristic(13, "Placing a unit in a territory that borders a country in a different continent"),
                 "Connection Bias": AgentCharacteristic(1, "Placing a unit on a territory with connections to multiple other countries, +value per connection"),
-                "Placement Bias Multiplier": AgentCharacteristic(0.5, "Placing a unit where there already are other units, *value per army")
+                "Placement Bias Multiplier": AgentCharacteristic(0.05, "Placing a unit where there already are other units, *value per army")
             },
             "Attack": {
                 "Anywhere": AgentCharacteristic(3, "Attacking anywhere"),
