@@ -85,14 +85,9 @@ class Map():
                         f"Uni-directional connection found. {index} is connected to {i}, but {i} is not connected to {index}",
                         file=sys.stderr)
 
-    def getNewUnitCountForPlayer(self, playerName):
-        # Get "normal" unit amount based on territory count
-        territoryCount = len(self.getTerritoriesByPlayer(playerName))
-        unitCount = math.floor(territoryCount / 3)
-        # You always get at least 3 units
-        unitCount = max(unitCount, 3)
+    def getContinentBonus(self, playerName):
+        unitCount = 0
 
-        # Continent bonuses
         # TODO: Find a way to make these read from a file instead of hardcoded
         naCount = len([x for x in self.getTerritoriesByContinent("North America") if x.owner == playerName])
         saCount = len([x for x in self.getTerritoriesByContinent("South America") if x.owner == playerName])
@@ -107,6 +102,18 @@ class Map():
         unitCount += 3 if afCount == self.continentCount("Africa") else 0
         unitCount += 7 if asCount == self.continentCount("Asia") else 0
         unitCount += 2 if auCount == self.continentCount("Australia") else 0
+
+        return unitCount
+
+    def getNewUnitCountForPlayer(self, playerName):
+        # Get "normal" unit amount based on territory count
+        territoryCount = len(self.getTerritoriesByPlayer(playerName))
+        unitCount = math.floor(territoryCount / 3)
+        # You always get at least 3 units
+        unitCount = max(unitCount, 3)
+
+        # Continent bonuses
+        unitCount += self.getContinentBonus(playerName)
 
     def getTerritoriesByContinent(self, continentName):
         return [x for x in self.territories.values() if x.continent == continentName]
