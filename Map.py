@@ -1,5 +1,6 @@
 import sys
 from Territory import Territory
+import math
 
 
 class Map():
@@ -15,6 +16,8 @@ class Map():
             "Asia": (0, 0, 255),  # Blue
             "Australia": (255, 0, 255)  # Pink
         }
+
+        self.continentCount = {}
 
     def getPositions(self):
         positions = {}
@@ -81,3 +84,35 @@ class Map():
                     print(
                         f"Uni-directional connection found. {index} is connected to {i}, but {i} is not connected to {index}",
                         file=sys.stderr)
+
+    def getNewUnitCountForPlayer(self, playerName):
+        # Get "normal" unit amount based on territory count
+        territoryCount = len(self.getTerritoriesByPlayer(playerName))
+        unitCount = math.floor(territoryCount / 3)
+        # You always get at least 3 units
+        unitCount = max(unitCount, 3)
+
+        # Continent bonuses
+        # TODO: Find a way to make these read from a file instead of hardcoded
+        naCount = len([x for x in self.getTerritoriesByContinent("North America") if x.owner == playerName])
+        saCount = len([x for x in self.getTerritoriesByContinent("South America") if x.owner == playerName])
+        euCount = len([x for x in self.getTerritoriesByContinent("Europe") if x.owner == playerName])
+        afCount = len([x for x in self.getTerritoriesByContinent("Africa") if x.owner == playerName])
+        asCount = len([x for x in self.getTerritoriesByContinent("Asia") if x.owner == playerName])
+        auCount = len([x for x in self.getTerritoriesByContinent("Australia") if x.owner == playerName])
+
+        unitCount += 5 if naCount == self.continentCount("North America") else 0
+        unitCount += 2 if saCount == self.continentCount("South America") else 0
+        unitCount += 5 if euCount == self.continentCount("Europe") else 0
+        unitCount += 3 if afCount == self.continentCount("Africa") else 0
+        unitCount += 7 if asCount == self.continentCount("Asia") else 0
+        unitCount += 2 if auCount == self.continentCount("Australia") else 0
+
+    def getTerritoriesByContinent(self, continentName):
+        return [x for x in self.territories.values() if x.continent == continentName]
+
+    def updateContinentCount(self):
+        continentCounts = {}
+        for continentName in self.continentColors.keys():
+            continentCounts[continentName] = len(self.getTerritoriesByContinent(continentName))
+        self.continentCount = continentCounts

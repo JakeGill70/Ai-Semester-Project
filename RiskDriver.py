@@ -19,6 +19,7 @@ def setupGameBoard(agentList, initialUnits, map):
 game = Game()
 map = Map()
 map.readMapData("MapData.txt")
+map.updateContinentCount()
 atkSys = AttackSystem()
 
 agents = [Agent("Jake"), Agent("Xander"), Agent("Sabrina"), Agent("Rusty")]
