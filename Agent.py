@@ -30,6 +30,7 @@ class Agent:
                 "Anywhere": AgentCharacteristic(3, "Attacking anywhere"),
                 "Ally Adjacent": AgentCharacteristic(5, "Attacking a territory connected to another territory controlled by the attacking player"),
                 "Border Adjacent": AgentCharacteristic(8, "Attacking a territory on the border of a different continent"),
+                "Capture Continent": AgentCharacteristic(13, "Attacking a territory that will give this player control over all territories on a continent if the attack is successful"),
                 "Destroy Bias": AgentCharacteristic(1, "Estimated amount of defending units destroyed, +1 value per unit"),
                 "Remain Bias": AgentCharacteristic(-1, "Estimated amount of attacking units destroyed, -1 value per unit"),
                 "Safe Threshold": AgentCharacteristic(0.95, "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky"),
@@ -162,6 +163,16 @@ class Agent:
                     attackEstimate.attackSuccessChance < self.characteristics["Attack"]["Safe Threshold"].value else 0
                 score += self.characteristics["Preference"]["Safe"].value if  \
                     attackEstimate.attackSuccessChance >= self.characteristics["Attack"]["Safe Threshold"].value else 0
+
+                # Would capturing this territory give a continent bonus?
+                unitBonusBeforeCapture = map.getContinentBonus(self.name)
+                prevOwner = enemyTerritory.owner
+                unitBonusAfterCapture = map.getContinentBonus(self.name)
+                enemyTerritory.owner = prevOwner
+                if(unitBonusBeforeCapture != unitBonusAfterCapture):
+                    score += self.characteristics["Attack"]["Capture Continent"].value
+                    # Consider this an aggressive action
+                    score += self.characteristics["Preference"]["Aggression"].value
 
                 # If there is a best value to compare to
                 if(bestScore != -1):
