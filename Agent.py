@@ -5,6 +5,8 @@ import random
 
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
 
+# TODO: Standardize how to compare the sizes of enemies
+
 
 class AgentCharacteristic:
     def __init__(self, value, description, adjustmentAmt=1.0):
@@ -127,6 +129,7 @@ class Agent:
                 score += self.characteristics["Preference"]["Aggression"].value
                 bestEnemyAdjacentData = self.getTerritoryDataEnemyAdjacent(bestIndex, map) if bestIndex != -1 else []
                 bestEnemySize = 0
+                # FIXME: Is this really the best way to determine enemy size?
                 bestEnemySize = max([td.army for td in bestEnemyAdjacentData]) if (bestEnemyAdjacentData) else 0
                 currEnemySize = max([td.army for td in enemyAdjacentsData])
                 # Assume the placement is riskier move if it is more risky to place
@@ -214,6 +217,7 @@ class Agent:
 
                 # If there is a best value to compare to
                 if(bestScore != -1):
+                    # FIXME: Is this really the best way to compare enemy size?
                     currEnemySize = len(map.getTerritoriesByPlayer(enemyTerritory.owner))
                     bestEnemySize = len(map.getTerritoriesByPlayer(bestDefendingTerritory.owner))
                     if(currEnemySize > bestEnemySize):
