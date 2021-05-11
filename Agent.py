@@ -49,26 +49,26 @@ class Agent:
                 "Enemy Adjacent": AgentCharacteristic(5, "Placing a unit on a territory connected to a territory controlled by a different player"),
                 "Ally Adjacent": AgentCharacteristic(8, "Placing a unit on a territory connected to a territory controlled by the same player"),
                 "Border Adjacent": AgentCharacteristic(13, "Placing a unit in a territory that borders a country in a different continent"),
-                "Connection Bias": AgentCharacteristic(1, "Placing a unit on a territory with connections to multiple other countries, +value per connection"),
-                "Placement Bias Multiplier": AgentCharacteristic(0.05, "Placing a unit where there already are other units, *value per army")
+                "Connection Bias": AgentCharacteristic(1, "Placing a unit on a territory with connections to multiple other countries, +value per connection", 0.25),
+                "Placement Bias Multiplier": AgentCharacteristic(0.05, "Placing a unit where there already are other units, +value per army", 0.01)
             },
             "Attack": {
                 "Anywhere": AgentCharacteristic(3, "Attacking anywhere"),
                 "Ally Adjacent": AgentCharacteristic(5, "Attacking a territory connected to another territory controlled by the attacking player"),
                 "Border Adjacent": AgentCharacteristic(8, "Attacking a territory on the border of a different continent"),
                 "Capture Continent": AgentCharacteristic(13, "Attacking a territory that will give this player control over all territories on a continent if the attack is successful"),
-                "Destroy Bias": AgentCharacteristic(1, "Estimated amount of defending units destroyed, +1 value per unit"),
-                "Remain Bias": AgentCharacteristic(-1, "Estimated amount of attacking units destroyed, -1 value per unit"),
-                "Safe Threshold": AgentCharacteristic(0.95, "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky"),
-                "Minimal Success Chance": AgentCharacteristic(0.5, "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable"),
-                "Minimal Remaining Percent": AgentCharacteristic(0.1, "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack")
+                "Destroy Bias": AgentCharacteristic(1, "Estimated amount of defending units destroyed, +value per unit", 0.1),
+                "Remain Bias": AgentCharacteristic(-1, "Estimated amount of attacking units destroyed, -value per unit", 0.1),
+                "Safe Threshold": AgentCharacteristic(0.95, "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky", 0.01),
+                "Minimal Success Chance": AgentCharacteristic(0.5, "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable", 0.01),
+                "Minimal Remaining Percent": AgentCharacteristic(0.1, "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack", 0.01)
             },
             "Preference": {
-                "Larger": AgentCharacteristic(1, "Preference to attack larger players"),
-                "Smaller": AgentCharacteristic(1, "Preference to attack smaller players"),
-                "Aggression": AgentCharacteristic(1, "Preferrence for aggressive actions"),
-                "Risky": AgentCharacteristic(1, "Preference for risky actions"),
-                "Safe": AgentCharacteristic(1, "Preference for safe actions")
+                "Larger": AgentCharacteristic(1, "Preference to attack larger players", 0.25),
+                "Smaller": AgentCharacteristic(1, "Preference to attack smaller players", 0.25),
+                "Aggression": AgentCharacteristic(1, "Preference for aggressive actions", 0.25),
+                "Risky": AgentCharacteristic(1, "Preference for risky actions", 0.25),
+                "Safe": AgentCharacteristic(1, "Preference for safe actions", 0.25)
             }
         }
 
