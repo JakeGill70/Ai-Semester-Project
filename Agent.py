@@ -4,6 +4,7 @@ import random
 
 
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
+MoveSelection = namedtuple('MoveSelection', 'supplyIndex receiveIndex transferAmount')
 
 # TODO: Standardize how to compare the sizes of enemies
 
@@ -239,6 +240,107 @@ class Agent:
 
         # Return the best option found
         return AttackSelection(bestAttackingTerritory.index, bestDefendingTerritory.index, bestAttackEstimate)
+
+    def pickTerritoryForMovement(self, map):
+        controlledTerritories = map.getTerritoriesByPlayer(self.name)
+        controlledTerritoriesThatCanMove = [x for x in controlledTerritories if x.army > 1]
+
+        score = -1
+        bestScore = -1
+        bestSupplyingTerritory = None
+        bestReceivingTerritory = None
+        bestTransferAmount = None
+
+        for supplyTerritory in controlledTerritoriesThatCanMove:
+            # Get connected territories
+            receivableTerritories = [map.territories[index]
+                                     for index in supplyTerritory.connections if map.territories[index].owner == self.name]
+
+            for receiveTerritory in receivableTerritories:
+                # Skip the movement calculation process if attempting to move units to self
+                if(supplyTerritory == receiveTerritory):
+                    continue
+
+                score = 0
+                # Calculate movement score based on movement settings
+                score += self.characteristics["Movement"]["Anywhere"].value
+                score += self.characteristics["Movement"]["Enemy Adjacent"].value if self.getTerritoryDataEnemyAdjacent(
+                    receiveTerritory.index, map) else 0
+                score += self.characteristics["Movement"]["Ally Adjacent"].value if self.getTerritoryDataAllyAdjacent(
+                    receiveTerritory.index, map) else 0
+                score += self.characteristics["Movement"]["Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(
+                    receiveTerritory.index, map) else 0
+                score += self.characteristics["Movement"]["Connection Bias"].value * len(receiveTerritory.connections)
+                score += self.characteristics["Movement"]["Bigger Territory"].value if receiveTerritory.army > supplyTerritory.army else 0
+                score += self.characteristics["Movement"]["Smaller Territory"].value if receiveTerritory.army < supplyTerritory.army else 0
+
+                # Calculate movement score based on preference settings
+                # Consider it to be aggressive to move into a territory with more enemy than ally connections
+                isAggressive = len(self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map)) > len(
+                    self.getTerritoryDataAllyAdjacent(receiveTerritory.index, map))
+                score += self.characteristics["Preference"]["Aggressive"].value if isAggressive else 0
+                # Consider it risky to move units away from a territory with enemy connections
+                isRisky = len(self.getTerritoryDataEnemyAdjacent(supplyTerritory.index, map)) > 0
+                score += self.characteristics["Preference"]["Risky"].value if isRisky else 0
+                # Consider it safe to move units away from a territory without enemy connections
+                isSafe = len(self.getTerritoryDataEnemyAdjacent(supplyTerritory.index, map)) == 0
+                score += self.characteristics["Preference"]["Safe"].value if isSafe else 0
+
+                # Consider preference to move towards smaller/bigger players as a prescursor to attack
+                # ! Be careful here, because you cannot assume the following:
+                # ! 1.) The current best movement receiver is connected to an enemy territory
+                # ! 2.) The current receiver is connected to an enemy territory
+                # ! 3.) That any territory is connected to a single enemy
+
+                # FIXME: Is this the best way to compare enemy size?
+
+                currTotalEnemySize = 0
+                try:
+                    currEnemyData = self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map)
+                    currConnectedEnemyNames = [x.owner for x in currEnemyData]
+                    # FIXME: Is this the best way to compare enemy size?
+                    currConnectedEnemySize = [map.getTotalArmiesByPlayer(x) for x in currConnectedEnemyNames]
+                    currTotalEnemySize = max(currConnectedEnemySize)
+                except:
+                    pass
+
+                currBestTotalEnemySize = 0
+                try:
+                    currBestEnemyData = self.getTerritoryDataEnemyAdjacent(bestReceivingTerritory.index, map)
+                    currBestConnectedEnemyNames = [x.owner for x in currBestEnemyData]
+
+                    currBestConnectedEnemySize = [map.getTotalArmiesByPlayer(x) for x in currBestConnectedEnemyNames]
+                    currBestTotalEnemySize = max(currBestConnectedEnemySize)
+                except:
+                    pass
+
+                if(currTotalEnemySize > currBestTotalEnemySize):
+                    score += self.characteristics["Preference"]["larger"].value
+                if(currTotalEnemySize < currBestTotalEnemySize):
+                    score += self.characteristics["Preference"]["smaller"].value
+
+                # Determine if this is the best movement
+                if(score > bestScore):
+                    # score = -1
+                    #
+
+                    # Determine how many armies to transfer over
+                    percentToTransfer = self.characteristics["Movement"]["Base Transfer Rate"].value
+                    if(isRisky):
+                        percentToTransfer = self.characteristics["Movement"]["Risky Transfer Rate"].value
+                    if(isSafe):
+                        percentToTransfer = self.characteristics["Movement"]["Safe Transfer Rate"].value
+
+                    unitsToTransfer = supplyTerritory.army * percentToTransfer
+                    # Don't move all units, at least 1 must stay on the supplying territory
+                    if(supplyTerritory.army - unitsToTransfer <= 0):
+                        unitsToTransfer = supplyTerritory.army - 1
+
+                    # Set best stats
+                    bestScore = score
+                    bestSupplyingTerritory = supplyTerritory
+                    bestReceivingTerritory = receiveTerritory
+                    bestTransferAmount = unitsToTransfer
 
     def attackTerritory(self, pickTerritoryResult, map, atkSys):
         if(not pickTerritoryResult):
