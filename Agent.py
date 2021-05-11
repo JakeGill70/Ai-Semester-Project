@@ -63,6 +63,18 @@ class Agent:
                 "Minimal Success Chance": AgentCharacteristic(0.5, "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable", 0.01),
                 "Minimal Remaining Percent": AgentCharacteristic(0.1, "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack", 0.01)
             },
+            "Movement": {
+                "Anywhere": AgentCharacteristic(3, "Moving a unit anywhere"),
+                "Enemy Adjacent": AgentCharacteristic(5, "Moving a unit on a territory connected to a territory controlled by a different player"),
+                "Ally Adjacent": AgentCharacteristic(8, "Moving a unit on a territory connected to a territory controlled by the same player"),
+                "Border Adjacent": AgentCharacteristic(13, "Moving a unit in a territory that borders a country in a different continent"),
+                "Bigger Territory": AgentCharacteristic(3, "Moving units onto a territory with more units."),
+                "Smaller Territory": AgentCharacteristic(5, "Moving units onto a territory with fewer units."),
+                "Connection Bias": AgentCharacteristic(1, "Moving a unit on a territory with connections to multiple other countries, +value per connection", 0.25),
+                "Base Transfer Rate": AgentCharacteristic(0.5, "Base percentage of units to transfer should it be necessary", 0.01),
+                "Risky Transfer Rate": AgentCharacteristic(0.3, "Percentage of units to transfer if the movement is considered risky", 0.01),
+                "Safe Transfer Rate": AgentCharacteristic(0.7, "Percentage of units to transfer if the movement is considered safe", 0.01)
+            },
             "Preference": {
                 "Larger": AgentCharacteristic(1, "Preference to attack larger players", 0.25),
                 "Smaller": AgentCharacteristic(1, "Preference to attack smaller players", 0.25),
