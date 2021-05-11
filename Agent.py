@@ -1,17 +1,43 @@
 from collections import namedtuple
 import math
+import random
 
 
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
 
 
 class AgentCharacteristic:
-    def __init__(self, value, description):
+    def __init__(self, value, description, adjustmentAmt=1.0):
         self.value = value
         self.description = description
+        self.adjustmentAmt = adjustmentAmt
 
     def __int__(self):
         return self.value
+
+    def adjust(self):
+        self.value += self.adjustmentAmt
+
+    def adjust(self, amt):
+        self.value += amt
+
+    def adjust_negative(self):
+        self.value -= self.adjustmentAmt
+
+    def adjust_negative(self, amt):
+        self.value -= amt
+
+    def adjust_random(self):
+        if(bool(random.getrandbits(1))):
+            self.adjust()
+        else:
+            self.adjust_negative()
+
+    def adjust_random(self, amt):
+        if(bool(random.getrandbits(1))):
+            self.adjust(amt)
+        else:
+            self.adjust_negative(amt)
 
 
 class Agent:
