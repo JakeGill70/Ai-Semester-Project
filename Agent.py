@@ -286,3 +286,26 @@ class Agent:
             map.placeArmy(self.name, 1, territoryIndex)
         else:
             self.placeUnit(map)
+
+    def mutate(self, recursiveChance=0.8, majorMutationChance=0.6, mutationMultiplier=1.0):
+
+        recurse = True
+        while(recurse):
+            # Determine if recursion is necessary
+            recurse = random.random() < recursiveChance
+            recursiveChance = recursiveChance/2
+
+            # Determine what to mutate
+            characteristicGroupName = random.choice(self.characteristics.keys)
+            # Determine how to mutate (Single attribute vs. entire group)
+            isMajorMutation = random.random() < majorMutationChance
+            # Perform mutation
+            self.mutateCharacteristic(characteristicGroupName, isMajorMutation, mutationMultiplier)
+
+    def mutateCharacteristic(self, characteristicGroupName, isMajorMutation=False, mutationMultiplier=1.0):
+        if(isMajorMutation):
+            for characteristic in self.characteristics[characteristicGroupName].values:
+                characteristic.adjust_random(characteristic.adjustmentAmt * mutationMultiplier)
+        else:
+            random.choice(self.characteristics[characteristicGroupName]).adjust_random(
+                characteristic.adjustmentAmt * mutationMultiplier)
