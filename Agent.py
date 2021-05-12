@@ -278,7 +278,7 @@ class Agent:
                 # Consider it to be aggressive to move into a territory with more enemy than ally connections
                 isAggressive = len(self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map)) > len(
                     self.getTerritoryDataAllyAdjacent(receiveTerritory.index, map))
-                score += self.characteristics["Preference"]["Aggressive"].value if isAggressive else 0
+                score += self.characteristics["Preference"]["Aggression"].value if isAggressive else 0
                 # Consider it risky to move units away from a territory with enemy connections
                 isRisky = len(self.getTerritoryDataEnemyAdjacent(supplyTerritory.index, map)) > 0
                 score += self.characteristics["Preference"]["Risky"].value if isRisky else 0
@@ -328,7 +328,7 @@ class Agent:
                     if(isSafe):
                         percentToTransfer = self.characteristics["Movement"]["Safe Transfer Rate"].value
 
-                    unitsToTransfer = supplyTerritory.army * percentToTransfer
+                    unitsToTransfer = math.floor(supplyTerritory.army * percentToTransfer)
                     # Don't move all units, at least 1 must stay on the supplying territory
                     if(supplyTerritory.army - unitsToTransfer <= 0):
                         unitsToTransfer = supplyTerritory.army - 1
@@ -339,7 +339,12 @@ class Agent:
                     bestReceivingTerritory = receiveTerritory
                     bestTransferAmount = unitsToTransfer
 
-        return MovementSelection(bestSupplyingTerritory.index, bestReceivingTerritory.index, bestTransferAmount)
+        # ! Don't assume that the agent CAN move an army
+
+        if(bestScore == -1):
+            return None
+        else:
+            return MoveSelection(bestSupplyingTerritory.index, bestReceivingTerritory.index, bestTransferAmount)
 
     def attackTerritory(self, pickTerritoryResult, map, atkSys):
         if(not pickTerritoryResult):
