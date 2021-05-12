@@ -128,3 +128,7 @@ class Map():
         for continentName in self.continentColors.keys():
             continentCounts[continentName] = len(self.getTerritoriesByContinent(continentName))
         self.continentCount = continentCounts
+
+    def moveArmies(self, supplyIndex, receiveIndex, amount):
+        self.territories[supplyIndex].army -= amount
+        self.territories[receiveIndex].army += amount
