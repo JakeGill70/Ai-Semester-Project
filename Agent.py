@@ -339,6 +339,8 @@ class Agent:
                     bestReceivingTerritory = receiveTerritory
                     bestTransferAmount = unitsToTransfer
 
+        return MovementSelection(bestSupplyingTerritory.index, bestReceivingTerritory.index, bestTransferAmount)
+
     def attackTerritory(self, pickTerritoryResult, map, atkSys):
         if(not pickTerritoryResult):
             # rm print(f"{self.name} chose not to attack this turn")
