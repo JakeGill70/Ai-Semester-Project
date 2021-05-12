@@ -162,7 +162,7 @@ class Agent:
                 bestScore = score
                 bestIndex = territoryData.index
 
-            #print(f"Index: {territoryData.index}, Score: {score}, BestIndex: {bestIndex}")
+            # print(f"Index: {territoryData.index}, Score: {score}, BestIndex: {bestIndex}")
 
         return bestIndex
 
@@ -321,9 +321,6 @@ class Agent:
 
                 # Determine if this is the best movement
                 if(score > bestScore):
-                    # score = -1
-                    #
-
                     # Determine how many armies to transfer over
                     percentToTransfer = self.characteristics["Movement"]["Base Transfer Rate"].value
                     if(isRisky):
