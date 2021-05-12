@@ -50,13 +50,22 @@ while(turnCount < MAX_TURN_COUNT):
     print(f"=====================")
     print(f"    Turn: {turnCount} : {agents[agentIndex].name}")
     print(f"=====================")
+
     # Place Units
     newUnits = map.getNewUnitCountForPlayer(agents[agentIndex].name)
     for i in range(newUnits):
         placementIndex = agents[agentIndex].placeUnit(map)
         print(f"{agents[agentIndex].name} placed a unit at #{placementIndex}.")
+
     # Attack
     attackUntilUnfavorable(agents[agentIndex], map, atkSys)
+
+    # Move
+    pickMovementResult = agents[agentIndex].pickTerritoryForMovement(map)
+    if(pickMovementResult):
+        map.moveArmies(pickMovementResult.supplyIndex, pickMovementResult.receiveIndex,
+                       pickMovementResult.transferAmount)
+        print(f"{agents[agentIndex].name} moved {pickMovementResult.transferAmount} units from #{pickMovementResult.supplyIndex} to #{pickMovementResult.receiveIndex}.")
 
     # Period update
     if(turnCount % GRAPH_UPDATE_FREQUENCY == 0):
