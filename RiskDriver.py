@@ -33,6 +33,7 @@ def playGame(agents):
     map.readMapData("MapData.txt")
     map.updateContinentCount()
     atkSys = AttackSystem()
+    winners = []
 
     setupGameBoard(agents, 30, map)
 
@@ -85,15 +86,45 @@ def playGame(agents):
         # Check for winner
         if(len(agents) == 1):
             print(f"{agents[0].name} is the winner!")
+            winners.append(agents[0])
             break
 
     if(turnCount >= MAX_TURN_COUNT):
         print(f"Max turn limit reached, determining winner based on territory, using army count as tie breaker.")
         # TODO: Do like this print statement says :P
-        print(f"Tied winners: {[x.name for x in agents]}")
+
+        # Sort remaining agents by number of territories
+        agents.sort(key=lambda x: len(map.getTerritoriesByPlayer(x.name)))
+
+        # if there is a tie...
+        if(len(map.getTerritoriesByPlayer(agents[0].name)) == len(map.getTerritoriesByPlayer(agents[1].name))):
+            print("Tie!")
+            # Reduce agents to just those with the same number of territories
+            agents = [x for x in agents if len(map.getTerritoriesByPlayer(x.name)) ==
+                      len(map.getTerritoriesByPlayer(agents[0].name))]
+            # Sort remaining agents by number of armies
+            sassy = [map.getTotalArmiesByPlayer(x.name) for x in agents]
+            agents.sort(key=lambda x: map.getTotalArmiesByPlayer(x.name))
+            # if there is still a tie...
+            if(map.getTotalArmiesByPlayer(agents[0].name) == map.getTotalArmiesByPlayer(agents[1].name)):
+                # Reduce agents to just those with the same number of armies
+                agents = [x for x in agents if map.getTotalArmiesByPlayer(
+                    x.name) == map.getTotalArmiesByPlayer(agents[0].name)]
+                # Return all winners that are tied
+                winners = agents
+            else:
+                # There is not still a tie
+                winners.append(agents[0])
+        else:
+            # There is not a tie
+            winners.append(agents[0])
+
+        print(f"Winner(s): {[x.name for x in winners]}")
 
     print("Presenting final map")
     game.showWindow(map, 1.0)
+
+    return winners
 
 
 gameAgents = [Agent("Jake"), Agent("Xander"), Agent("Sabrina"), Agent("Rusty")]
