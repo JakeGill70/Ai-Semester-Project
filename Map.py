@@ -26,7 +26,7 @@ class Map():
         return positions
 
     def getTotalArmiesByPlayer(self, playerName):
-        return sum([x for x.army in self.getTerritoriesByPlayer(playerName)])
+        return sum([x.army for x in self.getTerritoriesByPlayer(playerName)])
 
     def getTerritoriesByPlayer(self, playerName):
         return [x for x in self.territories.values() if x.owner == playerName]
