@@ -315,9 +315,9 @@ class Agent:
                     pass
 
                 if(currTotalEnemySize > currBestTotalEnemySize):
-                    score += self.characteristics["Preference"]["larger"].value
+                    score += self.characteristics["Preference"]["Larger"].value
                 if(currTotalEnemySize < currBestTotalEnemySize):
-                    score += self.characteristics["Preference"]["smaller"].value
+                    score += self.characteristics["Preference"]["Smaller"].value
 
                 # Determine if this is the best movement
                 if(score > bestScore):
