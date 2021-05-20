@@ -1,6 +1,7 @@
 import sys
 from Territory import Territory
 import math
+import copy
 
 
 class Map():
@@ -18,6 +19,16 @@ class Map():
         }
 
         self.continentCount = {}
+
+    def __deepcopy__(self):
+        cpy = Map()
+
+        for k in self.territories.keys():
+            cpy.territories[k] = copy.deepcopy(cpy.territories[k])
+
+        cpy.continentColors = copy.deepcopy(self.continentColors)
+
+        cpy.continentCount = copy.deepcopy(self.continentCount)
 
     def getPositions(self):
         positions = {}
