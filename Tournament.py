@@ -1,10 +1,13 @@
 
 class TournamentEntry:
-    def __init__(self, agent):
-        self.agent = None
+    def __init__(self, agent=None):
+        self.agent = agent
         self.wins = 0
         self.losses = 0
         self.score = 0
+
+    def __str__(self):
+        return f"<{self.agent}, w:{self.wins}, l:{self.losses}, score:{self.score}>"
 
 
 class Tournament:
