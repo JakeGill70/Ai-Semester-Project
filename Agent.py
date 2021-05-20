@@ -1,6 +1,7 @@
 from collections import namedtuple
 import math
 import random
+import copy
 
 
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
@@ -17,6 +18,13 @@ class AgentCharacteristic:
 
     def __int__(self):
         return self.value
+
+    def __deepcopy__(self):
+        cpy = AgentCharacteristic()
+        cpy.value = self.value
+        cpy.description = self.description
+        cpy.adjustmentAmt = adjustmentAmt
+        return cpy
 
     def adjust(self):
         self.value += self.adjustmentAmt
@@ -86,6 +94,13 @@ class Agent:
                 "Safe": AgentCharacteristic(1, "Preference for safe actions", 0.25)
             }
         }
+
+    def __deepcopy__(self):
+        cpy = Agent(self.name)
+
+        for k in self.characteristics.keys():
+            for kk in self.characteristics[k].keys():
+                cpy.characteristics[k][kk] = copy.deepcopy(self.characteristics[k][kk])
 
     def getTerritoryDataBorderAdjacent(self, territoryIndex, map):
         territoryData = map.territories[territoryIndex]
