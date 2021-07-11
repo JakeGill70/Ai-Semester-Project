@@ -12,6 +12,9 @@ class Population:
 
         self.initAllAgents()
 
+    def __len__(self):
+        return len(self.allAgents)
+
     def clear(self):
         self.allAgents = []
 
@@ -44,3 +47,10 @@ class Population:
             matchUp = self.allAgents[i: i+groupSize]
             matchUps.append(matchUp)
         return matchUps
+
+    def addAgent(self, agent):
+        self.allAgents.append(agent)
+
+    def addAgents(self, agentList):
+        for agent in agentList:
+            self.allAgents.append(agent)
