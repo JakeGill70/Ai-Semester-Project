@@ -18,7 +18,7 @@ class Population:
     def getNameSymbols(self, size=2):
         return (''.join(random.choice(self.nameSymbols) for _ in range(size)))
 
-    def initAllAgents(self, initialMutations=10.0, mutationMultiplier=2.0):
+    def initAllAgents(self, initialMutations=10, mutationMultiplier=2.0):
         self.allAgents = []
         for i in range(self.popSize):
             name = self.getNameSymbols()
@@ -40,7 +40,7 @@ class Population:
 
     def getMatchGroups(self, groupSize=2):
         matchUps = []
-        for i in range(0, len(self.entries), groupSize):
-            matchUp = self.entries[i: i+groupSize]
+        for i in range(0, len(self.allAgents), groupSize):
+            matchUp = self.allAgents[i: i+groupSize]
             matchUps.append(matchUp)
         return matchUps
