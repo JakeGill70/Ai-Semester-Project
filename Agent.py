@@ -123,7 +123,7 @@ class Agent:
 
     def pickTerritoryForPlacement(self, possibleTerritoryData, map):
         score = 0
-        bestScore = -1
+        bestScore = -math.inf
         bestIndex = -1
         for territoryData in possibleTerritoryData:
             score = 0
@@ -179,6 +179,8 @@ class Agent:
 
             # print(f"Index: {territoryData.index}, Score: {score}, BestIndex: {bestIndex}")
 
+        if(bestIndex == -1):
+            raise Exception("No best index for placing a territory")
         return bestIndex
 
     def pickTerritoryForAttack(self, map, atkSys):
@@ -429,7 +431,7 @@ class Agent:
 
     def mutateCharacteristic(self, characteristicGroupName, isMajorMutation=False, mutationMultiplier=1.0):
         if(isMajorMutation):
-            for characteristic in self.characteristics[characteristicGroupName].values:
+            for characteristic in self.characteristics[characteristicGroupName].values():
                 characteristic.adjust_random(characteristic.adjustmentAmt * mutationMultiplier)
         else:
             random.choice(self.characteristics[characteristicGroupName]).adjust_random(
