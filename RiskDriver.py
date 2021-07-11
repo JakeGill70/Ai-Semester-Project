@@ -44,11 +44,13 @@ def playGame(agents, showGame=True):
         print("Presenting initial map")
         game.showWindow(map, 0.5)
 
-    MAX_TURN_COUNT = 1000
-    GRAPH_UPDATE_FREQUENCY = 10
+    # Each player should get 100 turns
     turnCount = 0
+    turnCountPerPlayer = 100
+    maxTurnCount = len(agents) * turnCountPerPlayer
+    GRAPH_UPDATE_FREQUENCY = 10
     agentIndex = -1
-    while(turnCount < MAX_TURN_COUNT):
+    while(turnCount < maxTurnCount):
         # Print out turn count update
         turnCount += 1
         agentIndex = (agentIndex + 1) % len(agents)
@@ -88,6 +90,8 @@ def playGame(agents, showGame=True):
                     print(f"{agent.name} has been defeated by {agents[agentIndex].name}!")
                     game.showWindow(map, 0.5)
         for agent in agentsToRemove:
+            # TODO: Remove that player agent's remaining turns
+            #   To ensure that each player uses the proper number of turns per player.
             losers.append(agent)
             agents.remove(agent)
 
@@ -98,7 +102,7 @@ def playGame(agents, showGame=True):
             winners.append(agents[0])
             break
 
-    if(turnCount >= MAX_TURN_COUNT):
+    if(turnCount >= maxTurnCount):
         if(showGame):
             print(f"Max turn limit reached, determining winner based on territory, using army count as tie breaker.")
         # TODO: Do like this print statement says :P
