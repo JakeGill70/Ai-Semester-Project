@@ -51,6 +51,8 @@ class Map():
         return players
 
     def placeArmy(self, playerName, amount, territoryId):
+        if(territoryId < 0 or territoryId > len(self.territories)):
+            raise Exception(f"The territory id {territoryId} is not a valid id.")
         territory = self.territories[territoryId]
         if(territory.owner and territory.owner != playerName):
             raise Exception(f"Player '{playerName}' is \
