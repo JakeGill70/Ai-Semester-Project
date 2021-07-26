@@ -95,6 +95,15 @@ class Agent:
             }
         }
 
+    def stats(self):
+        output = ""
+        for category in self.characteristics.keys():
+            output += f"\n{category}:"
+            for characteristicName in self.characteristics[category].keys():
+                c = self.characteristics[category][characteristicName]
+                output += f"\n\t{characteristicName}: {c.value}"
+        return output
+
     def __deepcopy__(self):
         cpy = Agent(self.name)
 
