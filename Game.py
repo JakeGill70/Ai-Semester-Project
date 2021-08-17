@@ -40,15 +40,15 @@ class Game():
 
     def drawNodes(self, screen, map, nodeSize):
         for territory in map.territories.values():
-            color = map.continentColors[territory.continent]
+            color = map.continents[territory.continent].color
             self.drawCircle(screen, color, territory.position[0], territory.position[1], nodeSize)
 
     def drawConnections(self, screen, map):
         for territory in map.territories.values():
             for connectingIndex in territory.connections:
                 connectingTerritory = map.territories[connectingIndex]
-                colorA = map.continentColors[territory.continent]
-                colorB = map.continentColors[connectingTerritory.continent]
+                colorA = map.continents[territory.continent].color
+                colorB = map.continents[connectingTerritory.continent].color
                 posA = territory.position
                 posB = connectingTerritory.position
 

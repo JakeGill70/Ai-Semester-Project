@@ -73,8 +73,8 @@ class MapReader():
 
         map = Map()
         map.territories = territories
-        map.continentColors = {continent.name : continent.color for continent in continents.values()}
-        map.continentCount = {continent.name : continent.unitBonus for continent in continents.values()}
+        map.continents = continents
+        
         return map
 
     @staticmethod
