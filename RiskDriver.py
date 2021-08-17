@@ -29,7 +29,7 @@ def attackUntilUnfavorable(agent, map, atkSys, showGame=True):
                 break
 
 
-def playGame(agents, showGame=True):
+def playGame(agents, showGame=True, windowName="RISK"):
     game = Game()
     map = Map()
     map.readMapData("MapData.txt")
@@ -46,14 +46,16 @@ def playGame(agents, showGame=True):
 
     # Each player should get 100 turns
     turnCount = 0
-    turnCountPerPlayer = 100
+    turnCountPerPlayer = 10
     maxTurnCount = len(agents) * turnCountPerPlayer
     GRAPH_UPDATE_FREQUENCY = 10
     agentIndex = -1
+    tmpWindowName = ""
     while(turnCount < maxTurnCount):
         # Print out turn count update
         turnCount += 1
         agentIndex = (agentIndex + 1) % len(agents)
+        tmpWindowName = windowName + f", turn {turnCount}"
         if(showGame):
             print(f"=====================")
             print(f"    Turn: {turnCount} : {agents[agentIndex].name}")
@@ -79,7 +81,7 @@ def playGame(agents, showGame=True):
 
         # Period update
         if(showGame and turnCount % GRAPH_UPDATE_FREQUENCY == 0):
-            game.showWindow(map, 0.1)
+            game.showWindow(map, 0.1, tmpWindowName)
 
         # Remove defeated players
         agentsToRemove = []
@@ -88,7 +90,7 @@ def playGame(agents, showGame=True):
                 agentsToRemove.append(agent)
                 if(showGame):
                     print(f"{agent.name} has been defeated by {agents[agentIndex].name}!")
-                    game.showWindow(map, 0.5)
+                    game.showWindow(map, 0.5, (f"RISK: {agent.name} has been defeated by {agents[agentIndex].name}!"))
         for agent in agentsToRemove:
             # TODO: Remove that player agent's remaining turns
             #   To ensure that each player uses the proper number of turns per player.
@@ -143,7 +145,7 @@ def playGame(agents, showGame=True):
 
     if(showGame):
         print("Presenting final map")
-        game.showWindow(map, 1.0)
+        game.showWindow(map, 1.0, (windowName + ", final"))
 
     return (winners, losers)
 
@@ -151,37 +153,10 @@ def playGame(agents, showGame=True):
 POPULATION_SIZE = 500
 generalPopulation = Population(POPULATION_SIZE)
 generalPopulation.initAllAgents()
-loserList = []
-master_loserList = []
-t = 0
-while(len(generalPopulation) > POPULATION_SIZE/4):
-    matchUps = generalPopulation.getMatchGroups(4)
-    winnerList = []
-    loserList = []
-    m = 0
-    t += 1
-    for match in matchUps:
-        m += 1
-        print("\n\n\n\nMatch ", m, ", Tier ", t, "\n\n\n\n\n")
-        matchWinners, matchLosers = playGame(match, True)
-        winnerList += matchWinners
-        loserList += matchLosers
-    # Clear the gene pool
-    generalPopulation.clear()
-    # Add winners back into the gene pool
-    generalPopulation.addAgents(winnerList)
-    # Add losers back into the gene pool, if they have not lost before
-    generalPopulation.addAgents([loser for loser in loserList if loser not in master_loserList])
-    # Add losers to big list of all losers
-    master_loserList += loserList
+for i in range(GENERATION_COUNT):
+    print(f"\n\n<<< GENERATION {int(i)} >>>\n\n")
+    playTournament(generalPopulation, i)
+    generalPopulation.generateNextGeneration()
 
-
-print("Winners: " + str(len(winnerList)))
-print("Losers: " + str(len(loserList)))
-
-# gameAgents = [Agent("Jake"), Agent("Xander"), Agent("Sabrina"), Agent("Rusty")]
-# winners, losers = playGame(gameAgents, True)
-# print("Winners: ")
-# print(winners)
-# print("Losers: ")
-# print(losers)
+for agent in generalPopulation.allAgents:
+    print(agent.name + "'s stats:" + agent.stats())

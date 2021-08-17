@@ -67,9 +67,10 @@ class Game():
 
         pygame.display.update()
 
-    def showWindow(self, map, autoCloseTimer=None):
+    def showWindow(self, map, autoCloseTimer=None, windowName="RISK"):
 
         screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption(windowName)
 
         if(not self.font):
             pygame.font.init()  # you have to call this at the start,
