@@ -150,7 +150,37 @@ def playGame(agents, showGame=True, windowName="RISK"):
     return (winners, losers)
 
 
-POPULATION_SIZE = 500
+def playTournament(population, generationCount=0):
+    populationSize = len(population)
+    loserList = []
+    master_loserList = []
+    t = 0
+    windowName = ""
+    while(len(population) > populationSize/4):
+        matchUps = population.getMatchGroups(4)
+        winnerList = []
+        loserList = []
+        m = 0
+        t += 1
+        for match in matchUps:
+            m += 1
+            print("\n\n\nGeneration", generationCount, "Match ", m, ", Tier ", t, "\n\n\n\n")
+            windowName = f"RISK: Gen {generationCount}, Tier {t}, Match {m}"
+            matchWinners, matchLosers = playGame(match, True, windowName)
+            winnerList += matchWinners
+            loserList += matchLosers
+        # Clear the gene pool
+        population.clear()
+        # Add winners back into the gene pool
+        population.addAgents(winnerList)
+        # Add losers back into the gene pool, if they have not lost before
+        population.addAgents([loser for loser in loserList if loser not in master_loserList])
+        # Add losers to big list of all losers
+        master_loserList += loserList
+
+
+GENERATION_COUNT = 5
+POPULATION_SIZE = 20
 generalPopulation = Population(POPULATION_SIZE)
 generalPopulation.initAllAgents()
 for i in range(GENERATION_COUNT):
