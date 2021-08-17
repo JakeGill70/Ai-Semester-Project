@@ -2,13 +2,13 @@ import copy
 
 
 class Territory():
-    def __init__(self, index, connections, continent, position):
+    def __init__(self, index, connections, continent, position, owner="", army=0):
         self.index = index
         self.connections = connections
         self.continent = continent
         self.position = position
-        self.owner = ""
-        self.army = 0
+        self.owner = owner
+        self.army = army
 
     def __str__(self):
         return f"#{self.index}:{self.owner}:{self.army}"

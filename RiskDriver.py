@@ -5,6 +5,7 @@ from Territory import Territory
 from Agent import Agent
 from AttackSystem import AttackSystem
 from Population import Population
+from MapReader import MapReader
 
 
 def setupGameBoard(agentList, initialUnits, map):
@@ -31,9 +32,7 @@ def attackUntilUnfavorable(agent, map, atkSys, showGame=True):
 
 def playGame(agents, showGame=True, windowName="RISK"):
     game = Game()
-    map = Map()
-    map.readMapData("MapData.txt")
-    map.updateContinentCount()
+    map = MapReader.readMap("./NewMapData.json")
     atkSys = AttackSystem()
     winners = []
     losers = []

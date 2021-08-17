@@ -63,44 +63,6 @@ class Map():
             territory.army += amount
             territory.owner = playerName
 
-    def readMapData(self, filePath):
-        currentContinent = ""
-        f = open(filePath, "r")
-        for line in f:
-            # Ignore comment lines
-            if(line[0] == "#"):
-                continue
-
-            # Process continent lines
-            if(line.strip().startswith("continent")):
-                try:
-                    currentContinent = line.split("=")[1].strip()
-                    continue
-                except IndexError:
-                    print(f"Malform line in mapdata: '{line}'", file=sys.stderr)
-                    continue
-
-            # Process data lines
-            try:
-                data = line.split(":")
-                index = int(data[0].strip())
-                connections = [int(x.strip()) for x in data[1].split(",")]
-                position = tuple([int(x.strip()) for x in data[2].split(",")])
-                self.territories[index] = Territory(index, connections, currentContinent, position)
-            except IndexError:
-                print(f"Malform line in mapdata: '{line}'", file=sys.stderr)
-                continue
-        f.close()
-
-        # Verify all connections are bi-directional
-        for territory in self.territories.values():
-            for connectingIndex in territory.connections:
-                connectingTerritory = self.territories[connectingIndex]
-                if(territory.index not in connectingTerritory.connections):
-                    print(
-                        f"Uni-directional connection found. {index} is connected to {i}, but {i} is not connected to {index}",
-                        file=sys.stderr)
-
     def getContinentBonus(self, playerName):
         unitCount = 0
 

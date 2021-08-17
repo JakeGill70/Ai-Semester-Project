@@ -1,0 +1,373 @@
+{
+  "agents": [],
+  "continents": [
+    {
+      "name": "North America",
+      "unitBonus": 5,
+      "color": [255, 255, 0]
+    },
+    {
+      "name": "South America",
+      "unitBonus": 2,
+      "color": [255, 0, 0]
+    },
+    {
+      "name": "Europe",
+      "unitBonus": 5,
+      "color": [200, 200, 200]
+    },
+    {
+      "name": "Africa",
+      "unitBonus": 3,
+      "color": [0, 255, 0]
+    },
+    {
+      "name": "Asia",
+      "unitBonus": 7,
+      "color": [0, 0, 255]
+    },
+    {
+      "name": "Australia",
+      "unitBonus": 2,
+      "color": [255, 0, 255]
+    }
+  ],
+  "territories": [
+    {
+      "index": 0,
+      "connections": [1, 4, 3, 13],
+      "continent": "North America",
+      "position": [274, 75],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 1,
+      "connections": [0, 2, 5, 4],
+      "continent": "North America",
+      "position": [120, 86],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 2,
+      "connections": [1, 5, 26],
+      "continent": "North America",
+      "position": [42, 30],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 3,
+      "connections": [0, 4, 6],
+      "continent": "North America",
+      "position": [220, 140],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 4,
+      "connections": [0, 1, 3, 5, 6, 7],
+      "continent": "North America",
+      "position": [162, 136],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 5,
+      "connections": [1, 2, 4, 7],
+      "continent": "North America",
+      "position": [111, 137],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 6,
+      "connections": [3, 4, 7, 8],
+      "continent": "North America",
+      "position": [174, 214],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 7,
+      "connections": [5, 4, 6, 8],
+      "continent": "North America",
+      "position": [109, 190],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 8,
+      "connections": [6, 7, 9],
+      "continent": "North America",
+      "position": [122, 281],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 9,
+      "connections": [8, 10, 11],
+      "continent": "South America",
+      "position": [174,339],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 10,
+      "connections": [9, 11, 12, 20],
+      "continent": "South America",
+      "position": [240, 394],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 11,
+      "connections": [9, 10, 12],
+      "continent": "South America",
+      "position": [195, 428],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 12,
+      "connections": [10, 11],
+      "continent": "South America",
+      "position": [201, 491],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 13,
+      "connections": [0, 14, 17],
+      "continent": "Europe",
+      "position": [333, 117],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 14,
+      "connections": [13, 15, 17, 16],
+      "continent": "Europe",
+      "position": [402, 107],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 15,
+      "connections": [14, 16, 19, 30, 34, 37],
+      "continent": "Europe",
+      "position": [466, 150],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 16,
+      "connections": [14, 17, 15, 18, 19],
+      "continent": "Europe",
+      "position": [394, 198],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 17,
+      "connections": [13, 14, 16, 18],
+      "continent": "Europe",
+      "position": [321, 185],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 18,
+      "connections": [16, 17, 19, 20],
+      "continent": "Europe",
+      "position": [336, 273],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 19,
+      "connections": [15, 16, 18, 20, 21, 37],
+      "continent": "Europe",
+      "position": [397, 248],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 20,
+      "connections": [10, 18, 19, 21, 22, 23],
+      "continent": "Africa",
+      "position": [365, 385],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 21,
+      "connections": [19, 20, 22, 37],
+      "continent": "Africa",
+      "position": [427, 349],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 22,
+      "connections": [20, 21, 23, 24, 25, 37],
+      "continent": "Africa",
+      "position": [470, 425],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 23,
+      "connections": [20, 22, 24],
+      "continent": "Africa",
+      "position": [428, 452],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 24,
+      "connections": [22, 23, 25],
+      "continent": "Africa",
+      "position": [431, 536],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 25,
+      "connections": [22, 24],
+      "continent": "Africa",
+      "position": [506, 537],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 26,
+      "connections": [2, 27, 29, 31, 32],
+      "continent": "Asia",
+      "position": [714, 30],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 27,
+      "connections": [26, 28, 29],
+      "continent": "Asia",
+      "position": [652, 60],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 28,
+      "connections": [27, 29, 30, 32, 33],
+      "continent": "Asia",
+      "position": [589, 95],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 29,
+      "connections": [26, 27, 28, 32],
+      "continent": "Asia",
+      "position": [648, 143],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 30,
+      "connections": [15, 28, 33, 34],
+      "continent": "Asia",
+      "position": [545, 133],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 31,
+      "connections": [26, 32],
+      "continent": "Asia",
+      "position": [740, 209],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 32,
+      "connections": [26, 28, 29, 31, 33],
+      "continent": "Asia",
+      "position": [652, 199],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 33,
+      "connections": [28, 30, 32, 34, 36, 35],
+      "continent": "Asia",
+      "position": [630, 261],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 34,
+      "connections": [15, 30, 33, 36, 37],
+      "continent": "Asia",
+      "position": [535, 218],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 35,
+      "connections": [33, 36, 39],
+      "continent": "Asia",
+      "position": [647, 340],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 36,
+      "connections": [33, 34, 35, 37],
+      "continent": "Asia",
+      "position": [582, 311],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 37,
+      "connections": [15, 19, 21, 22, 34, 36],
+      "continent": "Asia",
+      "position": [489, 301],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 38,
+      "connections": [39, 40, 41],
+      "continent": "Australia",
+      "position": [732, 419],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 39,
+      "connections": [35, 38, 41],
+      "continent": "Australia",
+      "position": [660, 439],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 40,
+      "connections": [38, 41],
+      "continent": "Australia",
+      "position": [763, 512],
+      "owner": "",
+      "armies": 0
+    },
+    {
+      "index": 41,
+      "connections": [38, 39, 40],
+      "continent": "Australia",
+      "position": [692, 531],
+      "owner": "",
+      "armies": 0
+    }
+  ]
+}
