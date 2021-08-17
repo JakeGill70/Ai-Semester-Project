@@ -237,6 +237,7 @@ class Agent:
                 # Would capturing this territory give a continent bonus?
                 unitBonusBeforeCapture = map.getContinentBonus(self.name)
                 prevOwner = enemyTerritory.owner
+                enemyTerritory.owner = self.name
                 unitBonusAfterCapture = map.getContinentBonus(self.name)
                 enemyTerritory.owner = prevOwner
                 if(unitBonusBeforeCapture != unitBonusAfterCapture):
