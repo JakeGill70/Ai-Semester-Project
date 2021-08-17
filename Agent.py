@@ -23,7 +23,7 @@ class AgentCharacteristic:
         cpy = AgentCharacteristic()
         cpy.value = self.value
         cpy.description = self.description
-        cpy.adjustmentAmt = adjustmentAmt
+        cpy.adjustmentAmt = self.adjustmentAmt
         return cpy
 
     def adjust(self):
@@ -104,12 +104,14 @@ class Agent:
                 output += f"\n\t{characteristicName}: {c.value}"
         return output
 
-    def __deepcopy__(self):
+    def clone(self):
         cpy = Agent(self.name)
 
         for k in self.characteristics.keys():
             for kk in self.characteristics[k].keys():
-                cpy.characteristics[k][kk] = copy.deepcopy(self.characteristics[k][kk])
+                cpy.characteristics[k][kk].value = self.characteristics[k][kk].value
+
+        return cpy
 
     def getTerritoryDataBorderAdjacent(self, territoryIndex, map):
         territoryData = map.territories[territoryIndex]
@@ -432,7 +434,7 @@ class Agent:
             recursiveChance = recursiveChance/2
 
             # Determine what to mutate
-            characteristicGroupName = random.choice(self.characteristics.keys)
+            characteristicGroupName = random.choice(list(self.characteristics.keys()))
             # Determine how to mutate (Single attribute vs. entire group)
             isMajorMutation = random.random() < majorMutationChance
             # Perform mutation
@@ -443,5 +445,5 @@ class Agent:
             for characteristic in self.characteristics[characteristicGroupName].values():
                 characteristic.adjust_random(characteristic.adjustmentAmt * mutationMultiplier)
         else:
-            random.choice(self.characteristics[characteristicGroupName]).adjust_random(
-                characteristic.adjustmentAmt * mutationMultiplier)
+            randomCharacteristic = random.choice(list(self.characteristics[characteristicGroupName].values()))
+            randomCharacteristic.adjust_random(randomCharacteristic.adjustmentAmt * mutationMultiplier)

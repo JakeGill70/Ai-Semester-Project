@@ -36,7 +36,7 @@ class Population:
         while(len(self.allAgents) < self.popSize):
             baseAgentIndex = math.floor(maxSelectionIndex * random.random())
             baseAgent = self.allAgents[baseAgentIndex]
-            newAgent = copy.deepcopy(baseAgent)
+            newAgent = baseAgent.clone()
             newAgent.name = newAgent.name + self.getNameSymbols()
             newAgent.mutate(mutationMultiplier=mutationMultiplier)
             self.allAgents.append(newAgent)
