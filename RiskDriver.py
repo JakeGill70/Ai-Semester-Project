@@ -80,7 +80,7 @@ def playGame(agents, showGame=True, windowName="RISK"):
 
         # Period update
         if(showGame and turnCount % GRAPH_UPDATE_FREQUENCY == 0):
-            game.showWindow(map, 0.1, tmpWindowName)
+            game.showWindow(map, 0.01, tmpWindowName)
 
         # Remove defeated players
         agentsToRemove = []
@@ -89,7 +89,7 @@ def playGame(agents, showGame=True, windowName="RISK"):
                 agentsToRemove.append(agent)
                 if(showGame):
                     print(f"{agent.name} has been defeated by {agents[agentIndex].name}!")
-                    game.showWindow(map, 0.5, (f"RISK: {agent.name} has been defeated by {agents[agentIndex].name}!"))
+                    game.showWindow(map, 0.1, (f"RISK: {agent.name} has been defeated by {agents[agentIndex].name}!"))
         for agent in agentsToRemove:
             # TODO: Remove that player agent's remaining turns
             #   To ensure that each player uses the proper number of turns per player.
