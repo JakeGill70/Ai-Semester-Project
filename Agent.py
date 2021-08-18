@@ -2,6 +2,7 @@ from collections import namedtuple
 import math
 import random
 import copy
+import json
 
 
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
@@ -25,6 +26,9 @@ class AgentCharacteristic:
         cpy.description = self.description
         cpy.adjustmentAmt = self.adjustmentAmt
         return cpy
+
+    def toJSON(self):
+        return f"{{\"value\" : {self.value}, \"adjustmentAmount\" : {self.adjustmentAmt}, \"description\" : \"{self.description}\"}}"
 
     def adjust(self):
         self.value += self.adjustmentAmt
@@ -94,6 +98,19 @@ class Agent:
                 "Safe": AgentCharacteristic(1, "Preference for safe actions", 0.25)
             }
         }
+
+    def toJSON(self):
+        s = f"{{\"name\": \"{self.name}\", \"characteristics\": {{ "
+        for groupKey, groupDict in self.characteristics.items():
+            s += f"\"{groupKey}\" : {{"
+            for characteristicName, characteristicObject in groupDict.items():
+                s += (f"\"{characteristicName}\" : {characteristicObject.toJSON()},")
+            s = s[:-1]
+            s += "},"
+        s = s[:-1]
+        s += "} }"
+        return s
+        
 
     def stats(self):
         output = ""
