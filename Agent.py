@@ -56,7 +56,7 @@ class AgentCharacteristic:
 
 
 class Agent:
-    def __init__(self, name):
+    def __init__(self, name="Unnamed Agent"):
         self.name = name
         self.characteristics = {
             "Placement": {
@@ -110,7 +110,6 @@ class Agent:
         s = s[:-1]
         s += "} }"
         return s
-        
 
     def stats(self):
         output = ""
