@@ -10,6 +10,7 @@ import os.path
 
 class MapReader():
 
+    @staticmethod
     def readMap(filePath):
         '''
         JSON Map Model Definition
@@ -68,13 +69,13 @@ class MapReader():
             territory = Territory(index, connections, continent, position, owner, armies)
             MapReader.validateTerritory(territory, territories, continents, agentFilePaths)
             territories[index] = territory
-        
+
         MapReader.validateTerritoryConnections(territories)
 
         map = Map()
         map.territories = territories
         map.continents = continents
-        
+
         return map
 
     @staticmethod
@@ -94,18 +95,23 @@ class MapReader():
     @staticmethod
     def validateTerritory(territory, territories, continents, agentFilePaths):
         if(territory.index in territories.keys()):
-            raise ValueError(f"Issue with territory {territory.index}'s index. A territory already exists at index {territory.index}")
+            raise ValueError(
+                f"Issue with territory {territory.index}'s index. A territory already exists at index {territory.index}")
         if(territory.continent not in continents.keys()):
-            raise ValueError(f"Issue with territory {territory.index}'s continent. Continent \"{territory.continent}\" does not exist.")
+            raise ValueError(
+                f"Issue with territory {territory.index}'s continent. Continent \"{territory.continent}\" does not exist.")
         if(territory.owner and territory.owner not in agentFilePaths.keys()):
-            raise ValueError(f"Issue with territory {territory.index}'s owner. Agent \"{territory.owner}\" does not exist.")
+            raise ValueError(
+                f"Issue with territory {territory.index}'s owner. Agent \"{territory.owner}\" does not exist.")
         if(territory.army < 0):
-            raise ValueError(f"Issue with territory {territory.index}'s army. A territory's army count cannot be less than 0.")
-    
+            raise ValueError(
+                f"Issue with territory {territory.index}'s army. A territory's army count cannot be less than 0.")
+
     @staticmethod
     def validateTerritoryConnections(territories):
         for territory in territories.values():
             for connectingIndex in territory.connections:
                 connectingTerritory = territories[connectingIndex]
                 if(territory.index not in connectingTerritory.connections):
-                    raise ValueError(f"Uni-directional connection found. {territory.index } is connected to {connectingIndex}, but {connectingIndex} is not connected to {territory.index}.")
+                    raise ValueError(
+                        f"Uni-directional connection found. {territory.index } is connected to {connectingIndex}, but {connectingIndex} is not connected to {territory.index}.")

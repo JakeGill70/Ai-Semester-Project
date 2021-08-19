@@ -177,8 +177,10 @@ def playTournament(population, generationCount=0):
         # Add losers to big list of all losers
         master_loserList += loserList
 
-def interpolate(x, y, t): 
+
+def interpolate(x, y, t):
     return x*(1-t) + y*t
+
 
 GENERATION_COUNT = 5
 POPULATION_SIZE = 20
@@ -189,7 +191,7 @@ generalPopulation.initAllAgents()
 for i in range(GENERATION_COUNT):
     print(f"\n\n<<< GENERATION {int(i)} >>>\n\n")
     playTournament(generalPopulation, i)
-    mutationMultiplier=interpolate(HIGH_MUTATION_MODIFIER, LOW_MUTATION_MODIFIER, (i/GENERATION_COUNT))
+    mutationMultiplier = interpolate(HIGH_MUTATION_MODIFIER, LOW_MUTATION_MODIFIER, (i/GENERATION_COUNT))
     generalPopulation.generateNextGeneration(mutationMultiplier)
 
 for agent in generalPopulation.allAgents:
