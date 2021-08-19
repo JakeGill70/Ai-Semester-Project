@@ -29,8 +29,22 @@ class AgentReader():
         return agent
 
     @staticmethod
+    def readAgentsFromMapFile(filePath):
+        # Load in map data as JSON
+        f = open(filePath)
+        data = json.load(f)
+        f.close()
+
+        agents = []
+
+        # Load agents
+        for agentData in data["agents"]:
+            agentName = agentData["name"]
+            filepath = agentData["filePath"]
+            agents.append(AgentReader.readAgent(filePath))
+
+    @staticmethod
     def dictionaryToCharacteristic(charDict):
-        # TODO: Validate these values
         value = float(charDict["value"])
         adjustmentAmt = float(charDict["adjustmentAmount"])
         description = str(charDict["description"])
