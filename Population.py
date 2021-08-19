@@ -54,3 +54,23 @@ class Population:
     def addAgents(self, agentList):
         for agent in agentList:
             self.allAgents.append(agent)
+
+    def getAverageAgent(self):
+        # Creates a new agent with characteristics set to the average characteristic value of the population
+        avgAgent = Agent("Average Agent")
+        # Reset avgAgent's values back to zero
+        for categoryName, characteristicCategory in avgAgent.characteristics.items():
+            for characteristicName, characteristic in avgAgent.characteristics[categoryName].items():
+                avgAgent.characteristics[categoryName][characteristicName].value = 0
+
+        # Add each agent's values * weight to avgAgent
+        #   The weight removes the need to divide by the
+        #   total number after the summation like you
+        #   would do when typically calculating the average
+        valueWeight = 1/len(self.allAgents)
+        for agent in self.allAgents:
+            for categoryName, characteristicCategory in agent.characteristics.items():
+                for characteristicName, characteristic in agent.characteristics[categoryName].items():
+                    avgAgent.characteristics[categoryName][characteristicName].value = agent.characteristics[categoryName][characteristicName].value * valueWeight
+
+        return avgAgent

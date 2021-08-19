@@ -42,7 +42,6 @@ class MapReader():
         agentFilePaths = {}
 
         # Load agents
-        # TODO Read agent file and return it with map output
         for agentData in data["agents"]:
             agentName = agentData["name"]
             filepath = agentData["filePath"]

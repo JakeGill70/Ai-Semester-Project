@@ -7,6 +7,9 @@ from AttackSystem import AttackSystem
 from Population import Population
 from MapReader import MapReader
 
+# TODO: Break a lot of this off into a "Tournament" or a "RiskGame" class, or both.
+#   This code is growing way beyond what should be in a simple driver class.
+
 
 def setupGameBoard(agentList, initialUnits, map):
     agentListSize = len(agentList)
@@ -191,6 +194,12 @@ generalPopulation.initAllAgents()
 for i in range(GENERATION_COUNT):
     print(f"\n\n<<< GENERATION {int(i)} >>>\n\n")
     playTournament(generalPopulation, i)
+
+    # TODO: Pull this average agent output to separate method
+    f = open(f"averageAgentStats - Gen{(i):03d}.txt", "wt+")
+    f.write(generalPopulation.getAverageAgent().toJSON())
+    f.close()
+
     mutationMultiplier = interpolate(HIGH_MUTATION_MODIFIER, LOW_MUTATION_MODIFIER, (i/GENERATION_COUNT))
     generalPopulation.generateNextGeneration(mutationMultiplier)
 
