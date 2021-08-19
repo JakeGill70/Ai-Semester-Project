@@ -6,6 +6,8 @@ from Agent import Agent
 from AttackSystem import AttackSystem
 from Population import Population
 from MapReader import MapReader
+from datetime import datetime
+import os
 
 # TODO: Break a lot of this off into a "Tournament" or a "RiskGame" class, or both.
 #   This code is growing way beyond what should be in a simple driver class.
@@ -189,6 +191,10 @@ GENERATION_COUNT = 5
 POPULATION_SIZE = 20
 HIGH_MUTATION_MODIFIER = 2.0
 LOW_MUTATION_MODIFIER = 0.25
+AGENT_OUTPUT_DIRECTORY_PATH = f"./Average Agents/{datetime.now().strftime('%Y-%m-%d-%I:%M%p')}/"
+
+os.makedirs(os.path.abspath(AGENT_OUTPUT_DIRECTORY_PATH))
+
 generalPopulation = Population(POPULATION_SIZE)
 generalPopulation.initAllAgents()
 for i in range(GENERATION_COUNT):
@@ -196,7 +202,7 @@ for i in range(GENERATION_COUNT):
     playTournament(generalPopulation, i)
 
     # TODO: Pull this average agent output to separate method
-    f = open(f"averageAgentStats - Gen{(i):03d}.txt", "wt+")
+    f = open(f"{AGENT_OUTPUT_DIRECTORY_PATH}Gen{(i):03d}.json", "wt+")
     f.write(generalPopulation.getAverageAgent().toJSON())
     f.close()
 
