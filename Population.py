@@ -8,7 +8,7 @@ class Population:
     def __init__(self, popSize):
         self.allAgents = []
         self.popSize = popSize
-        self.nameSymbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&+-|?<>."
+        self.nameSymbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
         self.initAllAgents()
 
@@ -18,7 +18,7 @@ class Population:
     def clear(self):
         self.allAgents = []
 
-    def getNameSymbols(self, size=2):
+    def getNameSymbols(self, size=6):
         return (''.join(random.choice(self.nameSymbols) for _ in range(size)))
 
     def initAllAgents(self, initialMutations=10, mutationMultiplier=2.0):
@@ -37,7 +37,7 @@ class Population:
             baseAgentIndex = math.floor(maxSelectionIndex * random.random())
             baseAgent = self.allAgents[baseAgentIndex]
             newAgent = baseAgent.clone()
-            newAgent.name = newAgent.name + self.getNameSymbols()
+            newAgent.name = baseAgent.name + "-" + self.getNameSymbols()
             newAgent.mutate(mutationMultiplier=mutationMultiplier)
             self.allAgents.append(newAgent)
 
@@ -55,9 +55,9 @@ class Population:
         for agent in agentList:
             self.allAgents.append(agent)
 
-    def getAverageAgent(self):
+    def getAverageAgent(self, name="Average Agent"):
         # Creates a new agent with characteristics set to the average characteristic value of the population
-        avgAgent = Agent("Average Agent")
+        avgAgent = Agent(name)
         # Reset avgAgent's values back to zero
         for categoryName, characteristicCategory in avgAgent.characteristics.items():
             for characteristicName, characteristic in avgAgent.characteristics[categoryName].items():
