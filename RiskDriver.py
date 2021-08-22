@@ -187,11 +187,11 @@ def interpolate(x, y, t):
     return x*(1-t) + y*t
 
 
-GENERATION_COUNT = 5
-POPULATION_SIZE = 20
-HIGH_MUTATION_MODIFIER = 2.0
-LOW_MUTATION_MODIFIER = 0.25
-AGENT_OUTPUT_DIRECTORY_PATH = f"./Average Agents/{datetime.now().strftime('%Y-%m-%d-%I:%M%p')}/"
+GENERATION_COUNT = 500
+POPULATION_SIZE = 256
+HIGH_MUTATION_MODIFIER = 1.5
+LOW_MUTATION_MODIFIER = 0.5
+AGENT_OUTPUT_DIRECTORY_PATH = f"./Average Agents/{datetime.now().strftime('%Y-%m-%d-%I-%M%p')}/"
 
 os.makedirs(os.path.abspath(AGENT_OUTPUT_DIRECTORY_PATH))
 
@@ -203,7 +203,7 @@ for i in range(GENERATION_COUNT):
 
     # TODO: Pull this average agent output to separate method
     f = open(f"{AGENT_OUTPUT_DIRECTORY_PATH}Gen{(i):03d}.json", "wt+")
-    f.write(generalPopulation.getAverageAgent().toJSON())
+    f.write(generalPopulation.getAverageAgent(name=f"Gen{i:03d} Mean Agent").toJSON())
     f.close()
 
     mutationMultiplier = interpolate(HIGH_MUTATION_MODIFIER, LOW_MUTATION_MODIFIER, (i/GENERATION_COUNT))
