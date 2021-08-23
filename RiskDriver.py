@@ -56,7 +56,7 @@ def playGame(agents, showGame=True, windowName="RISK"):
 
     # Each player should get 100 turns
     turnCount = 0
-    turnCountPerPlayer = 10
+    turnCountPerPlayer = 100
     maxTurnCount = len(agents) * turnCountPerPlayer
     GRAPH_UPDATE_FREQUENCY = 10
     agentIndex = -1
