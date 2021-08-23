@@ -42,6 +42,11 @@ def playGame(agents, showGame=True, windowName="RISK"):
     winners = []
     losers = []
 
+    print(f"Playing Game: {[agent.name for agent in agents]}")
+    if(len(agents) != len(set([agent.name for agent in agents]))):
+        print(f"Error: Duplicate player names: {[agent.name for agent in agents]}", file=sys.stderr)
+        return ([], [])
+
     setupGameBoard(agents, 30, map)
 
     if(showGame):
@@ -108,7 +113,8 @@ def playGame(agents, showGame=True, windowName="RISK"):
             winners.append(agents[0])
             break
 
-    if(turnCount >= maxTurnCount):
+    if(turnCount >= maxTurnCount and len(agents) > 1):
+
         if(showGame):
             print(f"Max turn limit reached, determining winner based on territory, using army count as tie breaker.")
         # TODO: Do like this print statement says :P
