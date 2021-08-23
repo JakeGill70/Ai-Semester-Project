@@ -11,7 +11,8 @@ def getAverageAgentFilePathNames(directoryPath):
     agentFilePathNames = []
     absDirectory = os.path.abspath(directoryPath)
     for file in os.listdir(absDirectory):
-        agentFilePathNames.append(os.path.join(absDirectory, file))
+        if(file != "turnCount.txt"):
+            agentFilePathNames.append(os.path.join(absDirectory, file))
     return agentFilePathNames
 
 

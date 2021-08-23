@@ -8,6 +8,7 @@ from Population import Population
 from MapReader import MapReader
 from datetime import datetime
 import os
+import math
 
 # TODO: Break a lot of this off into a "Tournament" or a "RiskGame" class, or both.
 #   This code is growing way beyond what should be in a simple driver class.
@@ -157,7 +158,7 @@ def playGame(agents, showGame=True, windowName="RISK"):
         print("Presenting final map")
         game.showWindow(map, 1.0, (windowName + ", final"))
 
-    return (winners, losers)
+    return (winners, losers, turnCount)
 
 
 def playTournament(population, generationCount=0):
@@ -170,15 +171,17 @@ def playTournament(population, generationCount=0):
         matchUps = population.getMatchGroups(4)
         winnerList = []
         loserList = []
+        turnCountList = []
         m = 0
         t += 1
         for match in matchUps:
             m += 1
             print("\n\n\nGeneration", generationCount, "Match ", m, ", Tier ", t, "\n\n\n\n")
             windowName = f"RISK: Gen {generationCount}, Tier {t}, Match {m}"
-            matchWinners, matchLosers = playGame(match, True, windowName)
+            matchWinners, matchLosers, turnCount = playGame(match, True, windowName)
             winnerList += matchWinners
             loserList += matchLosers
+            turnCountList.append(turnCount)
         # Clear the gene pool
         population.clear()
         # Add winners back into the gene pool
@@ -187,6 +190,19 @@ def playTournament(population, generationCount=0):
         population.addAgents([loser for loser in loserList if loser not in master_loserList])
         # Add losers to big list of all losers
         master_loserList += loserList
+        # TODO: Get the file name by parameter instead of using a global
+        # Also make it not print out if no file name is given
+        # Also, also, should this even be done here? I think it should return the
+        # turn count and then have the driver deal with writing the output
+        turnCountList.sort()
+        tc_min = turnCountList[0]
+        tc_max = turnCountList[-1]
+        tc_mean = sum(turnCountList)/len(turnCountList)
+        tc_median = turnCountList[math.ceil(len(turnCountList)/2)]
+        tc_std_dev = math.sqrt(sum((tc-tc_mean)**2 for tc in turnCountList)/len(turnCountList))
+        f = open(TURN_COUNT_FILE_NAME, "at+")
+        f.write(f"{tc_min},{tc_max},{tc_mean},{tc_median},{tc_std_dev}\n")
+        f.close()
 
 
 def interpolate(x, y, t):
@@ -198,8 +214,13 @@ POPULATION_SIZE = 256
 HIGH_MUTATION_MODIFIER = 1.5
 LOW_MUTATION_MODIFIER = 0.5
 AGENT_OUTPUT_DIRECTORY_PATH = f"./Average Agents/{datetime.now().strftime('%Y-%m-%d-%I-%M%p')}/"
+TURN_COUNT_FILE_NAME = f"{AGENT_OUTPUT_DIRECTORY_PATH}turnCount.txt"
 
 os.makedirs(os.path.abspath(AGENT_OUTPUT_DIRECTORY_PATH))
+
+f = open(TURN_COUNT_FILE_NAME, "at+")
+f.write("min, max, mean, median, std dev\n")
+f.close()
 
 generalPopulation = Population(POPULATION_SIZE)
 generalPopulation.initAllAgents()
