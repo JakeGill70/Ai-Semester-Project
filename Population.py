@@ -8,7 +8,7 @@ class Population:
     def __init__(self, popSize):
         self.allAgents = []
         self.popSize = popSize
-        self.nameSymbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        self.nameSymbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
 
         self.initAllAgents()
 
@@ -18,13 +18,14 @@ class Population:
     def clear(self):
         self.allAgents = []
 
-    def getNameSymbols(self, size=6):
+    def getNameSymbols(self, size=16):
         return (''.join(random.choice(self.nameSymbols) for _ in range(size)))
 
     def initAllAgents(self, initialMutations=10, mutationMultiplier=2.0):
         self.allAgents = []
         for i in range(self.popSize):
             name = self.getNameSymbols()
+            name = name + "+" + name
             agent = Agent(name)
             for _ in range(initialMutations):
                 for characteristicGroupName in agent.characteristics.keys():
@@ -37,7 +38,7 @@ class Population:
             baseAgentIndex = math.floor(maxSelectionIndex * random.random())
             baseAgent = self.allAgents[baseAgentIndex]
             newAgent = baseAgent.clone()
-            newAgent.name = baseAgent.name + "-" + self.getNameSymbols()
+            newAgent.name = baseAgent.name.split("+")[1] + "+" + self.getNameSymbols()
             newAgent.mutate(mutationMultiplier=mutationMultiplier)
             self.allAgents.append(newAgent)
 
