@@ -102,7 +102,7 @@ class MapReader():
         if(territory.owner and territory.owner not in agentFilePaths.keys()):
             raise ValueError(
                 f"Issue with territory {territory.index}'s owner. Agent \"{territory.owner}\" does not exist.")
-        if(territory.army < 0):
+        if(territory.getArmy() < 0):
             raise ValueError(
                 f"Issue with territory {territory.index}'s army. A territory's army count cannot be less than 0.")
 

@@ -173,8 +173,8 @@ class Agent:
                 bestEnemyAdjacentData = self.getTerritoryDataEnemyAdjacent(bestIndex, map) if bestIndex != -1 else []
                 bestEnemySize = 0
                 # FIXME: Is this really the best way to determine enemy size?
-                bestEnemySize = max([td.army for td in bestEnemyAdjacentData]) if (bestEnemyAdjacentData) else 0
-                currEnemySize = max([td.army for td in enemyAdjacentsData])
+                bestEnemySize = max([td.getArmy() for td in bestEnemyAdjacentData]) if (bestEnemyAdjacentData) else 0
+                currEnemySize = max([td.getArmy() for td in enemyAdjacentsData])
                 # Assume the placement is riskier move if it is more risky to place
                 # an army there than the current best placement
                 if(currEnemySize > bestEnemySize):
@@ -197,7 +197,7 @@ class Agent:
             # Score multipliers
             # Diminishing Return Multiplier
             diminishingReturnMultiplier = pow(
-                self.characteristics["Placement"]["Placement Bias Multiplier"].value, territoryData.army)
+                self.characteristics["Placement"]["Placement Bias Multiplier"].value, territoryData.getArmy())
             score *= diminishingReturnMultiplier
 
             if(score > bestScore):
@@ -212,7 +212,7 @@ class Agent:
 
     def pickTerritoryForAttack(self, map, atkSys):
         controlledTerritories = map.getTerritoriesByPlayer(self.name)
-        controlledTerritoriesThatCanAttack = [x for x in controlledTerritories if x.army > 1]
+        controlledTerritoriesThatCanAttack = [t for t in controlledTerritories if t.getArmy() > 1]
 
         score = -1
         bestScore = -1
@@ -225,7 +225,7 @@ class Agent:
 
             for enemyTerritory in enemyConnections:
                 # Get attack estimate
-                attackEstimate = atkSys.getAttackEstimate(territory.army, enemyTerritory.army)
+                attackEstimate = atkSys.getAttackEstimate(territory.getArmy(), enemyTerritory.getArmy())
 
                 # Determine if the attack is viable
                 if(attackEstimate.attackSuccessChance < self.characteristics["Attack"]["Minimal Success Chance"].value):
@@ -241,9 +241,9 @@ class Agent:
                     enemyTerritory.index, map) else 0
 
                 score += self.characteristics["Attack"]["Remain Bias"].value * \
-                    (territory.army - attackEstimate.attackers)
+                    (territory.getArmy() - attackEstimate.attackers)
                 score += self.characteristics["Attack"]["Destroy Bias"].value * \
-                    (enemyTerritory.army - attackEstimate.defenders)
+                    (enemyTerritory.getArmy() - attackEstimate.defenders)
 
                 score += self.characteristics["Preference"]["Risky"].value if \
                     attackEstimate.attackSuccessChance < self.characteristics["Attack"]["Safe Threshold"].value else 0
@@ -288,7 +288,7 @@ class Agent:
 
     def pickTerritoryForMovement(self, map):
         controlledTerritories = map.getTerritoriesByPlayer(self.name)
-        controlledTerritoriesThatCanMove = [x for x in controlledTerritories if x.army > 1]
+        controlledTerritoriesThatCanMove = [t for t in controlledTerritories if t.getArmy() > 1]
 
         score = -1
         bestScore = -1
@@ -316,8 +316,10 @@ class Agent:
                 score += self.characteristics["Movement"]["Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(
                     receiveTerritory.index, map) else 0
                 score += self.characteristics["Movement"]["Connection Bias"].value * len(receiveTerritory.connections)
-                score += self.characteristics["Movement"]["Bigger Territory"].value if receiveTerritory.army > supplyTerritory.army else 0
-                score += self.characteristics["Movement"]["Smaller Territory"].value if receiveTerritory.army < supplyTerritory.army else 0
+                score += self.characteristics["Movement"]["Bigger Territory"].value if receiveTerritory.getArmy(
+                ) > supplyTerritory.getArmy() else 0
+                score += self.characteristics["Movement"]["Smaller Territory"].value if receiveTerritory.getArmy(
+                ) < supplyTerritory.getArmy() else 0
 
                 # Calculate movement score based on preference settings
                 # Consider it to be aggressive to move into a territory with more enemy than ally connections
@@ -373,10 +375,10 @@ class Agent:
                     if(isSafe):
                         percentToTransfer = self.characteristics["Movement"]["Safe Transfer Rate"].value
 
-                    unitsToTransfer = math.floor(supplyTerritory.army * percentToTransfer)
+                    unitsToTransfer = math.floor(supplyTerritory.getArmy() * percentToTransfer)
                     # Don't move all units, at least 1 must stay on the supplying territory
-                    if(supplyTerritory.army - unitsToTransfer <= 0):
-                        unitsToTransfer = supplyTerritory.army - 1
+                    if(supplyTerritory.getArmy() - unitsToTransfer <= 0):
+                        unitsToTransfer = supplyTerritory.getArmy() - 1
 
                     # Set best stats
                     bestScore = score
@@ -399,8 +401,8 @@ class Agent:
         attackingTerritory = map.territories[pickTerritoryResult.attackIndex]
         defendingTerritory = map.territories[pickTerritoryResult.defendIndex]
 
-        attackingArmies = attackingTerritory.army - 1  # Keep one remaining on the territory
-        defendingArmies = defendingTerritory.army
+        attackingArmies = attackingTerritory.getArmy() - 1  # Keep one remaining on the territory
+        defendingArmies = defendingTerritory.getArmy()
 
         minimumAmountRemaining = math.floor(
             attackingArmies * self.characteristics["Attack"]["Minimal Remaining Percent"].value)
@@ -413,18 +415,18 @@ class Agent:
         # FIXME: Shouldn't this really be handled by the map object, not the agent?
         # Keep any remaining armies
         # Don't forget about the 1 that wasn't allowed to leave
-        attackingTerritory.army = attackResult.attackers + 1
+        attackingTerritory.setArmy(attackResult.attackers + 1)
 
         # Let the defenders keep their remaining armies
-        defendingTerritory.army = attackResult.defenders
+        defendingTerritory.setArmy(attackResult.defenders)
 
         # If the attack was successful, change ownership
         attackSuccessful = (attackResult.defenders == 0)
         if(attackSuccessful):
             defendingTerritory.owner = self.name
             # Take an attacking army and place it on the new territory
-            defendingTerritory.army = 1
-            attackingTerritory.army -= 1
+            defendingTerritory.setArmy(1)
+            attackingTerritory.addArmy(-1)
 
         return attackResult
 

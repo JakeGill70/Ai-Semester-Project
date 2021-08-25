@@ -29,7 +29,7 @@ class Map():
         return positions
 
     def getTotalArmiesByPlayer(self, playerName):
-        return sum([x.army for x in self.getTerritoriesByPlayer(playerName)])
+        return sum([x.getArmy() for x in self.getTerritoriesByPlayer(playerName)])
 
     def getTerritoriesByPlayer(self, playerName):
         return [x for x in self.territories.values() if x.owner == playerName]
@@ -52,15 +52,16 @@ class Map():
                         at {territoryId} controlled by \
                         {self.owners[territoryId]}")
         else:
-            territory.army += amount
+            territory.addArmy(amount)
             territory.owner = playerName
 
     def getContinentBonus(self, playerName):
         unitCount = 0
 
         for continent in self.continents.values():
-            unitCount += continent.unitBonus if all(x.owner == playerName for x in self.getTerritoriesByContinent(continent.name)) else 0
-        
+            unitCount += continent.unitBonus if all(x.owner == playerName
+                                                    for x in self.getTerritoriesByContinent(continent.name)) else 0
+
         return unitCount
 
     def getNewUnitCountForPlayer(self, playerName):
@@ -79,5 +80,5 @@ class Map():
         return [x for x in self.territories.values() if x.continent == continentName]
 
     def moveArmies(self, supplyIndex, receiveIndex, amount):
-        self.territories[supplyIndex].army -= amount
-        self.territories[receiveIndex].army += amount
+        self.territories[supplyIndex].addArmy(-amount)
+        self.territories[receiveIndex].addArmy(amount)
