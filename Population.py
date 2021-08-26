@@ -72,6 +72,6 @@ class Population:
         for agent in self.allAgents:
             for categoryName, characteristicCategory in agent.characteristics.items():
                 for characteristicName, characteristic in agent.characteristics[categoryName].items():
-                    avgAgent.characteristics[categoryName][characteristicName].value = agent.characteristics[categoryName][characteristicName].value * valueWeight
+                    avgAgent.characteristics[categoryName][characteristicName].value += agent.characteristics[categoryName][characteristicName].value * valueWeight
 
         return avgAgent
