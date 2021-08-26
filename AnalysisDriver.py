@@ -58,7 +58,6 @@ def detailedPlot(agents, categoryName, characteristicName):
     x = range(len(agents))
     y = [agent.characteristics[categoryName][characteristicName].value for agent in agents]
     plt.title(categoryName + " - " + characteristicName)
-    print("New plot title: " + categoryName + " - " + characteristicName)
     plt.xlabel("Generation")
     plt.ylabel("Value")
     plt.plot(x, y)
@@ -75,12 +74,6 @@ def loadAgents():
     return agents
 
 
-# print(folderPath)
-# pathNames = getAverageAgentFilePathNames("./Average Agents/2021-08-18-11PM-25")
-# print(pathNames)
-# print("\n\n\n")
-# agents = getListOfAverageAgents(pathNames)
-# print([a.name for a in agents])
 agents = loadAgents()
 baseAgent = agents[0]
 
