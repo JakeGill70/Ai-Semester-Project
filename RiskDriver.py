@@ -229,8 +229,8 @@ for i in range(GENERATION_COUNT):
     playTournament(generalPopulation, i)
 
     # TODO: Pull this average agent output to separate method
-    f = open(f"{AGENT_OUTPUT_DIRECTORY_PATH}Gen{(i):03d}.json", "wt+")
-    f.write(generalPopulation.getAverageAgent(name=f"Gen{i:03d} Mean Agent").toJSON())
+    f = open(f"{AGENT_OUTPUT_DIRECTORY_PATH}Gen{(i):05d}.json", "wt+")
+    f.write(generalPopulation.getAverageAgent(name=f"Gen{i:05d} Mean Agent").toJSON())
     f.close()
 
     mutationMultiplier = interpolate(HIGH_MUTATION_MODIFIER, LOW_MUTATION_MODIFIER, (i/GENERATION_COUNT))
