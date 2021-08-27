@@ -209,8 +209,8 @@ def interpolate(x, y, t):
     return x*(1-t) + y*t
 
 
-GENERATION_COUNT = 500
-POPULATION_SIZE = 100
+GENERATION_COUNT = 1500
+POPULATION_SIZE = 256
 HIGH_MUTATION_MODIFIER = 1.75
 LOW_MUTATION_MODIFIER = 0.5
 AGENT_OUTPUT_DIRECTORY_PATH = f"./Average Agents/{datetime.now().strftime('%Y-%m-%d-%I-%M%p')}/"
