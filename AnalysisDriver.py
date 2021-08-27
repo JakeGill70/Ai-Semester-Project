@@ -5,6 +5,7 @@ from AgentReader import AgentReader
 import matplotlib.pyplot as plt
 import math
 import tkinter as tk
+from Logger import Logger, MessageTypes
 
 
 def getAverageAgentFilePathNames(directoryPath):
@@ -107,7 +108,7 @@ for characteristicCategoryName in baseAgent.characteristics.keys():
         charName = characteristicName
         buttons.append(tk.Button(root, text=characteristicName, command=lambda catName=catName,
                                  charName=charName: detailedPlot(agents, catName, charName)))
-        print(f"Button for {catName} - {charName}")
+        Logger.message(MessageTypes.GuiBuild, f"Button for {catName} - {charName}")
         buttons[-1].grid(row=gridRowCount, column=gridColumnCount)
         gridRowCount += 1
 

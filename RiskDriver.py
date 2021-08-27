@@ -9,6 +9,7 @@ from MapReader import MapReader
 from datetime import datetime
 import os
 import math
+from Logger import Logger, MessageTypes
 
 # TODO: Break a lot of this off into a "Tournament" or a "RiskGame" class, or both.
 #   This code is growing way beyond what should be in a simple driver class.
@@ -30,9 +31,11 @@ def attackUntilUnfavorable(agent, map, atkSys, showGame=True):
         attackResult = agent.attackTerritory(pickTerritoryResult, map, atkSys)
         if(showGame):
             if(attackResult):
-                print(f"{agent.name}'s attack from #{pickTerritoryResult.attackIndex} to #{pickTerritoryResult.defendIndex} was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}.")
+                Logger.message(
+                    MessageTypes.AttackResult,
+                    f"{agent.name}'s attack from #{pickTerritoryResult.attackIndex} to #{pickTerritoryResult.defendIndex} was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}.")
             else:
-                print(f"{agent.name} decided to stop attacking.")
+                Logger.message(MessageTypes.AttackStopNotice, "{agent.name} decided to stop attacking.")
                 break
 
 
@@ -43,15 +46,16 @@ def playGame(agents, showGame=True, windowName="RISK"):
     winners = []
     losers = []
 
-    print(f"Playing Game: {[agent.name for agent in agents]}")
+    Logger.message(MessageTypes.GameStartNotice, f"Playing Game: {[agent.name for agent in agents]}")
     if(len(agents) != len(set([agent.name for agent in agents]))):
-        print(f"Error: Duplicate player names: {[agent.name for agent in agents]}", file=sys.stderr)
+        Logger.message(MessageTypes.DuplicatePlayerWarning,
+                       f"Error: Duplicate player names: {[agent.name for agent in agents]}", file=sys.stderr)
         return ([], [])
 
     setupGameBoard(agents, 30, map)
 
     if(showGame):
-        print("Presenting initial map")
+        Logger.message(MessageTypes.GuiMirror, "Presenting initial map")
         game.showWindow(map, 0.5)
 
     # Each player should get 100 turns
@@ -67,16 +71,17 @@ def playGame(agents, showGame=True, windowName="RISK"):
         agentIndex = (agentIndex + 1) % len(agents)
         tmpWindowName = windowName + f", turn {turnCount}"
         if(showGame):
-            print(f"=====================")
-            print(f"    Turn: {turnCount} : {agents[agentIndex].name}")
-            print(f"=====================")
+            Logger.message(
+                MessageTypes.TurnStartNotice,
+                f"=====================\nTurn: {turnCount} : {agents[agentIndex].name}\n=====================")
 
         # Place Units
         newUnits = map.getNewUnitCountForPlayer(agents[agentIndex].name)
         for i in range(newUnits):
             placementIndex = agents[agentIndex].placeUnit(map)
             if(showGame):
-                print(f"{agents[agentIndex].name} placed a unit at #{placementIndex}.")
+                Logger.message(MessageTypes.UnitPlacementNotice,
+                               f"{agents[agentIndex].name} placed a unit at #{placementIndex}.")
 
         # Attack
         attackUntilUnfavorable(agents[agentIndex], map, atkSys, showGame)
@@ -87,7 +92,9 @@ def playGame(agents, showGame=True, windowName="RISK"):
             map.moveArmies(pickMovementResult.supplyIndex, pickMovementResult.receiveIndex,
                            pickMovementResult.transferAmount)
             if(showGame):
-                print(f"{agents[agentIndex].name} moved {pickMovementResult.transferAmount} units from #{pickMovementResult.supplyIndex} to #{pickMovementResult.receiveIndex}.")
+                Logger.message(
+                    MessageTypes.UnitMovementNotice,
+                    f"{agents[agentIndex].name} moved {pickMovementResult.transferAmount} units from #{pickMovementResult.supplyIndex} to #{pickMovementResult.receiveIndex}.")
 
         # Period update
         if(showGame and turnCount % GRAPH_UPDATE_FREQUENCY == 0):
@@ -99,7 +106,8 @@ def playGame(agents, showGame=True, windowName="RISK"):
             if(len(map.getTerritoriesByPlayer(agent.name)) == 0):
                 agentsToRemove.append(agent)
                 if(showGame):
-                    print(f"{agent.name} has been defeated by {agents[agentIndex].name}!")
+                    Logger.message(MessageTypes.PlayerDefeatedNotice,
+                                   f"{agent.name} has been defeated by {agents[agentIndex].name}!")
                     game.showWindow(map, 0.1, (f"RISK: {agent.name} has been defeated by {agents[agentIndex].name}!"))
         for agent in agentsToRemove:
             # TODO: Remove that player agent's remaining turns
@@ -110,14 +118,16 @@ def playGame(agents, showGame=True, windowName="RISK"):
         # Check for winner
         if(len(agents) == 1):
             if(showGame):
-                print(f"{agents[0].name} is the winner!")
+                Logger.message(MessageTypes.PlayerVictoryNotice, f"{agents[0].name} is the winner!")
             winners.append(agents[0])
             break
 
     if(turnCount >= maxTurnCount and len(agents) > 1):
 
         if(showGame):
-            print(f"Max turn limit reached, determining winner based on territory, using army count as tie breaker.")
+            Logger.message(
+                MessageTypes.TurnLimitReachedNotice,
+                f"Max turn limit reached, determining winner based on territory, using army count as tie breaker.")
         # TODO: Do like this print statement says :P
 
         # Sort remaining agents by number of territories
@@ -125,7 +135,6 @@ def playGame(agents, showGame=True, windowName="RISK"):
 
         # if there is a tie...
         if(len(map.getTerritoriesByPlayer(agents[0].name)) == len(map.getTerritoriesByPlayer(agents[1].name))):
-            print("Tie!")
             # Reduce agents to just those with the same number of territories
             agents = [x for x in agents if len(map.getTerritoriesByPlayer(x.name)) ==
                       len(map.getTerritoriesByPlayer(agents[0].name))]
@@ -151,11 +160,11 @@ def playGame(agents, showGame=True, windowName="RISK"):
                 losers.append(a)
 
         if(showGame):
-            print(f"Winner(s): {[x.name for x in winners]}")
-            print(f"Losers: {[x.name for x in losers]}")
+            Logger.message(MessageTypes.GameResults,
+                           f"Winner(s): {[x.name for x in winners]}\nLosers: {[x.name for x in losers]}")
 
     if(showGame):
-        print("Presenting final map")
+        Logger.message(MessageTypes.GuiMirror, "Presenting final map")
         game.showWindow(map, 1.0, (windowName + ", final"))
 
     return (winners, losers, turnCount)
@@ -176,7 +185,7 @@ def playTournament(population, generationCount=0):
         t += 1
         for match in matchUps:
             m += 1
-            print("\n\n\nGeneration", generationCount, "Match ", m, ", Tier ", t, "\n\n\n\n")
+            Logger.message(MessageTypes.MatchStartNotice, f"Gen {generationCount}, Tier {t}, Match {m}")
             windowName = f"RISK: Gen {generationCount}, Tier {t}, Match {m}"
             matchWinners, matchLosers, turnCount = playGame(match, True, windowName)
             winnerList += matchWinners
@@ -225,7 +234,7 @@ f.close()
 generalPopulation = Population(POPULATION_SIZE)
 generalPopulation.initAllAgents()
 for i in range(GENERATION_COUNT):
-    print(f"\n\n<<< GENERATION {int(i)} >>>\n\n")
+    Logger.message(MessageTypes.GenerationStartNotice, f"GENERATION {int(i)}")
     playTournament(generalPopulation, i)
 
     # TODO: Pull this average agent output to separate method
@@ -235,6 +244,3 @@ for i in range(GENERATION_COUNT):
 
     mutationMultiplier = interpolate(HIGH_MUTATION_MODIFIER, LOW_MUTATION_MODIFIER, (i/GENERATION_COUNT))
     generalPopulation.generateNextGeneration(mutationMultiplier)
-
-for agent in generalPopulation.allAgents:
-    print(agent.name + "'s stats:" + agent.stats())

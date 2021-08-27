@@ -204,7 +204,7 @@ class Agent:
                 bestScore = score
                 bestIndex = territoryData.index
 
-            # print(f"Index: {territoryData.index}, Score: {score}, BestIndex: {bestIndex}")
+            # rm print(f"Index: {territoryData.index}, Score: {score}, BestIndex: {bestIndex}")
 
         if(bestIndex == -1):
             raise Exception("No best index for placing a territory")
