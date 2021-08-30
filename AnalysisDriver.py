@@ -32,7 +32,7 @@ def summaryPlots(agents):
     for characteristicCategoryName in baseAgent.characteristics.keys():
         numberOfItemsInCategory = len(baseAgent.characteristics[characteristicCategoryName].keys())
         sqrtNOIIC = math.ceil(math.sqrt(numberOfItemsInCategory))
-        fig, axes = plt.subplots(nrows=sqrtNOIIC, ncols=sqrtNOIIC)
+        fig, axes = plt.subplots(nrows=sqrtNOIIC, ncols=sqrtNOIIC, constrained_layout=True)
         fig.suptitle(characteristicCategoryName)
         fig.canvas.set_window_title(characteristicCategoryName)
         i = 0
@@ -49,6 +49,7 @@ def summaryPlots(agents):
                 i = 0
                 j += 1
 
+        # fig.tight_layout()
         fig.show()
 
 
