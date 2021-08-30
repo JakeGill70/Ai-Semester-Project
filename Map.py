@@ -1,6 +1,8 @@
 import sys
 from Territory import Territory
+from Continent import Continent
 import math
+import copy
 
 
 class Map():
@@ -8,22 +10,26 @@ class Map():
         super().__init__()
         self.territories = {}
         # TODO: Make these readable from the MapData instead of hardcoded
-        self.continentColors = {
-            "North America": (255, 255, 0),  # Yellow
-            "South America": (255, 0, 0),  # Red
-            "Europe": (200, 200, 200),  # Grey
-            "Africa": (0, 255, 0),  # Green
-            "Asia": (0, 0, 255),  # Blue
-            "Australia": (255, 0, 255)  # Pink
-        }
+        self.continents = {}
 
-        self.continentCount = {}
+    def __deepcopy__(self):
+        cpy = Map()
+
+        for k in self.territories.keys():
+            cpy.territories[k] = copy.deepcopy(cpy.territories[k])
+
+        cpy.continentColors = copy.deepcopy(self.continentColors)
+
+        cpy.continentCount = copy.deepcopy(self.continentCount)
 
     def getPositions(self):
         positions = {}
         for territory in self.territories:
             positions[territory.index] = territory.position
         return positions
+
+    def getTotalArmiesByPlayer(self, playerName):
+        return sum([x.getArmy() for x in self.getTerritoriesByPlayer(playerName)])
 
     def getTerritoriesByPlayer(self, playerName):
         return [x for x in self.territories.values() if x.owner == playerName]
@@ -37,6 +43,8 @@ class Map():
         return players
 
     def placeArmy(self, playerName, amount, territoryId):
+        if(territoryId < 0 or territoryId > len(self.territories)):
+            raise Exception(f"The territory id {territoryId} is not a valid id.")
         territory = self.territories[territoryId]
         if(territory.owner and territory.owner != playerName):
             raise Exception(f"Player '{playerName}' is \
@@ -44,64 +52,15 @@ class Map():
                         at {territoryId} controlled by \
                         {self.owners[territoryId]}")
         else:
-            territory.army += amount
+            territory.addArmy(amount)
             territory.owner = playerName
-
-    def readMapData(self, filePath):
-        currentContinent = ""
-        f = open(filePath, "r")
-        for line in f:
-            # Ignore comment lines
-            if(line[0] == "#"):
-                continue
-
-            # Process continent lines
-            if(line.strip().startswith("continent")):
-                try:
-                    currentContinent = line.split("=")[1].strip()
-                    continue
-                except IndexError:
-                    print(f"Malform line in mapdata: '{line}'", file=sys.stderr)
-                    continue
-
-            # Process data lines
-            try:
-                data = line.split(":")
-                index = int(data[0].strip())
-                connections = [int(x.strip()) for x in data[1].split(",")]
-                position = tuple([int(x.strip()) for x in data[2].split(",")])
-                self.territories[index] = Territory(index, connections, currentContinent, position)
-            except IndexError:
-                print(f"Malform line in mapdata: '{line}'", file=sys.stderr)
-                continue
-        f.close()
-
-        # Verify all connections are bi-directional
-        for territory in self.territories.values():
-            for connectingIndex in territory.connections:
-                connectingTerritory = self.territories[connectingIndex]
-                if(territory.index not in connectingTerritory.connections):
-                    print(
-                        f"Uni-directional connection found. {index} is connected to {i}, but {i} is not connected to {index}",
-                        file=sys.stderr)
 
     def getContinentBonus(self, playerName):
         unitCount = 0
 
-        # TODO: Find a way to make these read from a file instead of hardcoded
-        naCount = len([x for x in self.getTerritoriesByContinent("North America") if x.owner == playerName])
-        saCount = len([x for x in self.getTerritoriesByContinent("South America") if x.owner == playerName])
-        euCount = len([x for x in self.getTerritoriesByContinent("Europe") if x.owner == playerName])
-        afCount = len([x for x in self.getTerritoriesByContinent("Africa") if x.owner == playerName])
-        asCount = len([x for x in self.getTerritoriesByContinent("Asia") if x.owner == playerName])
-        auCount = len([x for x in self.getTerritoriesByContinent("Australia") if x.owner == playerName])
-
-        unitCount += 5 if naCount == self.continentCount["North America"] else 0
-        unitCount += 2 if saCount == self.continentCount["South America"] else 0
-        unitCount += 5 if euCount == self.continentCount["Europe"] else 0
-        unitCount += 3 if afCount == self.continentCount["Africa"] else 0
-        unitCount += 7 if asCount == self.continentCount["Asia"] else 0
-        unitCount += 2 if auCount == self.continentCount["Australia"] else 0
+        for continent in self.continents.values():
+            unitCount += continent.unitBonus if all(x.owner == playerName
+                                                    for x in self.getTerritoriesByContinent(continent.name)) else 0
 
         return unitCount
 
@@ -120,8 +79,6 @@ class Map():
     def getTerritoriesByContinent(self, continentName):
         return [x for x in self.territories.values() if x.continent == continentName]
 
-    def updateContinentCount(self):
-        continentCounts = {}
-        for continentName in self.continentColors.keys():
-            continentCounts[continentName] = len(self.getTerritoriesByContinent(continentName))
-        self.continentCount = continentCounts
+    def moveArmies(self, supplyIndex, receiveIndex, amount):
+        self.territories[supplyIndex].addArmy(-amount)
+        self.territories[receiveIndex].addArmy(amount)

@@ -1,0 +1,163 @@
+{
+  "name": "test",
+  "characteristics": {
+    "Placement": {
+      "Anywhere": {
+        "value": 3,
+        "adjustmentAmount": 1.0,
+        "description": "Placing a unit anywhere"
+      },
+      "Enemy Adjacent": {
+        "value": 5,
+        "adjustmentAmount": 1.0,
+        "description": "Placing a unit on a territory connected to a territory controlled by a different player"
+      },
+      "Ally Adjacent": {
+        "value": 8,
+        "adjustmentAmount": 1.0,
+        "description": "Placing a unit on a territory connected to a territory controlled by the same player"
+      },
+      "Border Adjacent": {
+        "value": 13,
+        "adjustmentAmount": 1.0,
+        "description": "Placing a unit in a territory that borders a country in a different continent"
+      },
+      "Connection Bias": {
+        "value": 1,
+        "adjustmentAmount": 0.25,
+        "description": "Placing a unit on a territory with connections to multiple other countries, +value per connection"
+      },
+      "Placement Bias Multiplier": {
+        "value": 0.05,
+        "adjustmentAmount": 0.01,
+        "description": "Placing a unit where there already are other units, +value per army"
+      }
+    },
+    "Attack": {
+      "Anywhere": {
+        "value": 3,
+        "adjustmentAmount": 1.0,
+        "description": "Attacking anywhere"
+      },
+      "Ally Adjacent": {
+        "value": 5,
+        "adjustmentAmount": 1.0,
+        "description": "Attacking a territory connected to another territory controlled by the attacking player"
+      },
+      "Border Adjacent": {
+        "value": 8,
+        "adjustmentAmount": 1.0,
+        "description": "Attacking a territory on the border of a different continent"
+      },
+      "Capture Continent": {
+        "value": 13,
+        "adjustmentAmount": 1.0,
+        "description": "Attacking a territory that will give this player control over all territories on a continent if the attack is successful"
+      },
+      "Destroy Bias": {
+        "value": 1,
+        "adjustmentAmount": 0.1,
+        "description": "Estimated amount of defending units destroyed, +value per unit"
+      },
+      "Remain Bias": {
+        "value": -1,
+        "adjustmentAmount": 0.1,
+        "description": "Estimated amount of attacking units destroyed, -value per unit"
+      },
+      "Safe Threshold": {
+        "value": 0.95,
+        "adjustmentAmount": 0.01,
+        "description": "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky"
+      },
+      "Minimal Success Chance": {
+        "value": 0.5,
+        "adjustmentAmount": 0.01,
+        "description": "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable"
+      },
+      "Minimal Remaining Percent": {
+        "value": 0.1,
+        "adjustmentAmount": 0.01,
+        "description": "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack"
+      }
+    },
+    "Movement": {
+      "Anywhere": {
+        "value": 3,
+        "adjustmentAmount": 1.0,
+        "description": "Moving a unit anywhere"
+      },
+      "Enemy Adjacent": {
+        "value": 5,
+        "adjustmentAmount": 1.0,
+        "description": "Moving a unit on a territory connected to a territory controlled by a different player"
+      },
+      "Ally Adjacent": {
+        "value": 8,
+        "adjustmentAmount": 1.0,
+        "description": "Moving a unit on a territory connected to a territory controlled by the same player"
+      },
+      "Border Adjacent": {
+        "value": 13,
+        "adjustmentAmount": 1.0,
+        "description": "Moving a unit in a territory that borders a country in a different continent"
+      },
+      "Bigger Territory": {
+        "value": 3,
+        "adjustmentAmount": 1.0,
+        "description": "Moving units onto a territory with more units."
+      },
+      "Smaller Territory": {
+        "value": 5,
+        "adjustmentAmount": 1.0,
+        "description": "Moving units onto a territory with fewer units."
+      },
+      "Connection Bias": {
+        "value": 1,
+        "adjustmentAmount": 0.25,
+        "description": "Moving a unit on a territory with connections to multiple other countries, +value per connection"
+      },
+      "Base Transfer Rate": {
+        "value": 0.5,
+        "adjustmentAmount": 0.01,
+        "description": "Base percentage of units to transfer should it be necessary"
+      },
+      "Risky Transfer Rate": {
+        "value": 0.3,
+        "adjustmentAmount": 0.01,
+        "description": "Percentage of units to transfer if the movement is considered risky"
+      },
+      "Safe Transfer Rate": {
+        "value": 0.7,
+        "adjustmentAmount": 0.01,
+        "description": "Percentage of units to transfer if the movement is considered safe"
+      }
+    },
+    "Preference": {
+      "Larger": {
+        "value": 1,
+        "adjustmentAmount": 0.25,
+        "description": "Preference to attack larger players"
+      },
+      "Smaller": {
+        "value": 1,
+        "adjustmentAmount": 0.25,
+        "description": "Preference to attack smaller players"
+      },
+      "Aggression": {
+        "value": 1,
+        "adjustmentAmount": 0.25,
+        "description": "Preference for aggressive actions"
+      },
+      "Risky": {
+        "value": 1,
+        "adjustmentAmount": 0.25,
+        "description": "Preference for risky actions"
+      },
+      "Safe": {
+        "value": 1,
+        "adjustmentAmount": 0.25,
+        "description": "Preference for safe actions"
+      }
+    }
+  }
+}

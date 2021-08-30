@@ -74,6 +74,9 @@ class AttackSystem:
         self.knownAttackSuccessEstimates = data
 
     def getAttackEstimate(self, attackCount, defendCount):
+        if(attackCount < 1 or defendCount < 1):
+            raise Exception(f"Error: attackCount/defendCount is is not valid: {attackCount},{defendCount}")
+
         originalAttackCount = attackCount
         originalDefendCount = defendCount
         estimateSuccess = 0
