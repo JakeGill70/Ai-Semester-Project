@@ -12,10 +12,12 @@ MoveSelection = namedtuple('MoveSelection', 'supplyIndex receiveIndex transferAm
 
 
 class AgentCharacteristic:
-    def __init__(self, value, description, adjustmentAmt=1.0):
+    def __init__(self, value, description, adjustmentAmt=1.0, lowerLimit=-math.inf, upperLimit=math.inf):
         self.value = value
         self.description = description
         self.adjustmentAmt = adjustmentAmt
+        self.lowerLimit = lowerLimit
+        self.upperLimit = upperLimit
 
     def __int__(self):
         return self.value
@@ -28,13 +30,17 @@ class AgentCharacteristic:
         return cpy
 
     def toJSON(self):
-        return f"{{\"value\" : {self.value}, \"adjustmentAmount\" : {self.adjustmentAmt}, \"description\" : \"{self.description}\"}}"
+        return f"{{\"value\" : {self.value}, \"adjustmentAmount\" : {self.adjustmentAmt}, \"lowerLimit\" : {self.lowerLimit}, \"upperLimit\" : {self.upperLimit}, \"description\" : \"{self.description}\"}}"
 
     def adjust(self):
-        self.value += self.adjustmentAmt
+        self.adjust(self.adjustmentAmt)
 
     def adjust(self, amt):
         self.value += amt
+        if(self.value > self.upperLimit):
+            self.value = self.upperLimit
+        elif(self.value < self.lowerLimit):
+            self.value = self.lowerLimit
 
     def adjust_negative(self):
         self.value -= self.adjustmentAmt

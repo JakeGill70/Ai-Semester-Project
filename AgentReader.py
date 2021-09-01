@@ -47,5 +47,7 @@ class AgentReader():
     def dictionaryToCharacteristic(charDict):
         value = float(charDict["value"])
         adjustmentAmt = float(charDict["adjustmentAmount"])
+        lowerLimit = float(charDict["lowerLimit"])
+        upperLimit = float(charDict["upperLimit"])
         description = str(charDict["description"])
-        return AgentCharacteristic(value, description, adjustmentAmt)
+        return AgentCharacteristic(value, description, adjustmentAmt, lowerLimit, upperLimit)

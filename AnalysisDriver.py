@@ -116,3 +116,4 @@ for characteristicCategoryName in baseAgent.characteristics.keys():
 root.mainloop()
 
 # TODO: Add trendlines for plots
+# TODO: Scale each plot to be the same size
