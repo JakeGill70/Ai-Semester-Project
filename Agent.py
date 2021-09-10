@@ -71,7 +71,7 @@ class Agent:
                 "Ally Adjacent": AgentCharacteristic(8, "Placing a unit on a territory connected to a territory controlled by the same player"),
                 "Border Adjacent": AgentCharacteristic(13, "Placing a unit in a territory that borders a country in a different continent"),
                 "Connection Bias": AgentCharacteristic(1, "Placing a unit on a territory with connections to multiple other countries, +value per connection", 0.25),
-                "Placement Bias Multiplier": AgentCharacteristic(0.05, "Placing a unit where there already are other units, +value per army", 0.05)
+                "Placement Bias Multiplier": AgentCharacteristic(0.85, "Placing a unit where there already are other units, value^(armies on territory)", 0.05, lowerLimit=0, upperLimit=1)
             },
             "Attack": {
                 "Anywhere": AgentCharacteristic(3, "Attacking anywhere"),
@@ -80,9 +80,9 @@ class Agent:
                 "Capture Continent": AgentCharacteristic(13, "Attacking a territory that will give this player control over all territories on a continent if the attack is successful"),
                 "Destroy Bias": AgentCharacteristic(1, "Estimated amount of defending units destroyed, +value per unit", 0.1),
                 "Remain Bias": AgentCharacteristic(-1, "Estimated amount of attacking units destroyed, -value per unit", 0.1),
-                "Safe Threshold": AgentCharacteristic(0.95, "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky", 0.05),
-                "Minimal Success Chance": AgentCharacteristic(0.5, "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable", 0.05),
-                "Minimal Remaining Percent": AgentCharacteristic(0.1, "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack", 0.05)
+                "Safe Threshold": AgentCharacteristic(0.95, "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky", 0.05, lowerLimit=0, upperLimit=1),
+                "Minimal Success Chance": AgentCharacteristic(0.5, "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable", 0.05, lowerLimit=0, upperLimit=1),
+                "Minimal Remaining Percent": AgentCharacteristic(0.1, "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack", 0.05, lowerLimit=0, upperLimit=1)
             },
             "Movement": {
                 "Anywhere": AgentCharacteristic(3, "Moving a unit anywhere"),
