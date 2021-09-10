@@ -99,7 +99,6 @@ class Agent:
             "Preference": {
                 "Larger": AgentCharacteristic(1, "Preference to attack larger players", 0.25),
                 "Smaller": AgentCharacteristic(1, "Preference to attack smaller players", 0.25),
-                "Aggression": AgentCharacteristic(1, "Preference for aggressive actions", 0.25),
                 "Risky": AgentCharacteristic(1, "Preference for risky actions", 0.25),
                 "Safe": AgentCharacteristic(1, "Preference for safe actions", 0.25)
             }
@@ -162,7 +161,6 @@ class Agent:
             score = 0
             # Calculate placement score based on placement settings
             score += self.characteristics["Placement"]["Anywhere"].value
-            enemyAdjacentsData = self.getTerritoryDataEnemyAdjacent(territoryData.index, map)
             score += self.characteristics["Placement"]["Enemy Adjacent"].value if self.getTerritoryDataEnemyAdjacent(
                 territoryData.index, map) else 0
             score += self.characteristics["Placement"]["Ally Adjacent"].value if self.getTerritoryDataAllyAdjacent(
@@ -172,10 +170,10 @@ class Agent:
             score += self.characteristics["Placement"]["Connection Bias"].value * len(territoryData.connections)
 
             # Adjust placement score based on preference settings
+            enemyAdjacentsData = self.getTerritoryDataEnemyAdjacent(territoryData.index, map)
             if(enemyAdjacentsData):
                 # ! Be careful through here, because you cannot assume
                 # ! that the best territory found so far is also enemy adjacent
-                score += self.characteristics["Preference"]["Aggression"].value
                 bestEnemyAdjacentData = self.getTerritoryDataEnemyAdjacent(bestIndex, map) if bestIndex != -1 else []
                 bestEnemySize = 0
                 # FIXME: Is this really the best way to determine enemy size?
