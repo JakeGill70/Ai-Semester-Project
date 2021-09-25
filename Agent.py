@@ -267,9 +267,8 @@ class Agent:
 
                 # If there is a best value to compare to
                 if(bestScore != -1):
-                    # FIXME: Is this really the best way to compare enemy size?
-                    currEnemySize = len(map.getTerritoriesByPlayer(enemyTerritory.owner))
-                    bestEnemySize = len(map.getTerritoriesByPlayer(bestDefendingTerritory.owner))
+                    currEnemySize = map.getPlayerSize(enemyTerritory.owner)
+                    bestEnemySize = map.getPlayerSize(bestDefendingTerritory.owner)
                     if(currEnemySize > bestEnemySize):
                         score += self.characteristics["Preference"]["Larger"].value
                     if(currEnemySize < bestEnemySize):
@@ -350,8 +349,8 @@ class Agent:
                     currEnemyData = self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map)
                     currConnectedEnemyNames = [x.owner for x in currEnemyData]
                     # FIXME: Is this the best way to compare enemy size?
-                    currConnectedEnemySize = [map.getTotalArmiesByPlayer(x) for x in currConnectedEnemyNames]
-                    currTotalEnemySize = max(currConnectedEnemySize)
+                    currConnectedEnemySize = [map.getPlayerSize(x) for x in currConnectedEnemyNames]
+                    currTotalEnemySize = sum(currConnectedEnemySize)
                 except:
                     pass
 
@@ -360,8 +359,8 @@ class Agent:
                     currBestEnemyData = self.getTerritoryDataEnemyAdjacent(bestReceivingTerritory.index, map)
                     currBestConnectedEnemyNames = [x.owner for x in currBestEnemyData]
 
-                    currBestConnectedEnemySize = [map.getTotalArmiesByPlayer(x) for x in currBestConnectedEnemyNames]
-                    currBestTotalEnemySize = max(currBestConnectedEnemySize)
+                    currBestConnectedEnemySize = [map.getPlayerSize(x) for x in currBestConnectedEnemyNames]
+                    currBestTotalEnemySize = sum(currBestConnectedEnemySize)
                 except:
                     pass
 

@@ -34,6 +34,13 @@ class Map():
     def getTerritoriesByPlayer(self, playerName):
         return [x for x in self.territories.values() if x.owner == playerName]
 
+    def getPlayerSize(self, playerName):
+        territorySize = len(self.getTerritoriesByPlayer(playerName))
+        armySize = self.getTotalArmiesByPlayer(playerName)
+        territoryWeight = 1000
+        playerSize = territorySize * territoryWeight + armySize
+        return playerSize
+
     def getPlayerTerritories(self):
         players = {}
         for territoryIndex, territoryData in self.territories.items():
