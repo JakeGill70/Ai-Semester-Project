@@ -262,8 +262,6 @@ class Agent:
                 enemyTerritory.owner = prevOwner
                 if(unitBonusBeforeCapture != unitBonusAfterCapture):
                     score += self.characteristics["Attack"]["Capture Continent"].value
-                    # Consider this an aggressive action
-                    score += self.characteristics["Preference"]["Aggression"].value
 
                 # If there is a best value to compare to
                 if(bestScore != -1):
@@ -325,10 +323,6 @@ class Agent:
                 ) < supplyTerritory.getArmy() else 0
 
                 # Calculate movement score based on preference settings
-                # Consider it to be aggressive to move into a territory with more enemy than ally connections
-                isAggressive = len(self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map)) > len(
-                    self.getTerritoryDataAllyAdjacent(receiveTerritory.index, map))
-                score += self.characteristics["Preference"]["Aggression"].value if isAggressive else 0
                 # Consider it risky to move units away from a territory with enemy connections
                 isRisky = len(self.getTerritoryDataEnemyAdjacent(supplyTerritory.index, map)) > 0
                 score += self.characteristics["Preference"]["Risky"].value if isRisky else 0
