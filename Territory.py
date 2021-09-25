@@ -26,8 +26,6 @@ class Territory():
         self.army += value
         if(self.army < 1):
             raise Exception("Error: Army value cannot be less than 1")
-        else:
-            self.army = value
 
     def __deepcopy__(self):
         cpy = Territory

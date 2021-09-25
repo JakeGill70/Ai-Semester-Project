@@ -337,6 +337,7 @@ class Agent:
                 # ! 3.) That any territory is connected to a single enemy
 
                 # FIXME: Is this the best way to compare enemy size?
+                # TODO: Add more comments and simplify this logic - it smells bad!
 
                 currTotalEnemySize = 0
                 try:
@@ -374,14 +375,18 @@ class Agent:
 
                     unitsToTransfer = math.floor(supplyTerritory.getArmy() * percentToTransfer)
                     # Don't move all units, at least 1 must stay on the supplying territory
-                    if(supplyTerritory.getArmy() - unitsToTransfer <= 0):
+                    # Remember that a territory must have at least 2 units to perform a transfer:
+                    #       1 unit to remain on the territory, and the 1 unit to transfer
+                    if(supplyTerritory.getArmy() - unitsToTransfer < 2):
                         unitsToTransfer = supplyTerritory.getArmy() - 1
 
-                    # Set best stats
-                    bestScore = score
-                    bestSupplyingTerritory = supplyTerritory
-                    bestReceivingTerritory = receiveTerritory
-                    bestTransferAmount = unitsToTransfer
+                    if(unitsToTransfer > 0):
+                        # Don't consider it a best movement if no units actually get moved
+                        # Set best stats
+                        bestScore = score
+                        bestSupplyingTerritory = supplyTerritory
+                        bestReceivingTerritory = receiveTerritory
+                        bestTransferAmount = unitsToTransfer
 
         # ! Don't assume that the agent CAN move an army
 
@@ -410,21 +415,22 @@ class Agent:
         # rm print(f"Attacking ({defendingTerritory}) from ({attackingTerritory}) was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}")
 
         # FIXME: Shouldn't this really be handled by the map object, not the agent?
-        # Keep any remaining armies
-        # Don't forget about the 1 that wasn't allowed to leave
-        attackingTerritory.setArmy(attackResult.attackers + 1)
-
-        # Let the defenders keep their remaining armies
-        defendingTerritory.setArmy(attackResult.defenders)
 
         # If the attack was successful, change ownership
         attackSuccessful = (attackResult.defenders == 0)
         if(attackSuccessful):
             defendingTerritory.owner = self.name
+
+            # Keep any remaining armies
+            attackingTerritory.setArmy(attackResult.attackers)
             # Take an attacking army and place it on the new territory
             defendingTerritory.setArmy(1)
-            attackingTerritory.addArmy(-1)
-
+        else:
+            # Keep any remaining armies
+            # Don't forget about the 1 that wasn't allowed to leave
+            attackingTerritory.setArmy(attackResult.attackers + 1)
+            # Let the defenders keep their remaining armies
+            defendingTerritory.setArmy(attackResult.defenders)
         return attackResult
 
     def placeUnit(self, map):
