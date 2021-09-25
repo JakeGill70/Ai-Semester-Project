@@ -43,10 +43,10 @@ class AgentCharacteristic:
             self.value = self.lowerLimit
 
     def adjust_negative(self):
-        self.value -= self.adjustmentAmt
+        self.adjust(-self.adjustmentAmt)
 
     def adjust_negative(self, amt):
-        self.value -= amt
+        self.adjust(-amt)
 
     def adjust_random(self):
         if(bool(random.getrandbits(1))):
