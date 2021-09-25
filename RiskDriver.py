@@ -172,11 +172,12 @@ def playGame(agents, showGame=True, windowName="RISK"):
 
 def playTournament(population, generationCount=0):
     populationSize = len(population)
+    remainingPercent = 0.25
     loserList = []
     master_loserList = []
     t = 0
     windowName = ""
-    while(len(population) > populationSize/4):
+    while(len(population) > populationSize * remainingPercent):
         matchUps = population.getMatchGroups(4)
         winnerList = []
         loserList = []
