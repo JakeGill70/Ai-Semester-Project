@@ -22,6 +22,9 @@ class Map():
 
         cpy.continentCount = copy.deepcopy(self.continentCount)
 
+    def getTerritoryCount(self):
+        return len(self.territories)
+
     def getPositions(self):
         positions = {}
         for territory in self.territories:

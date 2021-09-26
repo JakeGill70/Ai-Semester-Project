@@ -19,6 +19,15 @@ def setupGameBoard(agentList, initialUnits, map):
     agentListSize = len(agentList)
     initialUnits *= agentListSize
     agentIndex = 0
+
+    # guarantee that there is at least enough units to cover the map
+    # This can sometimes happen if there is only 1 player. The game board
+    # must still be setup correctly before they can end their turn and
+    # the game logic recognize that they are the only remaining player
+    # at the end of that first turn.
+    if(initialUnits < map.getTerritoryCount()):
+        initialUnits = map.getTerritoryCount()
+
     for i in range(initialUnits):
         agentList[agentIndex].placeUnitSetup(map)
         agentIndex += 1
