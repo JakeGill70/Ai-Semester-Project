@@ -12,6 +12,9 @@ class AgentReader():
         # Load in map data as JSON
         f = open(filePath)
         rawData = f.read()
+        # Filter "inf" and "-inf" values
+        rawData = rawData.replace("-inf", "-1000")
+        rawData = rawData.replace("inf", "1000")
         f.close()
         data = json.loads(rawData)
         # f.close()
