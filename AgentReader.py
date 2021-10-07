@@ -54,3 +54,9 @@ class AgentReader():
         upperLimit = float(charDict["upperLimit"])
         description = str(charDict["description"])
         return AgentCharacteristic(value, description, adjustmentAmt, lowerLimit, upperLimit)
+
+    @staticmethod
+    def writeAgent(filePathName, agent):
+        f = open(filePathName, "wt+")
+        f.write(agent.toJSON())
+        f.close()
