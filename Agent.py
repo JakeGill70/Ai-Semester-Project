@@ -373,6 +373,9 @@ class Agent:
                     if(isSafe):
                         percentToTransfer = self.characteristics["Movement"]["Safe Transfer Rate"].value
 
+                    # Clamp percent to transfer to be a percentage value
+                    percentToTransfer = max(0, min(percentToTransfer, 1))
+
                     unitsToTransfer = math.floor(supplyTerritory.getArmy() * percentToTransfer)
                     # Don't move all units, at least 1 must stay on the supplying territory
                     # Remember that a territory must have at least 2 units to perform a transfer:
