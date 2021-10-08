@@ -60,3 +60,12 @@ class AgentReader():
         f = open(filePathName, "wt+")
         f.write(agent.toJSON())
         f.close()
+
+    @staticmethod
+    def readSampleAgents():
+        agents = []
+        agents.append(AgentReader.readAgent("./Sample Agents/Gen00000 - Jacob.json"))
+        agents.append(AgentReader.readAgent("./Sample Agents/Gen00500 - Sabrina.json"))
+        agents.append(AgentReader.readAgent("./Sample Agents/Gen01000 - Jamey.json"))
+        agents.append(AgentReader.readAgent("./Sample Agents/Gen01499 - Rusty.json"))
+        return agents

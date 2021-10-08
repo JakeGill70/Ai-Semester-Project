@@ -1,18 +1,13 @@
 from Map import Map
-import random
-from Game import Game
-from Territory import Territory
-from Agent import Agent
-from AttackSystem import AttackSystem
-from Population import Population
 from MapReader import MapReader
-from datetime import datetime
-import os
-import math
-from Logger import Logger, MessageTypes
+from Agent import Agent
 from AgentReader import AgentReader
+from Logger import Logger, MessageTypes
 from Tournament import Tournament
+from RiskGame import RiskGame
+from datetime import datetime
 
+EXAMPLE = 3
 
 GENERATION_COUNT = 1500
 POPULATION_SIZE = 256
@@ -23,5 +18,19 @@ TURN_COUNT_FILE_NAME = f"{AGENT_OUTPUT_DIRECTORY_PATH}turnCount.txt"
 
 map = MapReader.readMap("./NewMapData.json")
 
-Tournament.playMultipleTournaments(map, POPULATION_SIZE, GENERATION_COUNT, LOW_MUTATION_MODIFIER,
-                                   HIGH_MUTATION_MODIFIER, AGENT_OUTPUT_DIRECTORY_PATH, TURN_COUNT_FILE_NAME)
+if(EXAMPLE == 1):
+    Tournament.playMultipleTournaments(map.getCopy(), POPULATION_SIZE, GENERATION_COUNT, LOW_MUTATION_MODIFIER,
+                                       HIGH_MUTATION_MODIFIER, AGENT_OUTPUT_DIRECTORY_PATH, TURN_COUNT_FILE_NAME)
+
+elif(EXAMPLE == 2):
+    RiskGame.playGame(AgentReader.readSampleAgents(), map.getCopy())
+
+elif(EXAMPLE == 3):
+    winCounts = {"Jacob": 0, "Sabrina": 0, "Jamey": 0, "Rusty": 0}
+    for i in range(100):
+        winners, losers, turnCount = RiskGame.playGame(AgentReader.readSampleAgents(), map.getCopy())
+        for winner in winners:
+            winCounts[winner.name] += 1
+
+    for player in winCounts.keys():
+        print(f"{player}'s Wins: {winCounts[player]}")
