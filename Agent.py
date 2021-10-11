@@ -8,8 +8,6 @@ import json
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
 MoveSelection = namedtuple('MoveSelection', 'supplyIndex receiveIndex transferAmount')
 
-# TODO: Standardize how to compare the sizes of enemies
-
 
 class AgentCharacteristic:
     def __init__(self, value, description, adjustmentAmt=1.0, lowerLimit=-math.inf, upperLimit=math.inf):
