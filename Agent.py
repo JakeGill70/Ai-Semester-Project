@@ -8,14 +8,14 @@ import json
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
 MoveSelection = namedtuple('MoveSelection', 'supplyIndex receiveIndex transferAmount')
 
-# TODO: Standardize how to compare the sizes of enemies
-
 
 class AgentCharacteristic:
-    def __init__(self, value, description, adjustmentAmt=1.0):
+    def __init__(self, value, description, adjustmentAmt=1.0, lowerLimit=-math.inf, upperLimit=math.inf):
         self.value = value
         self.description = description
         self.adjustmentAmt = adjustmentAmt
+        self.lowerLimit = lowerLimit
+        self.upperLimit = upperLimit
 
     def __int__(self):
         return self.value
@@ -28,19 +28,23 @@ class AgentCharacteristic:
         return cpy
 
     def toJSON(self):
-        return f"{{\"value\" : {self.value}, \"adjustmentAmount\" : {self.adjustmentAmt}, \"description\" : \"{self.description}\"}}"
+        return f"{{\"value\" : {self.value}, \"adjustmentAmount\" : {self.adjustmentAmt}, \"lowerLimit\" : {self.lowerLimit}, \"upperLimit\" : {self.upperLimit}, \"description\" : \"{self.description}\"}}"
 
     def adjust(self):
-        self.value += self.adjustmentAmt
+        self.adjust(self.adjustmentAmt)
 
     def adjust(self, amt):
         self.value += amt
+        if(self.value > self.upperLimit):
+            self.value = self.upperLimit
+        elif(self.value < self.lowerLimit):
+            self.value = self.lowerLimit
 
     def adjust_negative(self):
-        self.value -= self.adjustmentAmt
+        self.adjust(-self.adjustmentAmt)
 
     def adjust_negative(self, amt):
-        self.value -= amt
+        self.adjust(-amt)
 
     def adjust_random(self):
         if(bool(random.getrandbits(1))):
@@ -60,30 +64,30 @@ class Agent:
         self.name = name
         self.characteristics = {
             "Placement": {
-                "Anywhere": AgentCharacteristic(3, "Placing a unit anywhere"),
+                "Anywhere": AgentCharacteristic(5, "Placing a unit anywhere"),
                 "Enemy Adjacent": AgentCharacteristic(5, "Placing a unit on a territory connected to a territory controlled by a different player"),
-                "Ally Adjacent": AgentCharacteristic(8, "Placing a unit on a territory connected to a territory controlled by the same player"),
-                "Border Adjacent": AgentCharacteristic(13, "Placing a unit in a territory that borders a country in a different continent"),
+                "Ally Adjacent": AgentCharacteristic(5, "Placing a unit on a territory connected to a territory controlled by the same player"),
+                "Border Adjacent": AgentCharacteristic(5, "Placing a unit in a territory that borders a country in a different continent"),
                 "Connection Bias": AgentCharacteristic(1, "Placing a unit on a territory with connections to multiple other countries, +value per connection", 0.25),
-                "Placement Bias Multiplier": AgentCharacteristic(0.05, "Placing a unit where there already are other units, +value per army", 0.05)
+                "Placement Bias Multiplier": AgentCharacteristic(0.85, "Placing a unit where there already are other units, value^(armies on territory)", 0.05, lowerLimit=0, upperLimit=1)
             },
             "Attack": {
-                "Anywhere": AgentCharacteristic(3, "Attacking anywhere"),
+                "Anywhere": AgentCharacteristic(5, "Attacking anywhere"),
                 "Ally Adjacent": AgentCharacteristic(5, "Attacking a territory connected to another territory controlled by the attacking player"),
-                "Border Adjacent": AgentCharacteristic(8, "Attacking a territory on the border of a different continent"),
-                "Capture Continent": AgentCharacteristic(13, "Attacking a territory that will give this player control over all territories on a continent if the attack is successful"),
+                "Border Adjacent": AgentCharacteristic(5, "Attacking a territory on the border of a different continent"),
+                "Capture Continent": AgentCharacteristic(5, "Attacking a territory that will give this player control over all territories on a continent if the attack is successful"),
                 "Destroy Bias": AgentCharacteristic(1, "Estimated amount of defending units destroyed, +value per unit", 0.1),
                 "Remain Bias": AgentCharacteristic(-1, "Estimated amount of attacking units destroyed, -value per unit", 0.1),
-                "Safe Threshold": AgentCharacteristic(0.95, "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky", 0.05),
-                "Minimal Success Chance": AgentCharacteristic(0.5, "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable", 0.05),
-                "Minimal Remaining Percent": AgentCharacteristic(0.1, "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack", 0.05)
+                "Safe Threshold": AgentCharacteristic(0.95, "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky", 0.05, lowerLimit=0, upperLimit=1),
+                "Minimal Success Chance": AgentCharacteristic(0.5, "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable", 0.05, lowerLimit=0, upperLimit=1),
+                "Minimal Remaining Percent": AgentCharacteristic(0.1, "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack", 0.05, lowerLimit=0, upperLimit=1)
             },
             "Movement": {
-                "Anywhere": AgentCharacteristic(3, "Moving a unit anywhere"),
+                "Anywhere": AgentCharacteristic(5, "Moving a unit anywhere"),
                 "Enemy Adjacent": AgentCharacteristic(5, "Moving a unit on a territory connected to a territory controlled by a different player"),
-                "Ally Adjacent": AgentCharacteristic(8, "Moving a unit on a territory connected to a territory controlled by the same player"),
-                "Border Adjacent": AgentCharacteristic(13, "Moving a unit in a territory that borders a country in a different continent"),
-                "Bigger Territory": AgentCharacteristic(3, "Moving units onto a territory with more units."),
+                "Ally Adjacent": AgentCharacteristic(5, "Moving a unit on a territory connected to a territory controlled by the same player"),
+                "Border Adjacent": AgentCharacteristic(5, "Moving a unit in a territory that borders a country in a different continent"),
+                "Bigger Territory": AgentCharacteristic(5, "Moving units onto a territory with more units."),
                 "Smaller Territory": AgentCharacteristic(5, "Moving units onto a territory with fewer units."),
                 "Connection Bias": AgentCharacteristic(1, "Moving a unit on a territory with connections to multiple other countries, +value per connection", 0.25),
                 "Base Transfer Rate": AgentCharacteristic(0.5, "Base percentage of units to transfer should it be necessary", 0.05),
@@ -93,7 +97,6 @@ class Agent:
             "Preference": {
                 "Larger": AgentCharacteristic(1, "Preference to attack larger players", 0.25),
                 "Smaller": AgentCharacteristic(1, "Preference to attack smaller players", 0.25),
-                "Aggression": AgentCharacteristic(1, "Preference for aggressive actions", 0.25),
                 "Risky": AgentCharacteristic(1, "Preference for risky actions", 0.25),
                 "Safe": AgentCharacteristic(1, "Preference for safe actions", 0.25)
             }
@@ -156,7 +159,6 @@ class Agent:
             score = 0
             # Calculate placement score based on placement settings
             score += self.characteristics["Placement"]["Anywhere"].value
-            enemyAdjacentsData = self.getTerritoryDataEnemyAdjacent(territoryData.index, map)
             score += self.characteristics["Placement"]["Enemy Adjacent"].value if self.getTerritoryDataEnemyAdjacent(
                 territoryData.index, map) else 0
             score += self.characteristics["Placement"]["Ally Adjacent"].value if self.getTerritoryDataAllyAdjacent(
@@ -166,10 +168,10 @@ class Agent:
             score += self.characteristics["Placement"]["Connection Bias"].value * len(territoryData.connections)
 
             # Adjust placement score based on preference settings
+            enemyAdjacentsData = self.getTerritoryDataEnemyAdjacent(territoryData.index, map)
             if(enemyAdjacentsData):
                 # ! Be careful through here, because you cannot assume
                 # ! that the best territory found so far is also enemy adjacent
-                score += self.characteristics["Preference"]["Aggression"].value
                 bestEnemyAdjacentData = self.getTerritoryDataEnemyAdjacent(bestIndex, map) if bestIndex != -1 else []
                 bestEnemySize = 0
                 # FIXME: Is this really the best way to determine enemy size?
@@ -258,14 +260,11 @@ class Agent:
                 enemyTerritory.owner = prevOwner
                 if(unitBonusBeforeCapture != unitBonusAfterCapture):
                     score += self.characteristics["Attack"]["Capture Continent"].value
-                    # Consider this an aggressive action
-                    score += self.characteristics["Preference"]["Aggression"].value
 
                 # If there is a best value to compare to
                 if(bestScore != -1):
-                    # FIXME: Is this really the best way to compare enemy size?
-                    currEnemySize = len(map.getTerritoriesByPlayer(enemyTerritory.owner))
-                    bestEnemySize = len(map.getTerritoriesByPlayer(bestDefendingTerritory.owner))
+                    currEnemySize = map.getPlayerSize(enemyTerritory.owner)
+                    bestEnemySize = map.getPlayerSize(bestDefendingTerritory.owner)
                     if(currEnemySize > bestEnemySize):
                         score += self.characteristics["Preference"]["Larger"].value
                     if(currEnemySize < bestEnemySize):
@@ -322,10 +321,6 @@ class Agent:
                 ) < supplyTerritory.getArmy() else 0
 
                 # Calculate movement score based on preference settings
-                # Consider it to be aggressive to move into a territory with more enemy than ally connections
-                isAggressive = len(self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map)) > len(
-                    self.getTerritoryDataAllyAdjacent(receiveTerritory.index, map))
-                score += self.characteristics["Preference"]["Aggression"].value if isAggressive else 0
                 # Consider it risky to move units away from a territory with enemy connections
                 isRisky = len(self.getTerritoryDataEnemyAdjacent(supplyTerritory.index, map)) > 0
                 score += self.characteristics["Preference"]["Risky"].value if isRisky else 0
@@ -340,14 +335,15 @@ class Agent:
                 # ! 3.) That any territory is connected to a single enemy
 
                 # FIXME: Is this the best way to compare enemy size?
+                # TODO: Add more comments and simplify this logic - it smells bad!
 
                 currTotalEnemySize = 0
                 try:
                     currEnemyData = self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map)
                     currConnectedEnemyNames = [x.owner for x in currEnemyData]
                     # FIXME: Is this the best way to compare enemy size?
-                    currConnectedEnemySize = [map.getTotalArmiesByPlayer(x) for x in currConnectedEnemyNames]
-                    currTotalEnemySize = max(currConnectedEnemySize)
+                    currConnectedEnemySize = [map.getPlayerSize(x) for x in currConnectedEnemyNames]
+                    currTotalEnemySize = sum(currConnectedEnemySize)
                 except:
                     pass
 
@@ -356,8 +352,8 @@ class Agent:
                     currBestEnemyData = self.getTerritoryDataEnemyAdjacent(bestReceivingTerritory.index, map)
                     currBestConnectedEnemyNames = [x.owner for x in currBestEnemyData]
 
-                    currBestConnectedEnemySize = [map.getTotalArmiesByPlayer(x) for x in currBestConnectedEnemyNames]
-                    currBestTotalEnemySize = max(currBestConnectedEnemySize)
+                    currBestConnectedEnemySize = [map.getPlayerSize(x) for x in currBestConnectedEnemyNames]
+                    currBestTotalEnemySize = sum(currBestConnectedEnemySize)
                 except:
                     pass
 
@@ -375,16 +371,23 @@ class Agent:
                     if(isSafe):
                         percentToTransfer = self.characteristics["Movement"]["Safe Transfer Rate"].value
 
+                    # Clamp percent to transfer to be a percentage value
+                    percentToTransfer = max(0, min(percentToTransfer, 1))
+
                     unitsToTransfer = math.floor(supplyTerritory.getArmy() * percentToTransfer)
                     # Don't move all units, at least 1 must stay on the supplying territory
-                    if(supplyTerritory.getArmy() - unitsToTransfer <= 0):
+                    # Remember that a territory must have at least 2 units to perform a transfer:
+                    #       1 unit to remain on the territory, and the 1 unit to transfer
+                    if(supplyTerritory.getArmy() - unitsToTransfer < 2):
                         unitsToTransfer = supplyTerritory.getArmy() - 1
 
-                    # Set best stats
-                    bestScore = score
-                    bestSupplyingTerritory = supplyTerritory
-                    bestReceivingTerritory = receiveTerritory
-                    bestTransferAmount = unitsToTransfer
+                    if(unitsToTransfer > 0):
+                        # Don't consider it a best movement if no units actually get moved
+                        # Set best stats
+                        bestScore = score
+                        bestSupplyingTerritory = supplyTerritory
+                        bestReceivingTerritory = receiveTerritory
+                        bestTransferAmount = unitsToTransfer
 
         # ! Don't assume that the agent CAN move an army
 
@@ -413,21 +416,22 @@ class Agent:
         # rm print(f"Attacking ({defendingTerritory}) from ({attackingTerritory}) was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}")
 
         # FIXME: Shouldn't this really be handled by the map object, not the agent?
-        # Keep any remaining armies
-        # Don't forget about the 1 that wasn't allowed to leave
-        attackingTerritory.setArmy(attackResult.attackers + 1)
-
-        # Let the defenders keep their remaining armies
-        defendingTerritory.setArmy(attackResult.defenders)
 
         # If the attack was successful, change ownership
         attackSuccessful = (attackResult.defenders == 0)
         if(attackSuccessful):
             defendingTerritory.owner = self.name
+
+            # Keep any remaining armies
+            attackingTerritory.setArmy(attackResult.attackers)
             # Take an attacking army and place it on the new territory
             defendingTerritory.setArmy(1)
-            attackingTerritory.addArmy(-1)
-
+        else:
+            # Keep any remaining armies
+            # Don't forget about the 1 that wasn't allowed to leave
+            attackingTerritory.setArmy(attackResult.attackers + 1)
+            # Let the defenders keep their remaining armies
+            defendingTerritory.setArmy(attackResult.defenders)
         return attackResult
 
     def placeUnit(self, map):

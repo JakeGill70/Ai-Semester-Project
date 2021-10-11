@@ -9,7 +9,6 @@ class Map():
     def __init__(self):
         super().__init__()
         self.territories = {}
-        # TODO: Make these readable from the MapData instead of hardcoded
         self.continents = {}
 
     def __deepcopy__(self):
@@ -22,6 +21,20 @@ class Map():
 
         cpy.continentCount = copy.deepcopy(self.continentCount)
 
+    def getCopy(self):
+        cpy = Map()
+
+        for tk in self.territories.keys():
+            cpy.territories[tk] = self.territories[tk].getCopy()
+
+        for ck in self.continents.keys():
+            cpy.continents[ck] = self.continents[ck]
+
+        return cpy
+
+    def getTerritoryCount(self):
+        return len(self.territories)
+
     def getPositions(self):
         positions = {}
         for territory in self.territories:
@@ -33,6 +46,13 @@ class Map():
 
     def getTerritoriesByPlayer(self, playerName):
         return [x for x in self.territories.values() if x.owner == playerName]
+
+    def getPlayerSize(self, playerName):
+        territorySize = len(self.getTerritoriesByPlayer(playerName))
+        armySize = self.getTotalArmiesByPlayer(playerName)
+        territoryWeight = 1000
+        playerSize = territorySize * territoryWeight + armySize
+        return playerSize
 
     def getPlayerTerritories(self):
         players = {}

@@ -37,19 +37,38 @@ def summaryPlots(agents):
         fig.canvas.set_window_title(characteristicCategoryName)
         i = 0
         j = 0
+        minY = 10000
+        maxY = -10000
         for characteristicName in baseAgent.characteristics[characteristicCategoryName].keys():
             y = [agent.characteristics[characteristicCategoryName][characteristicName].value for agent in agents]
+            isPercentageValues = all(yVal <= 1 and yVal >= -1 for yVal in y)
+
+            if(isPercentageValues):
+                y = [yVal*100 for yVal in y]
+
+            # Set y-axis scaling
+            mY = min(y)
+            if(mY < minY):
+                minY = mY
+            mY = max(y)
+            if(mY > maxY):
+                maxY = mY
 
             axes[i][j].plot(x, y)
             axes[i][j].set_title(characteristicName)
             axes[i][j].set_xlabel("Generation")
-            axes[i][j].set_ylabel("Value")
+            axes[i][j].set_ylabel("Value" + (" %" if isPercentageValues else ""))
             i += 1
             if(i % sqrtNOIIC == 0):
                 i = 0
                 j += 1
 
-        # fig.tight_layout()
+        # Set y-scaling for all figures
+        for axesi in axes:
+            for axesj in axesi:
+                axesj.set_ylim(minY, maxY)
+
+        fig.tight_layout()
         fig.show()
 
 
@@ -116,3 +135,4 @@ for characteristicCategoryName in baseAgent.characteristics.keys():
 root.mainloop()
 
 # TODO: Add trendlines for plots
+# TODO: Scale each plot to be the same size

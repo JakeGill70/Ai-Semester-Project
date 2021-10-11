@@ -13,6 +13,9 @@ class Territory():
     def __str__(self):
         return f"#{self.index}:{self.owner}:{self.army}"
 
+    def getCopy(self):
+        return Territory(self.index, self.connections, self.continent, self.position, self.owner, self.army)
+
     def getArmy(self):
         return self.army
 
@@ -26,8 +29,6 @@ class Territory():
         self.army += value
         if(self.army < 1):
             raise Exception("Error: Army value cannot be less than 1")
-        else:
-            self.army = value
 
     def __deepcopy__(self):
         cpy = Territory

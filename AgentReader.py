@@ -12,6 +12,9 @@ class AgentReader():
         # Load in map data as JSON
         f = open(filePath)
         rawData = f.read()
+        # Filter "inf" and "-inf" values
+        rawData = rawData.replace("-inf", "-1000")
+        rawData = rawData.replace("inf", "1000")
         f.close()
         data = json.loads(rawData)
         # f.close()
@@ -47,5 +50,22 @@ class AgentReader():
     def dictionaryToCharacteristic(charDict):
         value = float(charDict["value"])
         adjustmentAmt = float(charDict["adjustmentAmount"])
+        lowerLimit = float(charDict["lowerLimit"])
+        upperLimit = float(charDict["upperLimit"])
         description = str(charDict["description"])
-        return AgentCharacteristic(value, description, adjustmentAmt)
+        return AgentCharacteristic(value, description, adjustmentAmt, lowerLimit, upperLimit)
+
+    @staticmethod
+    def writeAgent(filePathName, agent):
+        f = open(filePathName, "wt+")
+        f.write(agent.toJSON())
+        f.close()
+
+    @staticmethod
+    def readSampleAgents():
+        agents = []
+        agents.append(AgentReader.readAgent("./Sample Agents/Gen00000 - Jacob.json"))
+        agents.append(AgentReader.readAgent("./Sample Agents/Gen00500 - Sabrina.json"))
+        agents.append(AgentReader.readAgent("./Sample Agents/Gen01000 - Jamey.json"))
+        agents.append(AgentReader.readAgent("./Sample Agents/Gen01499 - Rusty.json"))
+        return agents
