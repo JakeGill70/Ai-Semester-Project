@@ -497,3 +497,16 @@ class Agent:
         # 5 Generate all combinations with replacement
         allPlacementCombinations = set(combinations_with_replacement(eligableTerritoryIndices, groupSize))
 
+    def getAllValidMovements(self, map):
+        controlledTerritoryIndices = [t.id for t in map.getTerritoriesByPlayer(self.name)]
+        controlledTerritoriesThatCanMove = [t for t in controlledTerritories if map.territories[t].getArmy() > 1]
+
+        allValidMovements = []
+
+        for sourceId in controlledTerritoriesThatCanMove:
+            possibleTargets = [i for i in map.territories[sourceId].connections if i in controlledTerritoryIndices]
+            for targetId in possibleTargets:
+                allValidMovements.append(tuple(sourceId, targetId))
+
+        return allValidMovements
+
