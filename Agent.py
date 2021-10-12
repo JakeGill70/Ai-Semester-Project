@@ -100,6 +100,14 @@ class Agent:
                 "Smaller": AgentCharacteristic(1, "Preference to attack smaller players", 0.25),
                 "Risky": AgentCharacteristic(1, "Preference for risky actions", 0.25),
                 "Safe": AgentCharacteristic(1, "Preference for safe actions", 0.25)
+            },
+            "Consideration": {
+                "Armies": AgentCharacteristic(0, "Owning an army, +value each"),
+                "Territories": AgentCharacteristic(0, "Owning a territory, +value each"),
+                "Armies Enemy Adjacent": AgentCharacteristic(0, "Owning an army next to an enemy controlled territory, +value each"),
+                "Territories Enemy Adjacent": AgentCharacteristic(0, "Owning a territory with an enemy connection, +value for each connection"),
+                "Army Upkeep": AgentCharacteristic(0, "Armies given to player at start of next turn, +value for each"),
+                "Continents": AgentCharaceristic(0, "Owning a continent, +value each")
             }
         }
 
