@@ -470,3 +470,30 @@ class Agent:
         else:
             randomCharacteristic = random.choice(list(self.characteristics[characteristicGroupName].values()))
             randomCharacteristic.adjust_random(randomCharacteristic.adjustmentAmt * mutationMultiplier)
+
+    def getAllValidPlacements(self, map, armiesToPlace):
+        # 1 Get territories connected to enemy territories
+        # 2 Get territories connected to those territories
+        # 3 Use union set of both to get territories eligable for placement
+        controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
+        eligableTerritoryIndices = set()
+        for tid in controlledTerritoryIndices:
+            for connectionId in map.territories[tid].connections:
+                if(map.territories[connectionId].owner != self.name):
+                    eligableTerritoryIndices.add(tid)  # Add self
+                    eligableTerritoryIndices.add(map.territories[tid].connections)  # Add connections
+                    break
+        # Remove territories not controlled by self
+        eligableTerritoryIndices = [i for i in eligableTerritoryIndices if i not in controlledTerritoryIndices]
+
+        # 4 Determine group size for army placement
+        groupSize = -1
+        if(armiesToPlace <= 10):
+            groupSize = armiesToPlace
+        else:
+            armyGroupSize = math.ceil(armiesToPlace * 0.1)
+            groupSize = math.ceil((armiesToPlace)/armyGroupSize)
+
+        # 5 Generate all combinations with replacement
+        allPlacementCombinations = set(combinations_with_replacement(eligableTerritoryIndices, groupSize))
+
