@@ -3,6 +3,7 @@ import math
 import random
 import copy
 import json
+from itertools import combinations_with_replacement
 
 
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
@@ -510,3 +511,15 @@ class Agent:
 
         return allValidMovements
 
+    def getAllValidAttacks(self, map):
+        controlledTerritoryIndices = [t.id for t in map.getTerritoriesByPlayer(self.name)]
+        controlledTerritoriesThatCanAttack = [t for t in controlledTerritories if map.territories[t].getArmy() > 1]
+
+        allValidAttacks = []
+
+        for sourceId in controlledTerritoriesThatCanAttack:
+            possibleTargets = [i for i in map.territories[sourceId].connections if i not in controlledTerritoryIndices]
+            for targetId in possibleTargets:
+                allValidAttacks.append(tuple(sourceId, targetId))
+
+        return allValidMovements
