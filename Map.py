@@ -75,21 +75,29 @@ class Map():
             territory.addArmy(amount)
             territory.owner = playerName
 
+    def getCountOfContinentsControlledByPlayer(self, playerName):
+        continentCount = 0
+        for continent in self.continents.values():
+            continentCount += 1 if isContinentControlledByPlayer(continent.name, playerName) else 0
+        return continentCount
+
+    def isContinentControlledByPlayer(self, continentName, playerName):
+        return all(x.owner == playerName for x in self.getTerritoriesByContinent(continentName)
+
     def getContinentBonus(self, playerName):
-        unitCount = 0
+        unitCount=0
 
         for continent in self.continents.values():
-            unitCount += continent.unitBonus if all(x.owner == playerName
-                                                    for x in self.getTerritoriesByContinent(continent.name)) else 0
+            unitCount += continent.unitBonus if isContinentControlledByPlayer(continent.name, playerName) else 0
 
         return unitCount
 
     def getNewUnitCountForPlayer(self, playerName):
         # Get "normal" unit amount based on territory count
-        territoryCount = len(self.getTerritoriesByPlayer(playerName))
-        unitCount = math.floor(territoryCount / 3)
+        territoryCount=len(self.getTerritoriesByPlayer(playerName))
+        unitCount=math.floor(territoryCount / 3)
         # You always get at least 3 units
-        unitCount = max(unitCount, 3)
+        unitCount=max(unitCount, 3)
 
         # Continent bonuses
         unitCount += self.getContinentBonus(playerName)
