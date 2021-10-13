@@ -531,3 +531,29 @@ class Agent:
                 allValidAttacks.append(tuple(sourceId, targetId))
 
         return allValidMovements
+
+    def scoreGameState(self, map):
+        armyCount = map.getTotalArmiesByPlayer(self.name)
+        territories = map.getTerritoriesByPlayer(self.name)
+        territoryCount = len(territories)
+
+        armyEnemyAdjacent = 0
+        territoryEnemyAdjacent = 0
+        for territory in territories:
+            for tid in territory.connections:
+                if(map.territories[tid].owner != self.name):
+                    armyEnemnyAdjacent += territory.getArmy()
+                    territoryEnemyAdjacent += 1
+                    break
+
+        armyUpkeep = map.getNewUnitCountForPlayer(self.name)
+        continents = map.getCountOfContinentsControlledByPlayer(self.name)
+
+        score = 0
+        score += armyCount * self.characteristics["Consideration"]["Armies"]
+        score += territoryCount * self.characteristics["Consideration"]["Territories"]
+        score += armyEnemyAdjacent * self.characteristics["Consideration"]["Armies Enemy Adjacent"]
+        score += territoryEnemyAdjacent * self.characteristics["Consideration"]["Territories Enemy Adjacent"]
+        score += armyUpkeep * self.characteristics["Consideration"]["Army Upkeep"]
+        score += continents * self.characteristics["Consideration"]["Continents"]
+        return score
