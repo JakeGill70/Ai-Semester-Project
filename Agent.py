@@ -557,7 +557,35 @@ class Agent:
             for targetId in possibleTargets:
                 allValidAttacks.append(tuple(sourceId, targetId))
 
-        return allValidMovements
+        return allValidAttacks
+
+    def pickBestAttack(self, map, atkSys):
+        validAttacks = self.getAllValidAttacks(map)
+        bestScore = float('-inf')
+        bestAttackId = None
+        bestTargetId = None
+        bestSuccessEstimate = None
+        for attack in validAttacks:
+            tmp_map = map.getCopy()
+            territory = tmp_map.territories[attack[0]]
+            enemyTerritory = tmp_map.territories[attack[1]]
+
+            attackEstimate = atkSys.getAttackEstimate(territory.getArmy(), enemyTerritory.getArmy())
+
+            if(attackEstimate.attackers > 0):
+                enemyTerritory.owner = self.name
+                territory.setArmy(attackEstimate.attackers)
+                enemyTerritory.setArmy(1)
+            else:
+                continue
+
+            score = math.ceiling(self.scoreGameState(tmp_map) * attackEstimate.attackSuccessChance)
+            if(score > bestScore):
+                bestScore = score
+                bestAttackId = territory.index
+                bestTargetId = enemyTerritory.index
+
+        return AttackSelection(0, 0, 0)
 
     def scoreGameState(self, map):
         armyCount = map.getTotalArmiesByPlayer(self.name)
