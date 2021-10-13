@@ -519,6 +519,33 @@ class Agent:
 
         return allValidMovements
 
+    def convertArmyPercentageToAmount(self, armiesOnTerritory, percentage):
+        percentage = max(0, min(1, percentage))  # Clamp the percentage between 0-1
+        armiesOnTerritory -= 1  # Always keep 1 on the supplying territory
+        unitsToTransfer = math.floor(armiesOnTerritory * percentage)
+        return unitsToTransfer
+
+    def pickBestMovement(self, map):
+        validMovements = self.getAllValidMovements(map)
+        transferPercentages = [0.25, 0.5, 0.75, 1]
+        bestScore = float('-inf')
+        bestMovementSupplyId = None
+        bestMovementTargetId = None
+        bestMovementAmount = None
+        for movement in validMovements:
+            for transferPercent in transferPercentages:
+                tmp_map = map.getCopy()
+                amount = tmp_map.territories[movement[0]].getArmies()
+                amount = convertArmyPercentageToAmount(amount, transferPercent)
+                tmp_map.moveArmies(movement[0], movement[1], amount)
+                score = self.scoreGameState(tmp_map)
+                if(score > bestScore):
+                    bestScore = score
+                    bestMovementSupplyId = movement[0]
+                    bestMovementTargetId = movement[1]
+                    bestMovementAmount = amount
+        return MoveSelection(bestMovementSupplyId, bestMovementTargetId, bestMovementAmount)
+
     def getAllValidAttacks(self, map):
         controlledTerritoryIndices = [t.id for t in map.getTerritoriesByPlayer(self.name)]
         controlledTerritoriesThatCanAttack = [t for t in controlledTerritories if map.territories[t].getArmy() > 1]
