@@ -78,17 +78,17 @@ class Map():
     def getCountOfContinentsControlledByPlayer(self, playerName):
         continentCount = 0
         for continent in self.continents.values():
-            continentCount += 1 if isContinentControlledByPlayer(continent.name, playerName) else 0
+            continentCount += 1 if self.isContinentControlledByPlayer(continent.name, playerName) else 0
         return continentCount
 
     def isContinentControlledByPlayer(self, continentName, playerName):
-        return all(x.owner == playerName for x in self.getTerritoriesByContinent(continentName)
+        return all(x.owner == playerName for x in self.getTerritoriesByContinent(continentName))
 
     def getContinentBonus(self, playerName):
         unitCount=0
 
         for continent in self.continents.values():
-            unitCount += continent.unitBonus if isContinentControlledByPlayer(continent.name, playerName) else 0
+            unitCount += continent.unitBonus if self.isContinentControlledByPlayer(continent.name, playerName) else 0
 
         return unitCount
 
