@@ -48,6 +48,71 @@ class RiskGame():
                     break
 
     @staticmethod
+    def getLosingPlayers(agents, currentAgentTurn, map, game, showGame=True):
+        agentsToRemove = []
+        for agent in agents:
+            if(len(map.getTerritoriesByPlayer(agent.name)) == 0):
+                agentsToRemove.append(agent)
+                if(showGame):
+                    Logger.message(MessageTypes.PlayerDefeatedNotice,
+                                   f"{agent.name} has been defeated by {currentAgentTurn.name}!")
+                    game.showWindow(
+                        map, 0.1, (f"RISK: {agent.name} has been defeated by {currentAgentTurn.name}!"))
+        return agentsToRemove
+
+    @staticmethod
+    def getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame=True):
+        winners = []
+        losers = []
+        # Only 1 winner left, so they must be it
+        if(len(agents) == 1):
+            if(showGame):
+                Logger.message(MessageTypes.PlayerVictoryNotice, f"{agents[0].name} is the winner!")
+            winners.append(agents[0])
+
+        if(turnCount >= maxTurnCount and len(agents) > 1):
+
+            if(showGame):
+                Logger.message(
+                    MessageTypes.TurnLimitReachedNotice,
+                    f"Max turn limit reached, determining winner based on territory, using army count as tie breaker.")
+
+            # Sort remaining agents by number of territories
+            agents.sort(key=lambda x: len(map.getTerritoriesByPlayer(x.name)))
+
+            # if there is a tie...
+            if(len(map.getTerritoriesByPlayer(agents[0].name)) == len(map.getTerritoriesByPlayer(agents[1].name))):
+                # Reduce agents to just those with the same number of territories
+                agents = [x for x in agents if len(map.getTerritoriesByPlayer(x.name)) ==
+                          len(map.getTerritoriesByPlayer(agents[0].name))]
+                # Sort remaining agents by number of armies
+                agents.sort(key=lambda x: map.getTotalArmiesByPlayer(x.name))
+                # if there is still a tie...
+                if(map.getTotalArmiesByPlayer(agents[0].name) == map.getTotalArmiesByPlayer(agents[1].name)):
+                    # Reduce agents to just those with the same number of armies
+                    agents = [x for x in agents if map.getTotalArmiesByPlayer(
+                        x.name) == map.getTotalArmiesByPlayer(agents[0].name)]
+                    # Return all winners that are tied
+                    winners = agents
+                else:
+                    # There is not still a tie
+                    winners.append(agents[0])
+            else:
+                # There is not a tie
+                winners.append(agents[0])
+
+            # Change any non-winners to losers
+            for a in agents:
+                if(a not in winners):
+                    losers.append(a)
+
+            if(showGame):
+                Logger.message(MessageTypes.GameResults,
+                               f"Winner(s): {[x.name for x in winners]}\nLosers: {[x.name for x in losers]}")
+
+        return (winners, losers)
+
+    @staticmethod
     def playGame(agents, map, showGame=True, windowName="RISK"):
         game = Game()
         map = map.getCopy()
@@ -74,7 +139,7 @@ class RiskGame():
         GRAPH_UPDATE_FREQUENCY = 10
         agentIndex = -1
         tmpWindowName = ""
-        while(turnCount < maxTurnCount):
+        while(turnCount < maxTurnCount and not bool(winners)):
             # Print out turn count update
             turnCount += 1
             agentIndex = (agentIndex + 1) % len(agents)
@@ -110,68 +175,27 @@ class RiskGame():
                 game.showWindow(map, 0.01, tmpWindowName)
 
             # Remove defeated players
-            agentsToRemove = []
-            for agent in agents:
-                if(len(map.getTerritoriesByPlayer(agent.name)) == 0):
-                    agentsToRemove.append(agent)
-                    if(showGame):
-                        Logger.message(MessageTypes.PlayerDefeatedNotice,
-                                       f"{agent.name} has been defeated by {agents[agentIndex].name}!")
-                        game.showWindow(
-                            map, 0.1, (f"RISK: {agent.name} has been defeated by {agents[agentIndex].name}!"))
+            agentsToRemove = RiskGame.getLosingPlayers(agents, agents[agentIndex], map, game, showGame)
+
             for agent in agentsToRemove:
                 # TODO: Remove that player agent's remaining turns
                 #   To ensure that each player uses the proper number of turns per player.
                 losers.append(agent)
                 agents.remove(agent)
 
-            # Check for winner
-            if(len(agents) == 1):
-                if(showGame):
-                    Logger.message(MessageTypes.PlayerVictoryNotice, f"{agents[0].name} is the winner!")
-                winners.append(agents[0])
-                break
+            # Check for winners
+            gameWinners, gameLosers = RiskGame.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
+            winners += gameWinners
+            losers += gameLosers
 
-        if(turnCount >= maxTurnCount and len(agents) > 1):
+        # Check for winners
+        gameWinners, gameLosers = RiskGame.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
+        winners += gameWinners
+        losers += gameLosers
 
-            if(showGame):
-                Logger.message(
-                    MessageTypes.TurnLimitReachedNotice,
-                    f"Max turn limit reached, determining winner based on territory, using army count as tie breaker.")
-            # TODO: Do like this print statement says :P
-
-            # Sort remaining agents by number of territories
-            agents.sort(key=lambda x: len(map.getTerritoriesByPlayer(x.name)))
-
-            # if there is a tie...
-            if(len(map.getTerritoriesByPlayer(agents[0].name)) == len(map.getTerritoriesByPlayer(agents[1].name))):
-                # Reduce agents to just those with the same number of territories
-                agents = [x for x in agents if len(map.getTerritoriesByPlayer(x.name)) ==
-                          len(map.getTerritoriesByPlayer(agents[0].name))]
-                # Sort remaining agents by number of armies
-                agents.sort(key=lambda x: map.getTotalArmiesByPlayer(x.name))
-                # if there is still a tie...
-                if(map.getTotalArmiesByPlayer(agents[0].name) == map.getTotalArmiesByPlayer(agents[1].name)):
-                    # Reduce agents to just those with the same number of armies
-                    agents = [x for x in agents if map.getTotalArmiesByPlayer(
-                        x.name) == map.getTotalArmiesByPlayer(agents[0].name)]
-                    # Return all winners that are tied
-                    winners = agents
-                else:
-                    # There is not still a tie
-                    winners.append(agents[0])
-            else:
-                # There is not a tie
-                winners.append(agents[0])
-
-            # Change any non-winners to losers
-            for a in agents:
-                if(a not in winners):
-                    losers.append(a)
-
-            if(showGame):
-                Logger.message(MessageTypes.GameResults,
-                               f"Winner(s): {[x.name for x in winners]}\nLosers: {[x.name for x in losers]}")
+        # Remove duplicates
+        winners = list(set(winners))
+        losers = list(set(losers))
 
         if(showGame):
             Logger.message(MessageTypes.GuiMirror, "Presenting final map")
