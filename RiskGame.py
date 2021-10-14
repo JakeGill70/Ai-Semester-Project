@@ -113,6 +113,70 @@ class RiskGame():
         return (winners, losers)
 
     @staticmethod
+    def playGameMax(agents, map, showGame=True, windowName="RISK"):
+        game = Game()
+        map = map.getCopy()
+        atkSys = AttackSystem()
+        winners = []
+        losers = []
+
+        # Game start message
+        Logger.message(MessageTypes.GameStartNotice, f"Playing Game: {[agent.name for agent in agents]}")
+        # Exit if multiple agents with the same name
+        if(len(agents) != len(set([agent.name for agent in agents]))):
+            Logger.message(MessageTypes.DuplicatePlayerWarning,
+                           f"Error: Duplicate player names: {[agent.name for agent in agents]}", file=sys.stderr)
+            return ([], [])
+
+        # Place initial armies on map
+        RiskGame.setupGameBoard(agents, 30, map)
+
+        # Initial game message
+        if(showGame):
+            Logger.message(MessageTypes.GuiMirror, "Presenting initial map")
+            game.showWindow(map, 0.5)
+
+        # Each player should get 100 turns
+        turnCount = 0
+        turnCountPerPlayer = 100
+        maxTurnCount = len(agents) * turnCountPerPlayer
+        GRAPH_UPDATE_FREQUENCY = 10
+        agentIndex = -1
+        tmpWindowName = ""
+
+        while(turnCount < maxTurnCount and not bool(winners)):
+            # Print out turn count update
+            turnCount += 1
+            agentIndex = (agentIndex + 1) % len(agents)
+            tmpWindowName = windowName + f", turn {turnCount}"
+            if(showGame):
+                Logger.message(
+                    MessageTypes.TurnStartNotice,
+                    f"=====================\nTurn: {turnCount} : {agents[agentIndex].name}\n=====================")
+
+            # Place Units
+            # Attack
+            # Move
+
+            # Period update
+            if(showGame and turnCount % GRAPH_UPDATE_FREQUENCY == 0):
+                game.showWindow(map, 0.01, tmpWindowName)
+
+            # Remove defeated players
+            agentsToRemove = RiskGame.getLosingPlayers(agents, agents[agentIndex], map, game, showGame)
+
+            for agent in agentsToRemove:
+                # TODO: Remove that player agent's remaining turns
+                #   To ensure that each player uses the proper number of turns per player.
+                losers.append(agent)
+                agents.remove(agent)
+
+            # Check for winners
+            gameWinners, gameLosers = RiskGame.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
+            winners += gameWinners
+            losers += gameLosers
+
+    @staticmethod
     def playGame(agents, map, showGame=True, windowName="RISK"):
         game = Game()
         map = map.getCopy()
@@ -120,14 +184,18 @@ class RiskGame():
         winners = []
         losers = []
 
+        # Game start message
         Logger.message(MessageTypes.GameStartNotice, f"Playing Game: {[agent.name for agent in agents]}")
+        # Exit if multiple agents with the same name
         if(len(agents) != len(set([agent.name for agent in agents]))):
             Logger.message(MessageTypes.DuplicatePlayerWarning,
                            f"Error: Duplicate player names: {[agent.name for agent in agents]}", file=sys.stderr)
             return ([], [])
 
+        # Place initial armies on map
         RiskGame.setupGameBoard(agents, 30, map)
 
+        # Initial game message
         if(showGame):
             Logger.message(MessageTypes.GuiMirror, "Presenting initial map")
             game.showWindow(map, 0.5)
