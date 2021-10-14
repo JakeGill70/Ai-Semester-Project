@@ -62,6 +62,9 @@ class Map():
             players[territoryData.owner].append(territoryIndex)
         return players
 
+    def getPlayerCount(self):
+        return len(set([territoryData.owner for territoryData in self.territories.values()]))
+
     def placeArmy(self, playerName, amount, territoryId):
         if(territoryId < 0 or territoryId > len(self.territories)):
             raise Exception(f"The territory id {territoryId} is not a valid id.")
