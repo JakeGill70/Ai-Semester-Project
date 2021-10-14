@@ -107,7 +107,8 @@ class Agent:
                 "Armies Enemy Adjacent": AgentCharacteristic(0, "Owning an army next to an enemy controlled territory, +value each"),
                 "Territories Enemy Adjacent": AgentCharacteristic(0, "Owning a territory with an enemy connection, +value for each connection"),
                 "Army Upkeep": AgentCharacteristic(0, "Armies given to player at start of next turn, +value for each"),
-                "Continents": AgentCharacteristic(0, "Owning a continent, +value each")
+                "Continents": AgentCharacteristic(0, "Owning a continent, +value each"),
+                "Remaining Players": AgentCharacteristic(-50, "Number of remaining players on the game board, +value for each")
             }
         }
 
@@ -611,4 +612,5 @@ class Agent:
         score += territoryEnemyAdjacent * self.characteristics["Consideration"]["Territories Enemy Adjacent"]
         score += armyUpkeep * self.characteristics["Consideration"]["Army Upkeep"]
         score += continents * self.characteristics["Consideration"]["Continents"]
+        score += remainingPlayers * self.characteristics["Consideration"]["Remaining Players"]
         return score
