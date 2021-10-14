@@ -481,10 +481,16 @@ class Agent:
             randomCharacteristic = random.choice(list(self.characteristics[characteristicGroupName].values()))
             randomCharacteristic.adjust_random(randomCharacteristic.adjustmentAmt * mutationMultiplier)
 
-    def getAllValidPlacements(self, map, armiesToPlace):
-        # 1 Get territories connected to enemy territories
-        # 2 Get territories connected to those territories
-        # 3 Use union set of both to get territories eligable for placement
+    def convertArmiesToPlaceToGroupSize(self, armiesToPlace):
+        groupSize = -1
+        if(armiesToPlace <= 10):
+            groupSize = armiesToPlace
+        else:
+            armyGroupSize = math.ceil(armiesToPlace * 0.1)
+            groupSize = math.ceil((armiesToPlace)/armyGroupSize)
+        return groupSize
+
+    def getTerritoryIndicesEligableForPlacement(self, map):
         controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
         eligableTerritoryIndices = set()
         for tid in controlledTerritoryIndices:
@@ -495,17 +501,60 @@ class Agent:
                     break
         # Remove territories not controlled by self
         eligableTerritoryIndices = [i for i in eligableTerritoryIndices if i not in controlledTerritoryIndices]
+        return eligableTerritoryIndices
+
+    def getAllValidPlacements(self, map, armiesToPlace):
+        # 1 Get territories connected to enemy territories
+        # 2 Get territories connected to those territories
+        # 3 Use union set of both to get territories eligable for placement
+        eligableTerritoryIndices = self.getTerritoryIndicesEligableForPlacement(map)
+
+        # Limit the amount of eligable territories to 15
+        # If more than 15, then pick 15 at random
+        # That still gives 1,961,256 choices at 15_C_10 with replacement
+        if(eligableTerritoryIndices > 15):
+            eligableTerritoryIndices = random.choices(eligableTerritoryIndices, k=15)
 
         # 4 Determine group size for army placement
-        groupSize = -1
-        if(armiesToPlace <= 10):
-            groupSize = armiesToPlace
-        else:
-            armyGroupSize = math.ceil(armiesToPlace * 0.1)
-            groupSize = math.ceil((armiesToPlace)/armyGroupSize)
+        groupSize = self.convertArmiesToPlaceToGroupSize(armiesToPlace)
 
         # 5 Generate all combinations with replacement
         allPlacementCombinations = set(combinations_with_replacement(eligableTerritoryIndices, groupSize))
+
+        return allPlacementCombinations
+
+    def pickBestPlacementOrder(self, map, armiesToPlace, groupSize=None):
+        # Change in mindset - why consider placing them all at once?
+        # Build it up slowly to prune away bad placements early on.
+        if(groupSize == None):
+            groupSize = self.convertArmiesToPlaceToGroupSize(armiesToPlace)
+
+        placementOrder = []
+        armiesPlaced = 0
+        while(armiesToPlace < armiesPlaced):
+            if(armiesPlaced + groupSize > armiesToPlace):
+                groupSize = armiesToPlace - armiesPlaced
+
+            bestScore = float('-inf')
+            bestTerritoryPlacement = None
+            eligableTerritoryIndices = self.getTerritoryIndicesEligableForPlacement(map)
+            # Mix up the ordering a bit to prevent armies from going to the same territory in the event of a tie
+            random.shuffle(eligableTerritoryIndices)
+            for eligableTerritoryIndex in eligableTerritoryIndices:
+                tmp_map = map.getCopy()
+                tmp_map.placeArmy(self.name, groupSize, eligableTerritoryIndex)
+                score = self.scoreGameState(tmp_map)
+                if(score > bestScore):
+                    bestScore = score
+                    bestTerritoryPlacement = eligableTerritoryIndex
+            placementOrder.append((bestTerritoryPlacement, groupSize))  # Tuple: (TerritoryId, armiesToPlace)
+        return placementOrder
+
+    def placeArmiesInOrder(self, map, order):
+        for item in order:
+            territoryIndex = item[0]
+            armiesToPlace = item[1]
+            map.placeArmy(self.name, armiesToPlace, territoryIndex)
 
     def getAllValidMovements(self, map):
         controlledTerritoryIndices = [t.id for t in map.getTerritoriesByPlayer(self.name)]
