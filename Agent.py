@@ -550,11 +550,22 @@ class Agent:
             placementOrder.append((bestTerritoryPlacement, groupSize))  # Tuple: (TerritoryId, armiesToPlace)
         return placementOrder
 
-    def placeArmiesInOrder(self, map, order):
-        for item in order:
-            territoryIndex = item[0]
-            armiesToPlace = item[1]
-            map.placeArmy(self.name, armiesToPlace, territoryIndex)
+    def placeArmiesInOrder(self, map, order, armiesToPlace=None):
+        if(armiesToPlace == None):
+            for item in order:
+                territoryIndex = item[0]
+                armiesToPlace = item[1]
+                map.placeArmy(self.name, armiesToPlace, territoryIndex)
+        else:
+            groupSize = self.convertArmiesToPlaceToGroupSize(armiesToPlace)
+            for item in order:
+                territoryIndex = item
+                if(armiesToPlace - groupSize > 0):
+                    atp = groupSize
+                    armiesToPlace -= groupSize
+                else:
+                    atp = armiesToPlace
+                map.placeArmy(self.name, atp, territoryIndex)
 
     def getAllValidMovements(self, map):
         controlledTerritoryIndices = [t.id for t in map.getTerritoriesByPlayer(self.name)]
@@ -663,3 +674,4 @@ class Agent:
         score += continents * self.characteristics["Consideration"]["Continents"]
         score += remainingPlayers * self.characteristics["Consideration"]["Remaining Players"]
         return score
+
