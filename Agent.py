@@ -3,7 +3,7 @@ import math
 import random
 import copy
 import json
-from itertools import combinations_with_replacement
+from itertools import combinations_with_replacement, permutations
 
 AttackSelection = namedtuple('AttackSelection',
                              'attackIndex defendIndex estimateResult')
