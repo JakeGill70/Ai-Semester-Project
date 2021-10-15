@@ -834,7 +834,8 @@ class Agent:
     def pickBestMovement(self, map):
         validMovements = self.getAllValidMovements(map)
         transferPercentages = [0.25, 0.5, 0.75, 1]
-        bestScore = float('-inf')
+        # Assume that the best score is not moving at all until proven otherwise
+        bestScore = self.scoreGameState(map)
         bestMovementSupplyId = None
         bestMovementTargetId = None
         bestMovementAmount = None
@@ -871,7 +872,6 @@ class Agent:
             ]
             for targetId in possibleTargets:
                 allValidAttacks.append(tuple(sourceId, targetId))
-
         return allValidAttacks
 
     def getAllValidAttackOrders(self, map, maxAttacks=5):
