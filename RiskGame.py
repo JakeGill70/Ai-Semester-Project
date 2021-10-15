@@ -11,6 +11,9 @@ import os
 import math
 from Logger import Logger, MessageTypes
 from AgentReader import AgentReader
+from collections import namedtuple
+
+PlayerMove = namedtuple('PlayerMove', 'placementOrder attackOrder Movement')
 
 
 class RiskGame():
@@ -310,3 +313,77 @@ class RiskGame():
             game.showWindow(map, 1.0, (windowName + ", final"))
 
         return (winners, losers, turnCount)
+
+    @staticmethod
+    def maxPlayerMove(agents, atkSys, map, depth, agentIndex):
+        # FIXME : Bounce/Modulo the agentIndex
+        bestPlayerMoves = [None] * len(agents)
+        bestScores = [float('-inf')] * len(agents)
+        agent = agents[agentIndex]
+        MAX_ATTACK_COUNT = 5
+
+        if (depth == 0):
+            bestScores[agentIndex] = agent.scoreGameState(map)
+            return (bestScores, None)
+
+        # Placement Phase
+        availableArmies = map.getNewUnitCountForPlayer(agent.name)
+        allValidPlacements = agent.getAllValidPlacements(map, availableArmies)
+        for validPlacement in allValidPlacements:
+            tmp_map_placement = map.getCopy()
+            agent.placeArmiesInOrder(tmp_map_placement, validPlacement,
+                                     availableArmies)
+
+            # Attack Phase
+            allValidAttackOrderings = agent.getAllValidAttackOrders(
+                tmp_map_placement, MAX_ATTACK_COUNT)
+            allValidAttackOrderings.append(
+                None)  # Allow not attacking as a valid option
+            for  in allValidAttackOrderings:
+                tmp_map_attack = temp_map_placement.getCopy()
+
+                # Always keep not attacking an option
+                if (validAttackOrder != None):  
+                    # Simulate each attack in the attack order
+                    for attack in validAttackOrder:
+                        attackSourceId = attack[0]
+                        attackTargetId = attack[1]
+                        territory = tmp_map_attack.territories[attackSourceId]
+                        enemyTerritory = tmp_map_attack.territories[
+                            attackTargetId]
+
+                        # Be careful not to attack somewhere that another attack already captured
+                        if (enemyTerritory.owner == self.name):
+                            continue
+
+                        attackEstimate = atkSys.getAttackEstimate(
+                            territory.getArmy(), enemyTerritory.getArmy())
+
+                        # Capture or weaken territories
+                        if (attackEstimate.defenders <= 0):
+                            enemyTerritory.owner = self.name
+                            enemyTerritory.setArmy(1)
+                        else:
+                            territory.setArmy(attackEstimate.attackers)
+                            enemyTerritory.setArmy(attackEstimate.defenders)
+
+                # Movement Phase
+                # A player can only move once person,
+                # so whatever is best once is best overall.
+                # Pick best movement already considers different
+                # amounts of armies to move (25%, 50%, 75%, 100%),
+                # therefore calling pickBestMovement() with the
+                # current map will always provide the best movement.
+                bestMovementResult = agent.pickBestMovement(tmp_map_attack)
+                tmp_map_attack.moveArmies(bestMovementResult.supplyIndex,
+                                          bestMovementResult.receiveIndex,
+                                          bestMovementResult.transferAmount)
+
+                # Map Scoring
+                tmpScores, tmpPlayerMove = self.maxPlayerMove(
+                    agents, atkSys, map, depth - 1, agentIndex + 1)
+                if (tmpScores[agentIndex] > bestScores[agentIndex]):
+                    bestScores[agentIndex] = tmpScores[agentIndex]
+                    bestPlayerMoves[agentIndex] = PlayerMove(validPlacement, validAttackOrder, bestMovementResult)
+
+        return (bestScore, bestPlayerMoves)
