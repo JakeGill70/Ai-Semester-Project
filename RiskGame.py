@@ -329,7 +329,9 @@ class RiskGame():
         agent = agents[agentIndex]
         MAX_ATTACK_COUNT = 5
 
-        if (depth == 0):
+        # If depth had gone as low as possible or the agent has no territories left,
+        # then declare a leaf node.
+        if (depth <= 0 or map.getTerritoriesByPlayer(agent.name) == 0):
             bestScores[agentIndex] = agent.scoreGameState(map)
             return (bestScores, None)
 
