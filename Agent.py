@@ -821,7 +821,7 @@ class Agent:
                 if i in controlledTerritoryIndices
             ]
             for targetId in possibleTargets:
-                allValidMovements.append(tuple(sourceId, targetId))
+                allValidMovements.append((sourceId, targetId))
 
         return allValidMovements
 
@@ -844,8 +844,9 @@ class Agent:
         for movement in validMovements:
             for transferPercent in transferPercentages:
                 tmp_map = map.getCopy()
-                amount = tmp_map.territories[movement[0]].getArmies()
-                amount = convertArmyPercentageToAmount(amount, transferPercent)
+                amount = tmp_map.territories[movement[0]].getArmy()
+                amount = self.convertArmyPercentageToAmount(
+                    amount, transferPercent)
                 tmp_map.moveArmies(movement[0], movement[1], amount)
                 score = self.scoreGameState(tmp_map)
                 if (score > bestScore):
@@ -921,13 +922,14 @@ class Agent:
         armyCount = map.getTotalArmiesByPlayer(self.name)
         territories = map.getTerritoriesByPlayer(self.name)
         territoryCount = len(territories)
+        remainingPlayers = map.getPlayerCount()
 
         armyEnemyAdjacent = 0
         territoryEnemyAdjacent = 0
         for territory in territories:
             for tid in territory.connections:
                 if (map.territories[tid].owner != self.name):
-                    armyEnemnyAdjacent += territory.getArmy()
+                    armyEnemyAdjacent += territory.getArmy()
                     territoryEnemyAdjacent += 1
                     break
 
@@ -935,17 +937,18 @@ class Agent:
         continents = map.getCountOfContinentsControlledByPlayer(self.name)
 
         score = 0
-        score += armyCount * self.characteristics["Consideration"]["Armies"]
+        score += armyCount * self.characteristics["Consideration"][
+            "Armies"].value
         score += territoryCount * self.characteristics["Consideration"][
-            "Territories"]
+            "Territories"].value
         score += armyEnemyAdjacent * self.characteristics["Consideration"][
-            "Armies Enemy Adjacent"]
+            "Armies Enemy Adjacent"].value
         score += territoryEnemyAdjacent * self.characteristics[
-            "Consideration"]["Territories Enemy Adjacent"]
+            "Consideration"]["Territories Enemy Adjacent"].value
         score += armyUpkeep * self.characteristics["Consideration"][
-            "Army Upkeep"]
+            "Army Upkeep"].value
         score += continents * self.characteristics["Consideration"][
-            "Continents"]
+            "Continents"].value
         score += remainingPlayers * self.characteristics["Consideration"][
-            "Remaining Players"]
+            "Remaining Players"].value
         return score

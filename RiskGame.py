@@ -363,7 +363,7 @@ class RiskGame():
                             attackTargetId]
 
                         # Be careful not to attack somewhere that another attack already captured
-                        if (enemyTerritory.owner == self.name):
+                        if (enemyTerritory.owner == agent.name):
                             continue
 
                         attackEstimate = atkSys.getAttackEstimate(
@@ -371,10 +371,10 @@ class RiskGame():
 
                         # Capture or weaken territories
                         if (attackEstimate.defenders <= 0):
-                            enemyTerritory.owner = self.name
+                            enemyTerritory.owner = agent.name
                             enemyTerritory.setArmy(1)
                         else:
-                            territory.setArmy(attackEstimate.attackers)
+                            territory.setArmy(attackEstimate.attackers + 1)
                             enemyTerritory.setArmy(attackEstimate.defenders)
 
                 # Movement Phase
@@ -385,12 +385,14 @@ class RiskGame():
                 # therefore calling pickBestMovement() with the
                 # current map will always provide the best movement.
                 bestMovementResult = agent.pickBestMovement(tmp_map_attack)
-                tmp_map_attack.moveArmies(bestMovementResult.supplyIndex,
-                                          bestMovementResult.receiveIndex,
-                                          bestMovementResult.transferAmount)
+                if (bestMovementResult.transferAmount != None):
+                    tmp_map_attack.moveArmies(
+                        bestMovementResult.supplyIndex,
+                        bestMovementResult.receiveIndex,
+                        bestMovementResult.transferAmount)
 
                 # Map Scoring
-                tmpScores, tmpPlayerMove = self.maxPlayerMove(
+                tmpScores, tmpPlayerMove = RiskGame.maxPlayerMove(
                     agents, atkSys, map, depth - 1, agentIndex + 1)
                 if (tmpScores[agentIndex] > bestScores[agentIndex]):
                     bestScores[agentIndex] = tmpScores[agentIndex]
