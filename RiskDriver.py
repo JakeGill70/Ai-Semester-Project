@@ -7,7 +7,7 @@ from Tournament import Tournament
 from RiskGame import RiskGame
 from datetime import datetime
 
-EXAMPLE = 3
+EXAMPLE = 4
 
 GENERATION_COUNT = 1500
 POPULATION_SIZE = 256
@@ -34,3 +34,6 @@ elif(EXAMPLE == 3):
 
     for player in winCounts.keys():
         print(f"{player}'s Wins: {winCounts[player]}")
+
+elif (EXAMPLE == 4):
+    RiskGame.playGameMax(AgentReader.readSampleAgents(), map.getCopy())
