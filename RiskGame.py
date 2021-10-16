@@ -324,6 +324,7 @@ class RiskGame():
     @staticmethod
     def maxPlayerMove(agents, atkSys, map, depth, agentIndex):
         # FIXME : Bounce/Modulo the agentIndex
+        agentIndex = (agentIndex) % len(agents)
         bestPlayerMoves = [None] * len(agents)
         bestScores = [float('-inf')] * len(agents)
         agent = agents[agentIndex]
@@ -348,11 +349,11 @@ class RiskGame():
                 tmp_map_placement, MAX_ATTACK_COUNT)
             allValidAttackOrderings.append(
                 None)  # Allow not attacking as a valid option
-            for  in allValidAttackOrderings:
-                tmp_map_attack = temp_map_placement.getCopy()
+            for validAttackOrder in allValidAttackOrderings:
+                tmp_map_attack = tmp_map_placement.getCopy()
 
                 # Always keep not attacking an option
-                if (validAttackOrder != None):  
+                if (validAttackOrder != None):
                     # Simulate each attack in the attack order
                     for attack in validAttackOrder:
                         attackSourceId = attack[0]
@@ -393,6 +394,7 @@ class RiskGame():
                     agents, atkSys, map, depth - 1, agentIndex + 1)
                 if (tmpScores[agentIndex] > bestScores[agentIndex]):
                     bestScores[agentIndex] = tmpScores[agentIndex]
-                    bestPlayerMoves[agentIndex] = PlayerMove(validPlacement, validAttackOrder, bestMovementResult)
+                    bestPlayerMoves[agentIndex] = PlayerMove(
+                        validPlacement, validAttackOrder, bestMovementResult)
 
-        return (bestScore, bestPlayerMoves)
+        return (bestScores, bestPlayerMoves)
