@@ -182,7 +182,14 @@ class RiskGame():
             # Place Units
             # Attack
             # Move
-            agents[agentIndex]
+            depth = len(agents) + 1
+            bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(
+                agents, atkSys, map, depth, agentIndex)
+            playerMove = bestPlayerMoves[
+                agentIndex]  # Named tuple: (placementOrder, attackOrder, Movement)
+            placementOrder = playerMove.placementOrder
+            attackOrder = playerMove.attackOrder
+            movementOrder = playerMove.movement
 
             # Period update
             if (showGame and turnCount % GRAPH_UPDATE_FREQUENCY == 0):
