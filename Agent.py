@@ -716,19 +716,21 @@ class Agent:
         return groupSize
 
     def getTerritoryIndicesEligableForPlacement(self, map):
-        controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
+        controlledTerritoryIndices = [
+            t.index for t in map.getTerritoriesByPlayer(self.name)
+        ]
         eligableTerritoryIndices = set()
         for tid in controlledTerritoryIndices:
             for connectionId in map.territories[tid].connections:
                 if (map.territories[connectionId].owner != self.name):
                     eligableTerritoryIndices.add(tid)  # Add self
-                    eligableTerritoryIndices.add(
-                        map.territories[tid].connections)  # Add connections
+                    for c in map.territories[tid].connections:
+                        eligableTerritoryIndices.add(c)  # Add connections
                     break
         # Remove territories not controlled by self
         eligableTerritoryIndices = [
             i for i in eligableTerritoryIndices
-            if i not in controlledTerritoryIndices
+            if i in controlledTerritoryIndices
         ]
         return eligableTerritoryIndices
 
@@ -742,7 +744,7 @@ class Agent:
         # Limit the amount of eligable territories to 15
         # If more than 15, then pick 15 at random
         # That still gives 1,961,256 choices at 15_C_10 with replacement
-        if (eligableTerritoryIndices > 15):
+        if (len(eligableTerritoryIndices) > 15):
             eligableTerritoryIndices = random.choices(eligableTerritoryIndices,
                                                       k=15)
 
@@ -804,10 +806,10 @@ class Agent:
 
     def getAllValidMovements(self, map):
         controlledTerritoryIndices = [
-            t.id for t in map.getTerritoriesByPlayer(self.name)
+            t.index for t in map.getTerritoriesByPlayer(self.name)
         ]
         controlledTerritoriesThatCanMove = [
-            t for t in controlledTerritories
+            t for t in controlledTerritoryIndices
             if map.territories[t].getArmy() > 1
         ]
 
@@ -856,10 +858,10 @@ class Agent:
 
     def getAllValidAttacks(self, map):
         controlledTerritoryIndices = [
-            t.id for t in map.getTerritoriesByPlayer(self.name)
+            t.index for t in map.getTerritoriesByPlayer(self.name)
         ]
         controlledTerritoriesThatCanAttack = [
-            t for t in controlledTerritories
+            t for t in controlledTerritoryIndices
             if map.territories[t].getArmy() > 1
         ]
 
@@ -871,7 +873,7 @@ class Agent:
                 if i not in controlledTerritoryIndices
             ]
             for targetId in possibleTargets:
-                allValidAttacks.append(tuple(sourceId, targetId))
+                allValidAttacks.append((sourceId, targetId))
         return allValidAttacks
 
     def getAllValidAttackOrders(self, map, maxAttacks=5):
