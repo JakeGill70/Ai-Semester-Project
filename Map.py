@@ -42,7 +42,8 @@ class Map():
         return positions
 
     def getTotalArmiesByPlayer(self, playerName):
-        return sum([x.getArmy() for x in self.getTerritoriesByPlayer(playerName)])
+        return sum(
+            [x.getArmy() for x in self.getTerritoriesByPlayer(playerName)])
 
     def getTerritoriesByPlayer(self, playerName):
         return [x for x in self.territories.values() if x.owner == playerName]
@@ -57,23 +58,28 @@ class Map():
     def getPlayerTerritories(self):
         players = {}
         for territoryIndex, territoryData in self.territories.items():
-            if(territoryData.owner not in players):
+            if (territoryData.owner not in players):
                 players[territoryData.owner] = []
             players[territoryData.owner].append(territoryIndex)
         return players
 
     def getPlayerCount(self):
-        return len(set([territoryData.owner for territoryData in self.territories.values()]))
+        return len(
+            set([
+                territoryData.owner
+                for territoryData in self.territories.values()
+            ]))
 
     def placeArmy(self, playerName, amount, territoryId):
-        if(territoryId < 0 or territoryId > len(self.territories)):
-            raise Exception(f"The territory id {territoryId} is not a valid id.")
+        if (territoryId < 0 or territoryId > len(self.territories)):
+            raise Exception(
+                f"The territory id {territoryId} is not a valid id.")
         territory = self.territories[territoryId]
-        if(territory.owner and territory.owner != playerName):
+        if (territory.owner and territory.owner != playerName):
             raise Exception(f"Player '{playerName}' is \
                         trying to place {amount} armies \
                         at {territoryId} controlled by \
-                        {self.owners[territoryId]}")
+                        {territory.owner}")
         else:
             territory.addArmy(amount)
             territory.owner = playerName
@@ -81,17 +87,20 @@ class Map():
     def getCountOfContinentsControlledByPlayer(self, playerName):
         continentCount = 0
         for continent in self.continents.values():
-            continentCount += 1 if self.isContinentControlledByPlayer(continent.name, playerName) else 0
+            continentCount += 1 if self.isContinentControlledByPlayer(
+                continent.name, playerName) else 0
         return continentCount
 
     def isContinentControlledByPlayer(self, continentName, playerName):
-        return all(x.owner == playerName for x in self.getTerritoriesByContinent(continentName))
+        return all(x.owner == playerName
+                   for x in self.getTerritoriesByContinent(continentName))
 
     def getContinentBonus(self, playerName):
         unitCount = 0
 
         for continent in self.continents.values():
-            unitCount += continent.unitBonus if self.isContinentControlledByPlayer(continent.name, playerName) else 0
+            unitCount += continent.unitBonus if self.isContinentControlledByPlayer(
+                continent.name, playerName) else 0
 
         return unitCount
 
@@ -108,7 +117,10 @@ class Map():
         return unitCount
 
     def getTerritoriesByContinent(self, continentName):
-        return [x for x in self.territories.values() if x.continent == continentName]
+        return [
+            x for x in self.territories.values()
+            if x.continent == continentName
+        ]
 
     def moveArmies(self, supplyIndex, receiveIndex, amount):
         self.territories[supplyIndex].addArmy(-amount)
