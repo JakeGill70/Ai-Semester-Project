@@ -745,8 +745,8 @@ class Agent:
         # If more than 15, then pick 15 at random
         # That still gives 1,961,256 choices at 15_C_10 with replacement
         if (len(eligableTerritoryIndices) > 15):
-            eligableTerritoryIndices = random.choices(eligableTerritoryIndices,
-                                                      k=15)
+            eligableTerritoryIndices = random.sample(eligableTerritoryIndices,
+                                                     15)
 
         # 4 Determine group size for army placement
         groupSize = self.convertArmiesToPlaceToGroupSize(armiesToPlace)
