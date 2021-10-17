@@ -13,6 +13,9 @@ from Logger import Logger, MessageTypes
 from AgentReader import AgentReader
 from collections import namedtuple
 import datetime
+import multiprocessing
+import concurrent.futures
+import sys
 
 PlayerMove = namedtuple('PlayerMove', 'placementOrder attackOrder Movement')
 
@@ -182,7 +185,7 @@ class RiskGame():
             # Place Units
             # Attack
             # Move
-            depth = 3  #len(agents) + 1
+            depth = 1  #len(agents) + 1
             startTime = datetime.datetime.now()
             bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(
                 agents, atkSys, map, depth, agentIndex)
@@ -332,17 +335,69 @@ class RiskGame():
         return myList
 
     @staticmethod
-    def maxPlayerMove(agents,
-                      atkSys,
-                      map,
-                      depth,
-                      agentIndex,
-                      multiThread=False):
+    def considerPlacement(agents, atkSys, map, depth, agentIndex, placement, availableArmies):
         agentIndex = (agentIndex) % len(agents)
         bestPlayerMoves = [None] * len(agents)
         bestScores = [float('-inf')] * len(agents)
         agent = agents[agentIndex]
         MAX_ATTACK_COUNT = 5
+
+        
+
+        return (bestScores, bestPlayerMoves)
+
+    @staticmethod
+    def processAttackOrder(map, atkSys, agent, validAttackOrder):
+        # Always keep not attacking an option
+        if (validAttackOrder != None):
+            # Simulate each attack in the attack order
+            for attack in validAttackOrder:
+                attackSourceId = attack[0]
+                attackTargetId = attack[1]
+                territory = map.territories[attackSourceId]
+                enemyTerritory = map.territories[attackTargetId]
+
+                # Be careful not to attack somewhere that another attack already captured
+                if (enemyTerritory.owner == agent.name):
+                    continue
+
+                attackEstimate = atkSys.getAttackEstimate(
+                    territory.getArmy(), enemyTerritory.getArmy())
+
+                # Capture or weaken territories
+                if (attackEstimate.defenders <= 0):
+                    enemyTerritory.owner = agent.name
+                    enemyTerritory.setArmy(1)
+                else:
+                    territory.setArmy(attackEstimate.attackers + 1)
+                    enemyTerritory.setArmy(attackEstimate.defenders)
+        return map
+
+    @staticmethod
+    def processMovementOrder(map, bestMovementResult):
+        if (bestMovementResult.transferAmount != None):
+            map.moveArmies(bestMovementResult.supplyIndex, bestMovementResult.receiveIndex, bestMovementResult.transferAmount)
+        return map
+
+    @ staticmethod
+    def processAttackAndMovementOrder(map, atkSys, agent, validAttackOrder):
+        tmp_map_movement = RiskGame.processAttackOrder(map, atkSys, agent, validAttackOrder)
+        # Movement Phase
+        # A player can only move once person, so whatever is best once is best overall.
+        # Pick best movement already considers different amounts of armies to move (25%, 50%, 75%, 100%),
+        # therefore calling pickBestMovement() with the current map will always provide the best movement.
+        bestMovementResult = agent.pickBestMovement(tmp_map_movement)
+        tmp_map_final = RiskGame.processMovementOrder(tmp_map_movement, bestMovementResult)
+        return (tmp_map_final, bestMovementResult)
+
+    @staticmethod
+    def maxPlayerMove(agents, atkSys, map, depth, agentIndex, multiThread=False):
+        agentIndex = (agentIndex) % len(agents)
+        bestPlayerMoves = [None] * len(agents)
+        bestScores = [float('-inf')] * len(agents)
+        agent = agents[agentIndex]
+        MAX_ATTACK_COUNT = 5
+        results = []
 
         # If depth had gone as low as possible or the agent has no territories left,
         # then declare a leaf node.
@@ -354,68 +409,37 @@ class RiskGame():
         availableArmies = map.getNewUnitCountForPlayer(agent.name)
         allValidPlacements = agent.getAllValidPlacements(map, availableArmies)
         # Get random sample of 100 possible placements
-        allValidPlacements = RiskGame.downSampleList(allValidPlacements, 10)
-        for validPlacement in allValidPlacements:
-            tmp_map_placement = map.getCopy()
-            agent.placeArmiesInOrder(tmp_map_placement, validPlacement,
-                                     availableArmies)
+        allValidPlacements = RiskGame.downSampleList(allValidPlacements, 25)
 
-            # Attack Phase
-            allValidAttackOrderings = agent.getAllValidAttackOrders(
-                tmp_map_placement, atkSys, MAX_ATTACK_COUNT)
-            # Get random sample of 100 possible attacks
-            allValidAttackOrderings = RiskGame.downSampleList(
-                allValidAttackOrderings, 10)
-            allValidAttackOrderings.append(
-                None)  # Allow not attacking as a valid option
-            for validAttackOrder in allValidAttackOrderings:
-                tmp_map_attack = tmp_map_placement.getCopy()
+        if (multiThread):
+            executor = concurrent.futures.ProcessPoolExecutor(10)
+            futures = [ executor.submit(RiskGame.considerPlacement, agents, atkSys,
+                                map, depth, agentIndex, validPlacement, availableArmies)
+                for validPlacement in allValidPlacements
+            ]
+            concurrent.futures.wait(futures)
+            placementConsiderationResults = [ future.result() for future in futures ]
+        else:
+            # Placement phase continued
+            for validPlacement in allValidPlacements:
+                tmp_map_placement = map.getCopy()
+                agent.placeArmiesInOrder(tmp_map_placement, validPlacement, availableArmies)
 
-                # Always keep not attacking an option
-                if (validAttackOrder != None):
-                    # Simulate each attack in the attack order
-                    for attack in validAttackOrder:
-                        attackSourceId = attack[0]
-                        attackTargetId = attack[1]
-                        territory = tmp_map_attack.territories[attackSourceId]
-                        enemyTerritory = tmp_map_attack.territories[
-                            attackTargetId]
-
-                        # Be careful not to attack somewhere that another attack already captured
-                        if (enemyTerritory.owner == agent.name):
-                            continue
-
-                        attackEstimate = atkSys.getAttackEstimate(
-                            territory.getArmy(), enemyTerritory.getArmy())
-
-                        # Capture or weaken territories
-                        if (attackEstimate.defenders <= 0):
-                            enemyTerritory.owner = agent.name
-                            enemyTerritory.setArmy(1)
-                        else:
-                            territory.setArmy(attackEstimate.attackers + 1)
-                            enemyTerritory.setArmy(attackEstimate.defenders)
-
-                # Movement Phase
-                # A player can only move once person,
-                # so whatever is best once is best overall.
-                # Pick best movement already considers different
-                # amounts of armies to move (25%, 50%, 75%, 100%),
-                # therefore calling pickBestMovement() with the
-                # current map will always provide the best movement.
-                bestMovementResult = agent.pickBestMovement(tmp_map_attack)
-                if (bestMovementResult.transferAmount != None):
-                    tmp_map_attack.moveArmies(
-                        bestMovementResult.supplyIndex,
-                        bestMovementResult.receiveIndex,
-                        bestMovementResult.transferAmount)
-
-                # Map Scoring
-                tmpScores, tmpPlayerMove = RiskGame.maxPlayerMove(
-                    agents, atkSys, map, depth - 1, agentIndex + 1)
-                if (tmpScores[agentIndex] > bestScores[agentIndex]):
-                    bestScores[agentIndex] = tmpScores[agentIndex]
-                    bestPlayerMoves[agentIndex] = PlayerMove(
-                        validPlacement, validAttackOrder, bestMovementResult)
-
+                # Attack Phase
+                allValidAttackOrderings = agent.getAllValidAttackOrders(tmp_map_placement, atkSys, MAX_ATTACK_COUNT)
+                # Get random sample of 100 possible attacks
+                allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, 50)
+                allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
+                for validAttackOrder in allValidAttackOrderings:
+                    tmp_map_attack = tmp_map_placement.getCopy()
+                    tmp_map_final, bestMovementResult = RiskGame.processAttackAndMovementOrder(tmp_map_attack, atkSys, agent, validAttackOrder)
+                    
+                    # Map Scoring
+                    tmpScores, _ = RiskGame.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
+                    results.append((tmpScores[agentIndex], PlayerMove( validPlacement, validAttackOrder, bestMovementResult)))
+                    
+        results.sort(key=lambda y: y[0])
+        bestResults = results[0] # Get tuple from list
+        bestScores[agentIndex] = bestResults[0] # Get score from the tuple
+        bestPlayerMoves[agentIndex] = bestResults[1] # Get turn from the tuple
         return (bestScores, bestPlayerMoves)
