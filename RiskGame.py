@@ -12,6 +12,7 @@ import math
 from Logger import Logger, MessageTypes
 from AgentReader import AgentReader
 from collections import namedtuple
+import datetime
 
 PlayerMove = namedtuple('PlayerMove', 'placementOrder attackOrder Movement')
 
@@ -182,14 +183,20 @@ class RiskGame():
             # Place Units
             # Attack
             # Move
-            depth = len(agents) + 1
+            depth = 1  #len(agents) + 1
+            timeOut = datetime.datetime.now() + datetime.timedelta(seconds=30)
+            startTime = datetime.datetime.now()
             bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(
-                agents, atkSys, map, depth, agentIndex)
-            playerMove = bestPlayerMoves[
-                agentIndex]  # Named tuple: (placementOrder, attackOrder, Movement)
-            placementOrder = playerMove.placementOrder
-            attackOrder = playerMove.attackOrder
-            movementOrder = playerMove.movement
+                agents, atkSys, map, depth, agentIndex, timeOut)
+            endTime = datetime.datetime.now()
+            runTime = endTime - startTime
+            print(runTime.total_seconds())
+            #playerMove = bestPlayerMoves[
+            #agentIndex]  # Named tuple: (placementOrder, attackOrder, Movement)
+            #placementOrder = playerMove.placementOrder
+            #attackOrder = playerMove.attackOrder
+            #movementOrder = playerMove.movement
+            return None
 
             # Period update
             if (showGame and turnCount % GRAPH_UPDATE_FREQUENCY == 0):
