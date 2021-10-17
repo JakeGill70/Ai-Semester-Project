@@ -322,8 +322,18 @@ class RiskGame():
         return (winners, losers, turnCount)
 
     @staticmethod
-    def maxPlayerMove(agents, atkSys, map, depth, agentIndex):
-        # FIXME : Bounce/Modulo the agentIndex
+    def downSampleList(myList, maxSampleSize):
+        if (len(myList) > maxSampleSize):
+            myList = random.sample(myList, maxSampleSize)
+        return myList
+
+    @staticmethod
+    def maxPlayerMove(agents,
+                      atkSys,
+                      map,
+                      depth,
+                      agentIndex,
+                      multiThread=False):
         agentIndex = (agentIndex) % len(agents)
         bestPlayerMoves = [None] * len(agents)
         bestScores = [float('-inf')] * len(agents)
@@ -339,6 +349,8 @@ class RiskGame():
         # Placement Phase
         availableArmies = map.getNewUnitCountForPlayer(agent.name)
         allValidPlacements = agent.getAllValidPlacements(map, availableArmies)
+        # Get random sample of 100 possible placements
+        allValidPlacements = RiskGame.downSampleList(allValidPlacements, 10)
         for validPlacement in allValidPlacements:
             tmp_map_placement = map.getCopy()
             agent.placeArmiesInOrder(tmp_map_placement, validPlacement,
@@ -346,7 +358,10 @@ class RiskGame():
 
             # Attack Phase
             allValidAttackOrderings = agent.getAllValidAttackOrders(
-                tmp_map_placement, MAX_ATTACK_COUNT)
+                tmp_map_placement, atkSys, MAX_ATTACK_COUNT)
+            # Get random sample of 100 possible attacks
+            allValidAttackOrderings = RiskGame.downSampleList(
+                allValidAttackOrderings, 10)
             allValidAttackOrderings.append(
                 None)  # Allow not attacking as a valid option
             for validAttackOrder in allValidAttackOrderings:
