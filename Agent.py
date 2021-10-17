@@ -877,11 +877,14 @@ class Agent:
                 allValidAttacks.append((sourceId, targetId))
         return allValidAttacks
 
-    def getAllValidAttackOrders(self, map, maxAttacks=5):
-        allValidAttacks = self.getAllValidAttacks(map)
+    def getAllValidAttackOrders(self, map, atkSys, maxAttacks=5):
+        # Don't permute all valid attacks, only permute the top 10 good ones
+        #rm allValidAttacks = self.getAllValidAttacks(map)
+        allGoodAttacks = self.getBestAttacksRanked(map, atkSys)[:10]
         allAttackOrderings = []
         for i in range(maxAttacks):
-            attackOrderings = permutations(allValidAttacks, i)
+            #rm attackOrderings = permutations(allValidAttacks, i)
+            attackOrderings = permutations(allGoodAttacks, i)
             for attackOrder in attackOrderings:
                 allAttackOrderings.append(attackOrder)
         return allAttackOrderings
