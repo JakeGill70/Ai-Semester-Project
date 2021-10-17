@@ -889,6 +889,40 @@ class Agent:
                 allAttackOrderings.append(attackOrder)
         return allAttackOrderings
 
+    def getBestAttacksRanked(self, map, atkSys):
+        validAttacks = self.getAllValidAttacks(map)
+        attacks = []
+
+        for attack in validAttacks:
+            tmp_map = map.getCopy()
+            territory = tmp_map.territories[attack[0]]
+            enemyTerritory = tmp_map.territories[attack[1]]
+
+            attackEstimate = atkSys.getAttackEstimate(territory.getArmy(),
+                                                      enemyTerritory.getArmy())
+
+            if (attackEstimate.attackers > 0
+                    or attackEstimate.attackSuccessChance > 0.1):
+                territory.setArmy(attackEstimate.attackers)
+                if (attackEstimate.defenders <= 0):
+                    enemyTerritory.owner = self.name
+                    enemyTerritory.setArmy(1)
+            else:
+                continue
+
+            score = math.ceil(
+                self.scoreGameState(tmp_map) *
+                attackEstimate.attackSuccessChance)
+
+            attacks.append((score, attack))
+
+        attacks.sort(key=lambda y: y[0], reverse=True)  # Sort based on score
+        attacks = [
+            x[1] for x in attacks
+        ]  # Break apart tuple so that only the (source, target) tuple remains
+        return attacks
+        #rm return AttackSelection(bestAttackId, bestTargetId, bestEstimateResult)
+
     def pickBestAttack(self, map, atkSys):
         validAttacks = self.getAllValidAttacks(map)
         bestScore = float('-inf')
