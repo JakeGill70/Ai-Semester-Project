@@ -10,6 +10,7 @@ class Map():
         super().__init__()
         self.territories = {}
         self.continents = {}
+        self.territoryContinentCache = None
 
     def __deepcopy__(self):
         cpy = Map()
@@ -117,10 +118,14 @@ class Map():
         return unitCount
 
     def getTerritoriesByContinent(self, continentName):
-        return [
-            x for x in self.territories.values()
-            if x.continent == continentName
-        ]
+        if (self.territoryContinentCache == None):
+            self.territoryContinentCache = {}
+            for continent in self.continents.values():
+                self.territoryContinentCache[continent.name] = []
+            for territory in self.territories.values():
+                self.territoryContinentCache[territory.continent].append(
+                    territory)
+        return self.territoryContinentCache[continentName]
 
     def moveArmies(self, supplyIndex, receiveIndex, amount):
         self.territories[supplyIndex].addArmy(-amount)
