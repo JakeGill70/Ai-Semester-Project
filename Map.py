@@ -28,8 +28,8 @@ class Map():
         for tk in self.territories.keys():
             cpy.territories[tk] = self.territories[tk].getCopy()
 
-        for ck in self.continents.keys():
-            cpy.continents[ck] = self.continents[ck]
+        cpy.continents = self.continents
+        cpy.territoryContinentCache = self.territoryContinentCache
 
         return cpy
 
