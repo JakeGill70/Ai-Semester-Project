@@ -971,18 +971,11 @@ class Agent:
         continents = map.getCountOfContinentsControlledByPlayer(self.name)
 
         score = 0
-        score += armyCount * self.characteristics["Consideration"][
-            "Armies"].value
-        score += territoryCount * self.characteristics["Consideration"][
-            "Territories"].value
-        score += armyEnemyAdjacent * self.characteristics["Consideration"][
-            "Armies Enemy Adjacent"].value
-        score += territoryEnemyAdjacent * self.characteristics[
-            "Consideration"]["Territories Enemy Adjacent"].value
-        score += armyUpkeep * self.characteristics["Consideration"][
-            "Army Upkeep"].value
-        score += continents * self.characteristics["Consideration"][
-            "Continents"].value
-        score += remainingPlayers * self.characteristics["Consideration"][
-            "Remaining Players"].value
+        score += armyCount * self.characteristics["Consideration"]["Armies"].value
+        score += territoryCount * self.characteristics["Consideration"]["Territories"].value
+        score += armyEnemyAdjacent * self.characteristics["Consideration"]["Armies Enemy Adjacent"].value
+        score += territoryEnemyAdjacent * self.characteristics["Consideration"]["Territories Enemy Adjacent"].value
+        score += armyUpkeep * self.characteristics["Consideration"]["Army Upkeep"].value
+        score += continents * self.characteristics["Consideration"]["Continents"].value
+        score += remainingPlayers * self.characteristics["Consideration"]["Remaining Players"].value
         return score
