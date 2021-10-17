@@ -826,9 +826,7 @@ class Agent:
         return allValidMovements
 
     def convertArmyPercentageToAmount(self, armiesOnTerritory, percentage):
-        percentage = max(0,
-                         min(1,
-                             percentage))  # Clamp the percentage between 0-1
+        percentage = max(0, min(1, percentage))  # Clamp the percentage between 0-1
         armiesOnTerritory -= 1  # Always keep 1 on the supplying territory
         unitsToTransfer = math.floor(armiesOnTerritory * percentage)
         return unitsToTransfer
@@ -845,8 +843,7 @@ class Agent:
             for transferPercent in transferPercentages:
                 tmp_map = map.getCopy()
                 amount = tmp_map.territories[movement[0]].getArmy()
-                amount = self.convertArmyPercentageToAmount(
-                    amount, transferPercent)
+                amount = self.convertArmyPercentageToAmount( amount, transferPercent)
                 tmp_map.moveArmies(movement[0], movement[1], amount)
                 score = self.scoreGameState(tmp_map)
                 if (score > bestScore):
@@ -902,7 +899,7 @@ class Agent:
                                                       enemyTerritory.getArmy())
 
             if (attackEstimate.attackers > 0
-                    or attackEstimate.attackSuccessChance > 0.1):
+                    and attackEstimate.attackSuccessChance > 0.1):
                 territory.setArmy(attackEstimate.attackers)
                 if (attackEstimate.defenders <= 0):
                     enemyTerritory.owner = self.name
@@ -917,9 +914,8 @@ class Agent:
             attacks.append((score, attack))
 
         attacks.sort(key=lambda y: y[0], reverse=True)  # Sort based on score
-        attacks = [
-            x[1] for x in attacks
-        ]  # Break apart tuple so that only the (source, target) tuple remains
+        # Break apart tuple so that only the (source, target) tuple remains
+        attacks = [x[1] for x in attacks]
         return attacks
         #rm return AttackSelection(bestAttackId, bestTargetId, bestEstimateResult)
 
