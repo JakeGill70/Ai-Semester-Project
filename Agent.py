@@ -956,7 +956,7 @@ class Agent:
         return AttackSelection(bestAttackId, bestTargetId, bestEstimateResult)
 
     def scoreGameState(self, map):
-        armyCount = map.getTotalArmiesByPlayer(self.name)
+        armyCount = 0
         territories = map.getTerritoriesByPlayer(self.name)
         territoryCount = len(territories)
         remainingPlayers = map.getPlayerCount()
@@ -964,6 +964,7 @@ class Agent:
         armyEnemyAdjacent = 0
         territoryEnemyAdjacent = 0
         for territory in territories:
+            armyCount += territory.getArmy()
             for tid in territory.connections:
                 if (map.territories[tid].owner != self.name):
                     armyEnemyAdjacent += territory.getArmy()
