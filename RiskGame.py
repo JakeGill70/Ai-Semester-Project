@@ -6,7 +6,7 @@ from Agent import Agent
 from AttackSystem import AttackSystem
 from Population import Population
 from MapReader import MapReader
-from datetime import datetime
+import datetime
 import os
 import math
 from Logger import Logger, MessageTypes
@@ -149,8 +149,7 @@ class RiskGame():
         if (len(agents) != len(set([agent.name for agent in agents]))):
             Logger.message(
                 MessageTypes.DuplicatePlayerWarning,
-                f"Error: Duplicate player names: {[agent.name for agent in agents]}",
-                file=sys.stderr)
+                f"Error: Duplicate player names: {[agent.name for agent in agents]}")
             return ([], [])
 
         # Place initial armies on map
@@ -183,11 +182,10 @@ class RiskGame():
             # Place Units
             # Attack
             # Move
-            depth = 1  #len(agents) + 1
-            timeOut = datetime.datetime.now() + datetime.timedelta(seconds=30)
+            depth = 3  #len(agents) + 1
             startTime = datetime.datetime.now()
             bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(
-                agents, atkSys, map, depth, agentIndex, timeOut)
+                agents, atkSys, map, depth, agentIndex)
             endTime = datetime.datetime.now()
             runTime = endTime - startTime
             print(runTime.total_seconds())
@@ -234,8 +232,7 @@ class RiskGame():
         if (len(agents) != len(set([agent.name for agent in agents]))):
             Logger.message(
                 MessageTypes.DuplicatePlayerWarning,
-                f"Error: Duplicate player names: {[agent.name for agent in agents]}",
-                file=sys.stderr)
+                f"Error: Duplicate player names: {[agent.name for agent in agents]}")
             return ([], [])
 
         # Place initial armies on map
