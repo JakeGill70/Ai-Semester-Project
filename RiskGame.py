@@ -44,17 +44,14 @@ class RiskGame():
     def attackUntilUnfavorable(agent, map, atkSys, showGame=True):
         while (True):
             pickTerritoryResult = agent.pickTerritoryForAttack(map, atkSys)
-            attackResult = agent.attackTerritory(pickTerritoryResult, map,
-                                                 atkSys)
+            attackResult = agent.attackTerritory(pickTerritoryResult, map, atkSys)
             if (showGame):
                 if (attackResult):
                     Logger.message(
                         MessageTypes.AttackResult,
-                        f"{agent.name}'s attack from #{pickTerritoryResult.attackIndex} to #{pickTerritoryResult.defendIndex} was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}."
-                    )
+                        f"{agent.name}'s attack from #{pickTerritoryResult.attackIndex} to #{pickTerritoryResult.defendIndex} was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}.")
                 else:
-                    Logger.message(MessageTypes.AttackStopNotice,
-                                   "{agent.name} decided to stop attacking.")
+                    Logger.message(MessageTypes.AttackStopNotice, "{agent.name} decided to stop attacking.")
                     break
 
     @staticmethod
@@ -279,8 +276,7 @@ class RiskGame():
                                             showGame)
 
             # Move
-            pickMovementResult = agents[agentIndex].pickTerritoryForMovement(
-                map)
+            pickMovementResult = agents[agentIndex].pickTerritoryForMovement( map)
             if (pickMovementResult):
                 map.moveArmies(pickMovementResult.supplyIndex,
                                pickMovementResult.receiveIndex,

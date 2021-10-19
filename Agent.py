@@ -651,8 +651,7 @@ class Agent:
 
     def placeUnit(self, map):
         controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
-        territoryIndex = self.pickTerritoryForPlacement(
-            controlledTerritoryIndices, map)
+        territoryIndex = self.pickTerritoryForPlacement(controlledTerritoryIndices, map)
         map.placeArmy(self.name, 1, territoryIndex)
         return territoryIndex
 
