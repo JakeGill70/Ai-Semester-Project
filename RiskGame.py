@@ -185,7 +185,7 @@ class RiskGame():
             depth = 1  #len(agents) + 1
             startTime = datetime.datetime.now()
             bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(
-                agents, atkSys, map, depth, agentIndex)
+                agents, atkSys, map, depth, agentIndex, True)
             endTime = datetime.datetime.now()
             runTime = endTime - startTime
             print(runTime.total_seconds())
@@ -331,16 +331,28 @@ class RiskGame():
         return myList
 
     @staticmethod
-    def considerPlacement(agents, atkSys, map, depth, agentIndex, placement, availableArmies):
-        agentIndex = (agentIndex) % len(agents)
-        bestPlayerMoves = [None] * len(agents)
-        bestScores = [float('-inf')] * len(agents)
+    def considerPlacement(agents, atkSys, map, depth, agentIndex, validPlacement, availableArmies):
         agent = agents[agentIndex]
         MAX_ATTACK_COUNT = 5
-
+        results = []
         
+        tmp_map_placement = map.getCopy()
+        agent.placeArmiesInOrder(tmp_map_placement, validPlacement, availableArmies)
 
-        return (bestScores, bestPlayerMoves)
+        # Attack Phase
+        allValidAttackOrderings = agent.getAllValidAttackOrders(tmp_map_placement, atkSys, MAX_ATTACK_COUNT)
+        # Get random sample of 100 possible attacks
+        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, 50)
+        allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
+        for validAttackOrder in allValidAttackOrderings:
+            tmp_map_attack = tmp_map_placement.getCopy()
+            tmp_map_final, bestMovementResult = RiskGame.processAttackAndMovementOrder(tmp_map_attack, atkSys, agent, validAttackOrder)
+            
+            # Map Scoring
+            tmpScores, _ = RiskGame.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
+            results.append((tmpScores[agentIndex], PlayerMove( validPlacement, validAttackOrder, bestMovementResult)))
+
+        return results
 
     @staticmethod
     def processAttackOrder(map, atkSys, agent, validAttackOrder):
@@ -414,26 +426,14 @@ class RiskGame():
                 for validPlacement in allValidPlacements
             ]
             concurrent.futures.wait(futures)
-            placementConsiderationResults = [ future.result() for future in futures ]
+            listOflistOfResults = [future.result() for future in futures]
+            for listOfResults in listOflistOfResults:
+                results = results + listOfResults
         else:
             # Placement phase continued
             for validPlacement in allValidPlacements:
-                tmp_map_placement = map.getCopy()
-                agent.placeArmiesInOrder(tmp_map_placement, validPlacement, availableArmies)
+                results = RiskGame.considerPlacement(agents, atkSys, map, depth, agentIndex, validPlacement, availableArmies)
 
-                # Attack Phase
-                allValidAttackOrderings = agent.getAllValidAttackOrders(tmp_map_placement, atkSys, MAX_ATTACK_COUNT)
-                # Get random sample of 100 possible attacks
-                allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, 50)
-                allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
-                for validAttackOrder in allValidAttackOrderings:
-                    tmp_map_attack = tmp_map_placement.getCopy()
-                    tmp_map_final, bestMovementResult = RiskGame.processAttackAndMovementOrder(tmp_map_attack, atkSys, agent, validAttackOrder)
-                    
-                    # Map Scoring
-                    tmpScores, _ = RiskGame.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
-                    results.append((tmpScores[agentIndex], PlayerMove( validPlacement, validAttackOrder, bestMovementResult)))
-                    
         results.sort(key=lambda y: y[0])
         bestResults = results[0] # Get tuple from list
         bestScores[agentIndex] = bestResults[0] # Get score from the tuple
