@@ -786,6 +786,13 @@ class Agent:
                  groupSize))  # Tuple: (TerritoryId, armiesToPlace)
         return placementOrder
 
+    def getPreferredPlacementOrder(self, map, armiesToPlace):
+        tmpMap = map.getCopy()
+        order = []
+        for i in range(armiesToPlace):
+            order.append(self.placeUnit(tmpMap))
+        return order
+
     def placeArmiesInOrder(self, map, order, armiesToPlace=None):
         if (armiesToPlace == None):
             for item in order:
