@@ -73,170 +73,50 @@ class Agent:
         self.name = name
         self.characteristics = {
             "Placement": {
-                "Anywhere":
-                AgentCharacteristic(5, "Placing a unit anywhere"),
-                "Enemy Adjacent":
-                AgentCharacteristic(
-                    5,
-                    "Placing a unit on a territory connected to a territory controlled by a different player"
-                ),
-                "Ally Adjacent":
-                AgentCharacteristic(
-                    5,
-                    "Placing a unit on a territory connected to a territory controlled by the same player"
-                ),
-                "Border Adjacent":
-                AgentCharacteristic(
-                    5,
-                    "Placing a unit in a territory that borders a country in a different continent"
-                ),
-                "Connection Bias":
-                AgentCharacteristic(
-                    1,
-                    "Placing a unit on a territory with connections to multiple other countries, +value per connection",
-                    0.25),
-                "Placement Bias Multiplier":
-                AgentCharacteristic(
-                    0.85,
-                    "Placing a unit where there already are other units, value^(armies on territory)",
-                    0.05,
-                    lowerLimit=0,
-                    upperLimit=1)
+                "Anywhere":AgentCharacteristic(0, "Placing a unit anywhere"),
+                "Enemy Adjacent":AgentCharacteristic(0,"Placing a unit on a territory connected to a territory controlled by a different player"),
+                "Ally Adjacent":AgentCharacteristic(0, "Placing a unit on a territory connected to a territory controlled by the same player"),
+                "Border Adjacent":AgentCharacteristic(0,"Placing a unit in a territory that borders a country in a different continent"),
+                "Connection Bias":AgentCharacteristic(0, "Placing a unit on a territory with connections to multiple other countries, +value per connection",0.25),
+                "Placement Bias Multiplier":AgentCharacteristic(0.75,"Placing a unit where there already are other units, value^(armies on territory)", 0.05,lowerLimit=0,upperLimit=1)
             },
             "Attack": {
-                "Anywhere":
-                AgentCharacteristic(5, "Attacking anywhere"),
-                "Ally Adjacent":
-                AgentCharacteristic(
-                    5,
-                    "Attacking a territory connected to another territory controlled by the attacking player"
-                ),
-                "Border Adjacent":
-                AgentCharacteristic(
-                    5,
-                    "Attacking a territory on the border of a different continent"
-                ),
-                "Capture Continent":
-                AgentCharacteristic(
-                    5,
-                    "Attacking a territory that will give this player control over all territories on a continent if the attack is successful"
-                ),
-                "Destroy Bias":
-                AgentCharacteristic(
-                    1,
-                    "Estimated amount of defending units destroyed, +value per unit",
-                    0.1),
-                "Remain Bias":
-                AgentCharacteristic(
-                    -1,
-                    "Estimated amount of attacking units destroyed, -value per unit",
-                    0.1),
-                "Safe Threshold":
-                AgentCharacteristic(
-                    0.95,
-                    "Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky",
-                    0.05,
-                    lowerLimit=0,
-                    upperLimit=1),
-                "Minimal Success Chance":
-                AgentCharacteristic(
-                    0.5,
-                    "Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable",
-                    0.05,
-                    lowerLimit=0,
-                    upperLimit=1),
-                "Minimal Remaining Percent":
-                AgentCharacteristic(
-                    0.1,
-                    "The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack",
-                    0.05,
-                    lowerLimit=0,
-                    upperLimit=1)
+                "Anywhere":AgentCharacteristic(0, "Attacking anywhere"),
+                "Ally Adjacent":AgentCharacteristic(0,"Attacking a territory connected to another territory controlled by the attacking player"),
+                "Border Adjacent":AgentCharacteristic(0,"Attacking a territory on the border of a different continent"),
+                "Capture Continent":AgentCharacteristic(0, "Attacking a territory that will give this player control over all territories on a continent if the attack is successful"),
+                "Destroy Bias":AgentCharacteristic(0,"Estimated amount of defending units destroyed, +value per unit",0.1),
+                "Remain Bias":AgentCharacteristic(0,"Estimated amount of attacking units destroyed, -value per unit", 0.1),
+                "Safe Threshold":AgentCharacteristic(0.95,"Minimal amount of estimated chance of a successful attack to consider an attack safe, below this amount is considered risky",0.05,lowerLimit=0,upperLimit=1),
+                "Minimal Success Chance":AgentCharacteristic(0.5,"Minimal amount of estimated chance of successful attack necessary for an attack to be considered viable",0.05,lowerLimit=0,upperLimit=1),
+                "Minimal Remaining Percent":AgentCharacteristic(0.1,"The amount of units lost before calling off an attack, expressed as a percentage of the amount of units at the start of the attack",0.05,lowerLimit=0,upperLimit=1)
             },
             "Movement": {
-                "Anywhere":
-                AgentCharacteristic(5, "Moving a unit anywhere"),
-                "Enemy Adjacent":
-                AgentCharacteristic(
-                    5,
-                    "Moving a unit on a territory connected to a territory controlled by a different player"
-                ),
-                "Ally Adjacent":
-                AgentCharacteristic(
-                    5,
-                    "Moving a unit on a territory connected to a territory controlled by the same player"
-                ),
-                "Border Adjacent":
-                AgentCharacteristic(
-                    5,
-                    "Moving a unit in a territory that borders a country in a different continent"
-                ),
-                "Bigger Territory":
-                AgentCharacteristic(
-                    5, "Moving units onto a territory with more units."),
-                "Smaller Territory":
-                AgentCharacteristic(
-                    5, "Moving units onto a territory with fewer units."),
-                "Connection Bias":
-                AgentCharacteristic(
-                    1,
-                    "Moving a unit on a territory with connections to multiple other countries, +value per connection",
-                    0.25),
-                "Base Transfer Rate":
-                AgentCharacteristic(
-                    0.5,
-                    "Base percentage of units to transfer should it be necessary",
-                    0.05),
-                "Risky Transfer Rate":
-                AgentCharacteristic(
-                    0.3,
-                    "Percentage of units to transfer if the movement is considered risky",
-                    0.05),
-                "Safe Transfer Rate":
-                AgentCharacteristic(
-                    0.7,
-                    "Percentage of units to transfer if the movement is considered safe",
-                    0.05)
+                "Anywhere":AgentCharacteristic(0, "Moving a unit anywhere"),
+                "Enemy Adjacent":AgentCharacteristic(0,"Moving a unit on a territory connected to a territory controlled by a different player"),
+                "Ally Adjacent":AgentCharacteristic(0, "Moving a unit on a territory connected to a territory controlled by the same player"),
+                "Border Adjacent":AgentCharacteristic(0,"Moving a unit in a territory that borders a country in a different continent"),
+                "Bigger Territory":AgentCharacteristic(0, "Moving units onto a territory with more units."),
+                "Smaller Territory":AgentCharacteristic(0, "Moving units onto a territory with fewer units."),
+                "Connection Bias":AgentCharacteristic(0,"Moving a unit on a territory with connections to multiple other countries, +value per connection",0.25),
+                "Base Transfer Rate":AgentCharacteristic(0.5,"Base percentage of units to transfer should it be necessary", 0.05),
+                "Risky Transfer Rate":AgentCharacteristic(0.25,"Percentage of units to transfer if the movement is considered risky", 0.05),
+                "Safe Transfer Rate":AgentCharacteristic(0.75,"Percentage of units to transfer if the movement is considered safe",0.05)
             },
             "Preference": {
-                "Larger":
-                AgentCharacteristic(1, "Preference to attack larger players",
-                                    0.25),
-                "Smaller":
-                AgentCharacteristic(1, "Preference to attack smaller players",
-                                    0.25),
-                "Risky":
-                AgentCharacteristic(1, "Preference for risky actions", 0.25),
-                "Safe":
-                AgentCharacteristic(1, "Preference for safe actions", 0.25)
+                "Larger":AgentCharacteristic(1, "Preference to attack larger players",0.25),
+                "Smaller":AgentCharacteristic(1, "Preference to attack smaller players", 0.25),
+                "Risky":AgentCharacteristic(1, "Preference for risky actions", 0.25),
+                "Safe":AgentCharacteristic(1, "Preference for safe actions", 0.25)
             },
             "Consideration": {
-                "Armies":
-                AgentCharacteristic(0, "Owning an army, +value each"),
-                "Territories":
-                AgentCharacteristic(0, "Owning a territory, +value each"),
-                "Armies Enemy Adjacent":
-                AgentCharacteristic(
-                    0,
-                    "Owning an army next to an enemy controlled territory, +value each"
-                ),
-                "Territories Enemy Adjacent":
-                AgentCharacteristic(
-                    0,
-                    "Owning a territory with an enemy connection, +value for each connection"
-                ),
-                "Army Upkeep":
-                AgentCharacteristic(
-                    0,
-                    "Armies given to player at start of next turn, +value for each"
-                ),
-                "Continents":
-                AgentCharacteristic(0, "Owning a continent, +value each"),
-                "Remaining Players":
-                AgentCharacteristic(
-                    -50,
-                    "Number of remaining players on the game board, +value for each"
-                )
+                "Armies":AgentCharacteristic(0, "Owning an army, +value each"),
+                "Territories":AgentCharacteristic(0, "Owning a territory, +value each"),
+                "Armies Enemy Adjacent":AgentCharacteristic(0,"Owning an army next to an enemy controlled territory, +value each"),
+                "Territories Enemy Adjacent":AgentCharacteristic(0,"Owning a territory with an enemy connection, +value for each connection"),
+                "Army Upkeep":AgentCharacteristic(0,"Armies given to player at start of next turn, +value for each"),
+                "Continents":AgentCharacteristic(0, "Owning a continent, +value each"),
+                "Remaining Players":AgentCharacteristic(-50,"Number of remaining players on the game board, +value for each")
             }
         }
 
