@@ -306,21 +306,13 @@ class Agent:
             score = 0
             # Calculate placement score based on placement settings
             score += self.characteristics["Placement"]["Anywhere"].value
-            score += self.characteristics["Placement"][
-                "Enemy Adjacent"].value if self.getTerritoryDataEnemyAdjacent(
-                    territoryData.index, map) else 0
-            score += self.characteristics["Placement"][
-                "Ally Adjacent"].value if self.getTerritoryDataAllyAdjacent(
-                    territoryData.index, map) else 0
-            score += self.characteristics["Placement"][
-                "Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(
-                    territoryData.index, map) else 0
-            score += self.characteristics["Placement"][
-                "Connection Bias"].value * len(territoryData.connections)
+            score += self.characteristics["Placement"]["Enemy Adjacent"].value if self.getTerritoryDataEnemyAdjacent(territoryData.index, map) else 0
+            score += self.characteristics["Placement"]["Ally Adjacent"].value if self.getTerritoryDataAllyAdjacent(territoryData.index, map) else 0
+            score += self.characteristics["Placement"]["Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(territoryData.index, map) else 0
+            score += self.characteristics["Placement"]["Connection Bias"].value * len(territoryData.connections)
 
             # Adjust placement score based on preference settings
-            enemyAdjacentsData = self.getTerritoryDataEnemyAdjacent(
-                territoryData.index, map)
+            enemyAdjacentsData = self.getTerritoryDataEnemyAdjacent(territoryData.index, map)
             if (enemyAdjacentsData):
                 # ! Be careful through here, because you cannot assume
                 # ! that the best territory found so far is also enemy adjacent
@@ -328,29 +320,18 @@ class Agent:
                     bestIndex, map) if bestIndex != -1 else []
                 bestEnemySize = 0
                 # FIXME: Is this really the best way to determine enemy size?
-                bestEnemySize = max([
-                    td.getArmy() for td in bestEnemyAdjacentData
-                ]) if (bestEnemyAdjacentData) else 0
-                currEnemySize = max(
-                    [td.getArmy() for td in enemyAdjacentsData])
+                bestEnemySize = max([td.getArmy() for td in bestEnemyAdjacentData]) if (bestEnemyAdjacentData) else 0
+                currEnemySize = max([td.getArmy() for td in enemyAdjacentsData])
                 # Assume the placement is riskier move if it is more risky to place
                 # an army there than the current best placement
                 if (currEnemySize > bestEnemySize):
                     score += self.characteristics["Preference"]["Risky"].value
                 # Adjust the score if the biggest adjacent enemy army is larger
                 # than the biggest adjacent enemy army found so far
-                bestEnemyPlayers = set([
-                    td.owner for td in bestEnemyAdjacentData
-                ]) if (bestEnemyAdjacentData) else set()
+                bestEnemyPlayers = set([td.owner for td in bestEnemyAdjacentData]) if (bestEnemyAdjacentData) else set()
                 currEnemyPlayers = set([td.owner for td in enemyAdjacentsData])
-                bestEnemyPlayerSize = max([
-                    len(map.getTerritoriesByPlayer(x))
-                    for x in bestEnemyPlayers
-                ]) if bestEnemyPlayers else 0
-                currEnemyPlayerSize = max([
-                    len(map.getTerritoriesByPlayer(x))
-                    for x in currEnemyPlayers
-                ])
+                bestEnemyPlayerSize = max([len(map.getTerritoriesByPlayer(x)) for x in bestEnemyPlayers]) if bestEnemyPlayers else 0
+                currEnemyPlayerSize = max([len(map.getTerritoriesByPlayer(x)) for x in currEnemyPlayers])
                 if (currEnemyPlayerSize > bestEnemyPlayerSize):
                     score += self.characteristics["Preference"]["Larger"].value
                 if (currEnemyPlayerSize < bestEnemyPlayerSize):
@@ -613,11 +594,10 @@ class Agent:
             # rm print(f"{self.name} chose not to attack this turn")
             return None
 
-        attackingTerritory = map.territories[pickTerritoryResult.attackIndex]
-        defendingTerritory = map.territories[pickTerritoryResult.defendIndex]
+        attackingTerritory = map.territories[attackIndex]
+        defendingTerritory = map.territories[defendIndex]
 
-        attackingArmies = attackingTerritory.getArmy(
-        ) - 1  # Keep one remaining on the territory
+        attackingArmies = attackingTerritory.getArmy() - 1  # Keep one remaining on the territory
         defendingArmies = defendingTerritory.getArmy()
 
         minimumAmountRemaining = math.floor(
@@ -648,6 +628,7 @@ class Agent:
             # Let the defenders keep their remaining armies
             defendingTerritory.setArmy(attackResult.defenders)
         return attackResult
+
 
     def placeUnit(self, map):
         controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
