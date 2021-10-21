@@ -227,9 +227,7 @@ class RiskGame():
                 game.showWindow(map, 0.01, tmpWindowName)
 
             # Remove defeated players
-            agentsToRemove = RiskGame.getLosingPlayers(agents,
-                                                       agents[agentIndex], map,
-                                                       game, showGame)
+            agentsToRemove = RiskGame.getLosingPlayers(agents, agents[agentIndex], map, game, showGame)
 
             for agent in agentsToRemove:
                 # TODO: Remove that player agent's remaining turns
@@ -238,8 +236,7 @@ class RiskGame():
                 agents.remove(agent)
 
             # Check for winners
-            gameWinners, gameLosers = RiskGame.getWinningPlayers(
-                agents, map, turnCount, maxTurnCount, showGame)
+            gameWinners, gameLosers = RiskGame.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
             winners += gameWinners
             losers += gameLosers
 
@@ -335,8 +332,7 @@ class RiskGame():
             losers += gameLosers
 
         # Check for winners
-        gameWinners, gameLosers = RiskGame.getWinningPlayers(
-            agents, map, turnCount, maxTurnCount, showGame)
+        gameWinners, gameLosers = RiskGame.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
         winners += gameWinners
         losers += gameLosers
 
