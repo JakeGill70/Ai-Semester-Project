@@ -182,7 +182,7 @@ class RiskGame():
             # Place Units
             # Attack
             # Move
-            depth = max(1, len(agents)-1)
+            depth = math.ceil(len(agents)/2) + 1
             startTime = datetime.datetime.now()
             bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(agents, atkSys, map, depth, agentIndex, True)
             endTime = datetime.datetime.now()
