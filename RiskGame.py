@@ -240,6 +240,16 @@ class RiskGame():
             winners += gameWinners
             losers += gameLosers
 
+            # Remove duplicates
+            winners = list(set(winners))
+            losers = list(set(losers))
+
+            if (showGame):
+                Logger.message(MessageTypes.GuiMirror, "Presenting final map")
+                game.showWindow(map, 1.0, (windowName + ", final"))
+
+            return (winners, losers, turnCount)
+
     @staticmethod
     def playGame(agents, map, showGame=True, windowName="RISK"):
         game = Game()
