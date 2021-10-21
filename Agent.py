@@ -586,7 +586,10 @@ class Agent:
                                  bestTransferAmount)
 
     def attackTerritory(self, pickTerritoryResult, map, atkSys):
-        if (not pickTerritoryResult):
+        return self.attackTerritory(pickTerritoryResult.attackIndex, pickTerritoryResult.defendIndex, map, atkSys)
+
+    def attackTerritory(self, attackIndex, defendIndex, map, atkSys):
+        if (attackIndex == None or defendIndex == None):
             # rm print(f"{self.name} chose not to attack this turn")
             return None
 
