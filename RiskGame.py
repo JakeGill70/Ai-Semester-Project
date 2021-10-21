@@ -214,6 +214,8 @@ class RiskGame():
                 Logger.message(MessageTypes.AttackStopNotice, "{agents[agentIndex].name} decided to stop attacking.")
             
             # Movement
+            # FIXME: The movement is invalid because the board state changed during the attack,
+            # Therefore the movement shouldn't be calculated until after the attack.
             if (movementOrder.transferAmount): # Don't automatically assume the agent is moving
                 map.moveArmies(movementOrder.supplyIndex,
                                movementOrder.receiveIndex,
@@ -470,7 +472,7 @@ class RiskGame():
         # Attack Phase
         allValidAttackOrderings = agent.getAllValidAttackOrders(tmp_map, atkSys, MAX_ATTACK_COUNT)
         # Get random sample of 100 possible attacks
-        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, 500)
+        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, min(5000, max(500, math.ceil(len(allValidAttackOrderings)*0.1))))
         allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
         if (multiThread):
             executor = concurrent.futures.ProcessPoolExecutor(multiprocessing.cpu_count()+1)
