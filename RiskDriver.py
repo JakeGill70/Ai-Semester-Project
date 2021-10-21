@@ -12,7 +12,7 @@ if __name__ == '__main__':
     from os import environ
     environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
-    EXAMPLE = 4
+    EXAMPLE = 5
 
     GENERATION_COUNT = 1500
     POPULATION_SIZE = 256
@@ -47,3 +47,11 @@ if __name__ == '__main__':
 
     elif (EXAMPLE == 4):
         RiskGame.playGameMax(AgentReader.readSampleAgents(), map.getCopy())
+
+    elif (EXAMPLE == 5):
+        Tournament.playMultipleTournamentsMax(map.getCopy(), POPULATION_SIZE,
+                                           GENERATION_COUNT,
+                                           LOW_MUTATION_MODIFIER,
+                                           HIGH_MUTATION_MODIFIER,
+                                           AGENT_OUTPUT_DIRECTORY_PATH,
+                                           TURN_COUNT_FILE_NAME)
