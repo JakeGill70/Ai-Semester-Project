@@ -240,15 +240,20 @@ class RiskGame():
             winners += gameWinners
             losers += gameLosers
 
-            # Remove duplicates
-            winners = list(set(winners))
-            losers = list(set(losers))
+        # Check for winners
+        gameWinners, gameLosers = RiskGame.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
+        winners += gameWinners
+        losers += gameLosers
 
-            if (showGame):
-                Logger.message(MessageTypes.GuiMirror, "Presenting final map")
-                game.showWindow(map, 1.0, (windowName + ", final"))
+        # Remove duplicates
+        winners = list(set(winners))
+        losers = list(set(losers))
 
-            return (winners, losers, turnCount)
+        if (showGame):
+            Logger.message(MessageTypes.GuiMirror, "Presenting final map")
+            game.showWindow(map, 1.0, (windowName + ", final"))
+
+        return (winners, losers, turnCount)
 
     @staticmethod
     def playGame(agents, map, showGame=True, windowName="RISK"):
