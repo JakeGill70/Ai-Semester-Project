@@ -316,8 +316,7 @@ class Agent:
             if (enemyAdjacentsData):
                 # ! Be careful through here, because you cannot assume
                 # ! that the best territory found so far is also enemy adjacent
-                bestEnemyAdjacentData = self.getTerritoryDataEnemyAdjacent(
-                    bestIndex, map) if bestIndex != -1 else []
+                bestEnemyAdjacentData = self.getTerritoryDataEnemyAdjacent(bestIndex, map) if bestIndex != -1 else []
                 bestEnemySize = 0
                 # FIXME: Is this really the best way to determine enemy size?
                 bestEnemySize = max([td.getArmy() for td in bestEnemyAdjacentData]) if (bestEnemyAdjacentData) else 0
@@ -335,16 +334,13 @@ class Agent:
                 if (currEnemyPlayerSize > bestEnemyPlayerSize):
                     score += self.characteristics["Preference"]["Larger"].value
                 if (currEnemyPlayerSize < bestEnemyPlayerSize):
-                    score += self.characteristics["Preference"][
-                        "Smaller"].value
+                    score += self.characteristics["Preference"]["Smaller"].value
             else:
                 score += self.characteristics["Preference"]["Safe"].value
 
             # Score multipliers
             # Diminishing Return Multiplier
-            diminishingReturnMultiplier = pow(
-                self.characteristics["Placement"]
-                ["Placement Bias Multiplier"].value, territoryData.getArmy())
+            diminishingReturnMultiplier = pow(self.characteristics["Placement"]["Placement Bias Multiplier"].value, territoryData.getArmy())
             score *= diminishingReturnMultiplier
 
             if (score > bestScore):
