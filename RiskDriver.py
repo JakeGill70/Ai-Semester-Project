@@ -8,6 +8,10 @@ from RiskGame import RiskGame
 from datetime import datetime
 
 if __name__ == '__main__':
+    # Disable pyGame greeting message
+    from os import environ
+    environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+
     EXAMPLE = 4
 
     GENERATION_COUNT = 1500
