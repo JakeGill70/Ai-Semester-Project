@@ -687,6 +687,8 @@ class Agent:
         percentage = max(0, min(1, percentage))  # Clamp the percentage between 0-1
         armiesOnTerritory -= 1  # Always keep 1 on the supplying territory
         unitsToTransfer = math.floor(armiesOnTerritory * percentage)
+        # Ensure that unitsToTransfer is non-negative
+        unitsToTransfer = max(unitsToTransfer, 0)
         return unitsToTransfer
 
     def pickBestMovement(self, map):
@@ -798,7 +800,7 @@ class Agent:
             else:
                 continue
 
-            score = math.ceiling(
+            score = math.ceil(
                 self.scoreGameState(tmp_map) *
                 attackEstimate.attackSuccessChance)
             if (score > bestScore):
