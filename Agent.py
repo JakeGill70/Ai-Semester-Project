@@ -671,21 +671,13 @@ class Agent:
                 map.placeArmy(self.name, atp, territoryIndex)
 
     def getAllValidMovements(self, map):
-        controlledTerritoryIndices = [
-            t.index for t in map.getTerritoriesByPlayer(self.name)
-        ]
-        controlledTerritoriesThatCanMove = [
-            t for t in controlledTerritoryIndices
-            if map.territories[t].getArmy() > 1
-        ]
+        controlledTerritoryIndices = [t.index for t in map.getTerritoriesByPlayer(self.name)]
+        controlledTerritoriesThatCanMove = [ t for t in controlledTerritoryIndices if map.territories[t].getArmy() > 1]
 
         allValidMovements = []
 
         for sourceId in controlledTerritoriesThatCanMove:
-            possibleTargets = [
-                i for i in map.territories[sourceId].connections
-                if i in controlledTerritoryIndices
-            ]
+            possibleTargets = [i for i in map.territories[sourceId].connections if i in controlledTerritoryIndices]
             for targetId in possibleTargets:
                 allValidMovements.append((sourceId, targetId))
 

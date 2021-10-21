@@ -371,7 +371,7 @@ class RiskGame():
         
         # Map Scoring
         tmpScores, _ = RiskGame.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
-        return (tmpScores[agentIndex], PlayerMove( placementOrder, attackOrder, bestMovementResult))
+        return (tmpScores[agentIndex], PlayerMove(placementOrder, attackOrder, bestMovementResult))
 
     @staticmethod
     def considerPlacement(agents, atkSys, map, depth, agentIndex, validPlacement, availableArmies):
