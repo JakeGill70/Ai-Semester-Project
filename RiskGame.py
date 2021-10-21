@@ -17,7 +17,7 @@ import multiprocessing
 import concurrent.futures
 import sys
 
-PlayerMove = namedtuple('PlayerMove', 'placementOrder attackOrder Movement')
+PlayerMove = namedtuple('PlayerMove', 'placementOrder attackOrder movement')
 
 
 class RiskGame():
@@ -182,19 +182,45 @@ class RiskGame():
             # Place Units
             # Attack
             # Move
-            depth = 1  #len(agents) + 1
+            depth = max(1, len(agents)-1)
             startTime = datetime.datetime.now()
-            bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(
-                agents, atkSys, map, depth, agentIndex, True)
+            bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(agents, atkSys, map, depth, agentIndex, True)
             endTime = datetime.datetime.now()
             runTime = endTime - startTime
             print(runTime.total_seconds())
-            #playerMove = bestPlayerMoves[
-            #agentIndex]  # Named tuple: (placementOrder, attackOrder, Movement)
-            #placementOrder = playerMove.placementOrder
-            #attackOrder = playerMove.attackOrder
-            #movementOrder = playerMove.movement
-            return None
+            playerMove = bestPlayerMoves[agentIndex]  # Named tuple: (placementOrder, attackOrder, Movement)
+            placementOrder = playerMove.placementOrder # List of tid's
+            attackOrder = playerMove.attackOrder # List of tuples in the format (srcId, targetId)
+            movementOrder = playerMove.movement # Named tuple - Movement Selection
+            
+            # Placement
+            for territoryIndex in placementOrder:
+                map.placeArmy(agents[agentIndex].name, 1, territoryIndex)
+                if (showGame):
+                    Logger.message(MessageTypes.UnitPlacementNotice,
+                        f"{agents[agentIndex].name} placed a unit at #{territoryIndex}.")
+
+            # Attack
+            attackIndex = 0
+            defendIndex = 0
+            if(attackOrder): # Don't automatically assume the agent is attacking
+                for attack in attackOrder:
+                    attackIndex = attack[0]
+                    defendIndex = attack[1]
+                    attackResult = agents[agentIndex].attackTerritory(attackIndex, defendIndex, map, atkSys)
+                    if (showGame):
+                        Logger.message(MessageTypes.AttackResult,
+                            f"{agents[agentIndex].name}'s attack from #{attackIndex} to #{defendIndex} was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}.")
+                Logger.message(MessageTypes.AttackStopNotice, "{agents[agentIndex].name} decided to stop attacking.")
+            
+            # Movement
+            if (movementOrder.transferAmount): # Don't automatically assume the agent is moving
+                map.moveArmies(movementOrder.supplyIndex,
+                               movementOrder.receiveIndex,
+                               movementOrder.transferAmount)
+                if (showGame):
+                    Logger.message(MessageTypes.UnitMovementNotice,
+                        f"{agents[agentIndex].name} moved {movementOrder.transferAmount} units from #{movementOrder.supplyIndex} to #{movementOrder.receiveIndex}.")
 
             # Period update
             if (showGame and turnCount % GRAPH_UPDATE_FREQUENCY == 0):
@@ -331,6 +357,17 @@ class RiskGame():
         return myList
 
     @staticmethod
+    def considerAttackOrder(agents, atkSys, map, depth, agentIndex, placementOrder, attackOrder):
+        agent = agents[agentIndex]
+
+        tmp_map_attack = map.getCopy()
+        tmp_map_final, bestMovementResult = RiskGame.processAttackAndMovementOrder(tmp_map_attack, atkSys, agent, attackOrder)
+        
+        # Map Scoring
+        tmpScores, _ = RiskGame.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
+        return (tmpScores[agentIndex], PlayerMove( placementOrder, attackOrder, bestMovementResult))
+
+    @staticmethod
     def considerPlacement(agents, atkSys, map, depth, agentIndex, validPlacement, availableArmies):
         agent = agents[agentIndex]
         MAX_ATTACK_COUNT = 5
@@ -342,7 +379,7 @@ class RiskGame():
         # Attack Phase
         allValidAttackOrderings = agent.getAllValidAttackOrders(tmp_map_placement, atkSys, MAX_ATTACK_COUNT)
         # Get random sample of 100 possible attacks
-        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, 50)
+        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, 500)
         allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
         for validAttackOrder in allValidAttackOrderings:
             tmp_map_attack = tmp_map_placement.getCopy()
@@ -406,6 +443,7 @@ class RiskGame():
         agent = agents[agentIndex]
         MAX_ATTACK_COUNT = 5
         results = []
+        tmp_map = map.getCopy()
 
         # If depth had gone as low as possible or the agent has no territories left,
         # then declare a leaf node.
@@ -415,26 +453,26 @@ class RiskGame():
 
         # Placement Phase
         availableArmies = map.getNewUnitCountForPlayer(agent.name)
-        allValidPlacements = agent.getAllValidPlacements(map, availableArmies)
-        # Get random sample of 100 possible placements
-        allValidPlacements = RiskGame.downSampleList(allValidPlacements, 25)
+        placementOrder = agent.getPreferredPlacementOrder(tmp_map, availableArmies)
+        agent.placeArmiesInOrder(tmp_map, placementOrder, availableArmies)
 
+        # Attack Phase
+        allValidAttackOrderings = agent.getAllValidAttackOrders(tmp_map, atkSys, MAX_ATTACK_COUNT)
+        # Get random sample of 100 possible attacks
+        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, 500)
+        allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
         if (multiThread):
-            executor = concurrent.futures.ProcessPoolExecutor(10)
-            futures = [ executor.submit(RiskGame.considerPlacement, agents, atkSys,
-                                map, depth, agentIndex, validPlacement, availableArmies)
-                for validPlacement in allValidPlacements
-            ]
+            executor = concurrent.futures.ProcessPoolExecutor(multiprocessing.cpu_count()+1)
+            futures = [ executor.submit(RiskGame.considerAttackOrder, agents, atkSys, tmp_map, depth, agentIndex, placementOrder, x) for x in allValidAttackOrderings]
             concurrent.futures.wait(futures)
-            listOflistOfResults = [future.result() for future in futures]
-            for listOfResults in listOflistOfResults:
-                results = results + listOfResults
-        else:
-            # Placement phase continued
-            for validPlacement in allValidPlacements:
-                results = RiskGame.considerPlacement(agents, atkSys, map, depth, agentIndex, validPlacement, availableArmies)
+            listOfResults = [future.result() for future in futures]
+            for result in listOfResults:
+                results.append(result)
+        else:            
+            for validAttackOrder in allValidAttackOrderings:
+                results.append(RiskGame.considerAttackOrder(agents, atkSys, tmp_map, depth, agentIndex, placementOrder, validAttackOrder))
 
-        results.sort(key=lambda y: y[0])
+        results.sort(key=lambda y: y[0],reverse=True)
         bestResults = results[0] # Get tuple from list
         bestScores[agentIndex] = bestResults[0] # Get score from the tuple
         bestPlayerMoves[agentIndex] = bestResults[1] # Get turn from the tuple
