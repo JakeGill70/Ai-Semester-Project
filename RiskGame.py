@@ -182,7 +182,7 @@ class RiskGame():
             # Place Units
             # Attack
             # Move
-            depth = 1
+            depth = 2
             startTime = datetime.datetime.now()
             bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(agents, atkSys, map, depth, agentIndex, True)
             endTime = datetime.datetime.now()
@@ -216,13 +216,14 @@ class RiskGame():
             # Movement
             # FIXME: The movement is invalid because the board state changed during the attack,
             # Therefore the movement shouldn't be calculated until after the attack.
-            if (movementOrder.transferAmount): # Don't automatically assume the agent is moving
-                map.moveArmies(movementOrder.supplyIndex,
-                               movementOrder.receiveIndex,
-                               movementOrder.transferAmount)
+            realMovementOrder = agents[agentIndex].pickBestMovement(map.getCopy())
+            if (realMovementOrder.transferAmount): # Don't automatically assume the agent is moving
+                map.moveArmies(realMovementOrder.supplyIndex,
+                               realMovementOrder.receiveIndex,
+                               realMovementOrder.transferAmount)
                 if (showGame):
                     Logger.message(MessageTypes.UnitMovementNotice,
-                        f"{agents[agentIndex].name} moved {movementOrder.transferAmount} units from #{movementOrder.supplyIndex} to #{movementOrder.receiveIndex}.")
+                        f"{agents[agentIndex].name} moved {realMovementOrder.transferAmount} units from #{realMovementOrder.supplyIndex} to #{realMovementOrder.receiveIndex}.")
 
             # Period update
             if (showGame and turnCount % GRAPH_UPDATE_FREQUENCY == 0):
@@ -374,11 +375,13 @@ class RiskGame():
         agent = agents[agentIndex]
 
         tmp_map_attack = map.getCopy()
-        tmp_map_final, bestMovementResult = RiskGame.processAttackAndMovementOrder(tmp_map_attack, atkSys, agent, attackOrder)
+        # This LOC below was written after removing the line below
+        tmp_map_final = RiskGame.processAttackOrder(tmp_map_attack, atkSys, agent, attackOrder)
+        #rm tmp_map_final, bestMovementResult = RiskGame.processAttackAndMovementOrder(tmp_map_attack, atkSys, agent, attackOrder)
         
         # Map Scoring
         tmpScores, _ = RiskGame.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
-        return (tmpScores[agentIndex], PlayerMove(placementOrder, attackOrder, bestMovementResult))
+        return (tmpScores[agentIndex], PlayerMove(placementOrder, attackOrder, None))
 
     @staticmethod
     def considerPlacement(agents, atkSys, map, depth, agentIndex, validPlacement, availableArmies):
