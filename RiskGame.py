@@ -475,7 +475,7 @@ class RiskGame():
         # Attack Phase
         allValidAttackOrderings = agent.getAllValidAttackOrders(tmp_map, atkSys, MAX_ATTACK_COUNT)
         # Get random sample of 100 possible attacks
-        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, min(5000, max(500, math.ceil(len(allValidAttackOrderings)*0.1))))
+        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, min(5000, max(500, math.ceil(len(allValidAttackOrderings)*0.25))))
         allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
         if (multiThread):
             executor = concurrent.futures.ProcessPoolExecutor(multiprocessing.cpu_count()+1)
