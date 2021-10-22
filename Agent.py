@@ -115,8 +115,11 @@ class Agent:
                 "Armies Enemy Adjacent":AgentCharacteristic(0,"Owning an army next to an enemy controlled territory, +value each"),
                 "Territories Enemy Adjacent":AgentCharacteristic(0,"Owning a territory with an enemy connection, +value for each connection"),
                 "Army Upkeep":AgentCharacteristic(0,"Armies given to player at start of next turn, +value for each"),
-                "Continents":AgentCharacteristic(0, "Owning a continent, +value each"),
-                "Remaining Players":AgentCharacteristic(-50,"Number of remaining players on the game board, +value for each")
+                "Continents":AgentCharacteristic(0, "Owning a continent, +value each", 5),
+                "Remaining Players":AgentCharacteristic(0,"Number of remaining players on the game board, +value for each", 5),
+                # Consider continents, territories, armies, and adjacent armies controlled by other players
+                "Enemy Armies Adjacent":AgentCharacteristic(0,"Armies controlled by other players adjacent to player controlled territories, +value each"),
+                "Enemy Territories Adjacent":AgentCharacteristic(0, "Territories controlled by other players adjacent to player controlled territories, +value each")
             }
         }
 
@@ -804,19 +807,26 @@ class Agent:
 
     def scoreGameState(self, map):
         armyCount = 0
-        territories = map.getTerritoriesByPlayer(self.name)
-        territoryCount = len(territories)
+        playerControlledTerritories = map.getTerritoriesByPlayer(self.name)
+        territoryCount = len(playerControlledTerritories)
         remainingPlayers = map.getPlayerCount()
 
+        enemyArmyAdjacent = 0
+        enemyTerritoryAdjacent = 0
         armyEnemyAdjacent = 0
         territoryEnemyAdjacent = 0
-        for territory in territories:
+        for territory in playerControlledTerritories:
             armyCount += territory.getArmy()
+            thisTerritoryValuesIncluded = False
             for tid in territory.connections:
-                if (map.territories[tid].owner != self.name):
+                if (map.territories[tid].owner != self.name and not thisTerritoryValuesIncluded):
                     armyEnemyAdjacent += territory.getArmy()
                     territoryEnemyAdjacent += 1
-                    break
+                    thisTerritoryValuesIncluded = True
+                if(map.territories[tid].owner != self.name):
+                    enemyTerritoryAdjacent += 1
+                    enemyArmyAdjacent += map.territories[tid].getArmy()
+
 
         armyUpkeep = map.getNewUnitCountForPlayer(self.name)
         continents = map.getCountOfContinentsControlledByPlayer(self.name)
@@ -829,4 +839,6 @@ class Agent:
         score += armyUpkeep * self.characteristics["Consideration"]["Army Upkeep"].value
         score += continents * self.characteristics["Consideration"]["Continents"].value
         score += remainingPlayers * self.characteristics["Consideration"]["Remaining Players"].value
+        score += enemyArmyAdjacent * self.characteristics["Consideration"]["Enemy Armies Adjacent"].value
+        score += enemyTerritoryAdjacent * self.characteristics["Consideration"]["Enemy Territories Adjacent"].value
         return score
