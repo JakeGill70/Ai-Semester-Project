@@ -265,12 +265,8 @@ class Agent:
 
                 score = 0
                 score += self.characteristics["Attack"]["Anywhere"].value
-                score += self.characteristics["Attack"][
-                    "Ally Adjacent"].value if self.getTerritoryDataEnemyAdjacent(
-                        territory.index, map) else 0
-                score += self.characteristics["Attack"][
-                    "Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(
-                        enemyTerritory.index, map) else 0
+                score += self.characteristics["Attack"]["Ally Adjacent"].value if self.getTerritoryDataEnemyAdjacent(territory.index, map) else 0
+                score += self.characteristics["Attack"]["Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(enemyTerritory.index, map) else 0
 
                 score += self.characteristics["Attack"]["Remain Bias"].value * \
                     (territory.getArmy() - attackEstimate.attackers)
@@ -289,8 +285,7 @@ class Agent:
                 unitBonusAfterCapture = map.getContinentBonus(self.name)
                 enemyTerritory.owner = prevOwner
                 if (unitBonusBeforeCapture != unitBonusAfterCapture):
-                    score += self.characteristics["Attack"][
-                        "Capture Continent"].value
+                    score += self.characteristics["Attack"]["Capture Continent"].value
 
                 # If there is a best value to compare to
                 if (bestScore != -1):
@@ -298,11 +293,9 @@ class Agent:
                     bestEnemySize = map.getPlayerSize(
                         bestDefendingTerritory.owner)
                     if (currEnemySize > bestEnemySize):
-                        score += self.characteristics["Preference"][
-                            "Larger"].value
+                        score += self.characteristics["Preference"]["Larger"].value
                     if (currEnemySize < bestEnemySize):
-                        score += self.characteristics["Preference"][
-                            "Smaller"].value
+                        score += self.characteristics["Preference"]["Smaller"].value
 
                 if (score > bestScore):
                     bestScore = score
@@ -323,9 +316,7 @@ class Agent:
 
     def pickTerritoryForMovement(self, map):
         controlledTerritories = map.getTerritoriesByPlayer(self.name)
-        controlledTerritoriesThatCanMove = [
-            t for t in controlledTerritories if t.getArmy() > 1
-        ]
+        controlledTerritoriesThatCanMove = [t for t in controlledTerritories if t.getArmy() > 1]
 
         score = -1
         bestScore = -1
