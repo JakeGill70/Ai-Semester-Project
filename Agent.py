@@ -183,7 +183,12 @@ class Agent:
 
     def pickTerritoryForPlacement(self, possibleTerritoryData, map):
         if(len(possibleTerritoryData) == 0):
+            # If there was no valid territory data given, just grab everything
             possibleTerritoryData = map.getTerritoriesByPlayer(self.name)
+        if(len(possibleTerritoryData) == 0):
+            # If there is still no valid data, then this agent is dead and something has gone wrong,
+            # so just return a None and let the caller deal with it.
+            return None
         score = 0
         bestScore = -math.inf
         bestIndex = random.choice(possibleTerritoryData).index
@@ -504,14 +509,14 @@ class Agent:
     def placeUnit(self, map):
         controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
         territoryIndex = self.pickTerritoryForPlacement(controlledTerritoryIndices, map)
-        map.placeArmy(self.name, 1, territoryIndex)
+        if(territoryIndex):
+            map.placeArmy(self.name, 1, territoryIndex)
         return territoryIndex
 
     def placeUnitSetup(self, map):
         emptyTerritoriesIndices = map.getTerritoriesByPlayer("")
         if (emptyTerritoriesIndices):
-            territoryIndex = self.pickTerritoryForPlacement(
-                emptyTerritoriesIndices, map)
+            territoryIndex = self.pickTerritoryForPlacement(emptyTerritoriesIndices, map)
             map.placeArmy(self.name, 1, territoryIndex)
         else:
             self.placeUnit(map)
@@ -646,6 +651,8 @@ class Agent:
         return order
 
     def placeArmiesInOrder(self, map, order, armiesToPlace=None):
+        if(order == None):
+            return
         if (armiesToPlace == None):
             for item in order:
                 territoryIndex = item[0]
