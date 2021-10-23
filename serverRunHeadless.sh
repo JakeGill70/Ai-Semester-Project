@@ -7,4 +7,4 @@
 #	because we do want to log error messages in the event of a crash.
 # Lastly, place a & at the end so this task runs in the background.
 
-nohup python3 RiskDriver.py > /dev/null 2>&1 &
+nohup python3 RiskDriver.py > ./Outputs/Output.txt 2> ./Outputs/Error.txt &
