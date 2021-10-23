@@ -182,9 +182,11 @@ class Agent:
         return adjacentTerritoryData
 
     def pickTerritoryForPlacement(self, possibleTerritoryData, map):
+        if(len(possibleTerritoryData) == 0):
+            possibleTerritoryData = map.getTerritoriesByPlayer(self.name)
         score = 0
         bestScore = -math.inf
-        bestIndex = -1
+        bestIndex = random.choice(possibleTerritoryData).index
         for territoryData in possibleTerritoryData:
             score = 0
             # Calculate placement score based on placement settings
@@ -230,10 +232,6 @@ class Agent:
                 bestScore = score
                 bestIndex = territoryData.index
 
-            # rm print(f"Index: {territoryData.index}, Score: {score}, BestIndex: {bestIndex}")
-
-        if (bestIndex == -1):
-            raise Exception("No best index for placing a territory")
         return bestIndex
 
     def pickTerritoryForAttack(self, map, atkSys):
