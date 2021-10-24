@@ -661,6 +661,8 @@ class Agent:
         else:
             groupSize = self.convertArmiesToPlaceToGroupSize(armiesToPlace)
             for item in order:
+                if (item == None):
+                    continue
                 territoryIndex = item
                 if (armiesToPlace - groupSize > 0):
                     atp = groupSize
