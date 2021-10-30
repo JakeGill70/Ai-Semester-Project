@@ -274,10 +274,8 @@ class Agent:
                 score += self.characteristics["Attack"]["Ally Adjacent"].value if self.getTerritoryDataEnemyAdjacent(territory.index, map) else 0
                 score += self.characteristics["Attack"]["Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(enemyTerritory.index, map) else 0
 
-                score += self.characteristics["Attack"]["Remain Bias"].value * \
-                    (territory.getArmy() - attackEstimate.attackers)
-                score += self.characteristics["Attack"]["Destroy Bias"].value * \
-                    (enemyTerritory.getArmy() - attackEstimate.defenders)
+                score += self.characteristics["Attack"]["Remain Bias"].value * (territory.getArmy() - attackEstimate.attackers)
+                score += self.characteristics["Attack"]["Destroy Bias"].value * (enemyTerritory.getArmy() - attackEstimate.defenders)
 
                 score += self.characteristics["Preference"]["Risky"].value if \
                     attackEstimate.attackSuccessChance < self.characteristics["Attack"]["Safe Threshold"].value else 0
@@ -296,8 +294,7 @@ class Agent:
                 # If there is a best value to compare to
                 if (bestScore != -1):
                     currEnemySize = map.getPlayerSize(enemyTerritory.owner)
-                    bestEnemySize = map.getPlayerSize(
-                        bestDefendingTerritory.owner)
+                    bestEnemySize = map.getPlayerSize(bestDefendingTerritory.owner)
                     if (currEnemySize > bestEnemySize):
                         score += self.characteristics["Preference"]["Larger"].value
                     if (currEnemySize < bestEnemySize):
@@ -345,38 +342,20 @@ class Agent:
                 score = 0
                 # Calculate movement score based on movement settings
                 score += self.characteristics["Movement"]["Anywhere"].value
-                score += self.characteristics["Movement"][
-                    "Enemy Adjacent"].value if self.getTerritoryDataEnemyAdjacent(
-                        receiveTerritory.index, map) else 0
-                score += self.characteristics["Movement"][
-                    "Ally Adjacent"].value if self.getTerritoryDataAllyAdjacent(
-                        receiveTerritory.index, map) else 0
-                score += self.characteristics["Movement"][
-                    "Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(
-                        receiveTerritory.index, map) else 0
-                score += self.characteristics["Movement"][
-                    "Connection Bias"].value * len(
-                        receiveTerritory.connections)
-                score += self.characteristics["Movement"][
-                    "Bigger Territory"].value if receiveTerritory.getArmy(
-                    ) > supplyTerritory.getArmy() else 0
-                score += self.characteristics["Movement"][
-                    "Smaller Territory"].value if receiveTerritory.getArmy(
-                    ) < supplyTerritory.getArmy() else 0
+                score += self.characteristics["Movement"]["Enemy Adjacent"].value if self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map) else 0
+                score += self.characteristics["Movement"]["Ally Adjacent"].value if self.getTerritoryDataAllyAdjacent(receiveTerritory.index, map) else 0
+                score += self.characteristics["Movement"]["Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(receiveTerritory.index, map) else 0
+                score += self.characteristics["Movement"]["Connection Bias"].value * len(receiveTerritory.connections)
+                score += self.characteristics["Movement"]["Bigger Territory"].value if receiveTerritory.getArmy() > supplyTerritory.getArmy() else 0
+                score += self.characteristics["Movement"]["Smaller Territory"].value if receiveTerritory.getArmy() < supplyTerritory.getArmy() else 0
 
                 # Calculate movement score based on preference settings
                 # Consider it risky to move units away from a territory with enemy connections
-                isRisky = len(
-                    self.getTerritoryDataEnemyAdjacent(supplyTerritory.index,
-                                                       map)) > 0
-                score += self.characteristics["Preference"][
-                    "Risky"].value if isRisky else 0
+                isRisky = len(self.getTerritoryDataEnemyAdjacent(supplyTerritory.index, map)) > 0
+                score += self.characteristics["Preference"]["Risky"].value if isRisky else 0
                 # Consider it safe to move units away from a territory without enemy connections
-                isSafe = len(
-                    self.getTerritoryDataEnemyAdjacent(supplyTerritory.index,
-                                                       map)) == 0
-                score += self.characteristics["Preference"][
-                    "Safe"].value if isSafe else 0
+                isSafe = len(self.getTerritoryDataEnemyAdjacent(supplyTerritory.index, map)) == 0
+                score += self.characteristics["Preference"]["Safe"].value if isSafe else 0
 
                 # Consider preference to move towards smaller/bigger players as a prescursor to attack
                 # ! Be careful here, because you cannot assume the following:
@@ -389,29 +368,20 @@ class Agent:
 
                 currTotalEnemySize = 0
                 try:
-                    currEnemyData = self.getTerritoryDataEnemyAdjacent(
-                        receiveTerritory.index, map)
+                    currEnemyData = self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map)
                     currConnectedEnemyNames = [x.owner for x in currEnemyData]
                     # FIXME: Is this the best way to compare enemy size?
-                    currConnectedEnemySize = [
-                        map.getPlayerSize(x) for x in currConnectedEnemyNames
-                    ]
+                    currConnectedEnemySize = [map.getPlayerSize(x) for x in currConnectedEnemyNames]
                     currTotalEnemySize = sum(currConnectedEnemySize)
                 except:
                     pass
 
                 currBestTotalEnemySize = 0
                 try:
-                    currBestEnemyData = self.getTerritoryDataEnemyAdjacent(
-                        bestReceivingTerritory.index, map)
-                    currBestConnectedEnemyNames = [
-                        x.owner for x in currBestEnemyData
-                    ]
+                    currBestEnemyData = self.getTerritoryDataEnemyAdjacent(bestReceivingTerritory.index, map)
+                    currBestConnectedEnemyNames = [x.owner for x in currBestEnemyData]
 
-                    currBestConnectedEnemySize = [
-                        map.getPlayerSize(x)
-                        for x in currBestConnectedEnemyNames
-                    ]
+                    currBestConnectedEnemySize = [map.getPlayerSize(x) for x in currBestConnectedEnemyNames]
                     currBestTotalEnemySize = sum(currBestConnectedEnemySize)
                 except:
                     pass
@@ -419,26 +389,21 @@ class Agent:
                 if (currTotalEnemySize > currBestTotalEnemySize):
                     score += self.characteristics["Preference"]["Larger"].value
                 if (currTotalEnemySize < currBestTotalEnemySize):
-                    score += self.characteristics["Preference"][
-                        "Smaller"].value
+                    score += self.characteristics["Preference"]["Smaller"].value
 
                 # Determine if this is the best movement
                 if (score > bestScore):
                     # Determine how many armies to transfer over
-                    percentToTransfer = self.characteristics["Movement"][
-                        "Base Transfer Rate"].value
+                    percentToTransfer = self.characteristics["Movement"]["Base Transfer Rate"].value
                     if (isRisky):
-                        percentToTransfer = self.characteristics["Movement"][
-                            "Risky Transfer Rate"].value
+                        percentToTransfer = self.characteristics["Movement"]["Risky Transfer Rate"].value
                     if (isSafe):
-                        percentToTransfer = self.characteristics["Movement"][
-                            "Safe Transfer Rate"].value
+                        percentToTransfer = self.characteristics["Movement"]["Safe Transfer Rate"].value
 
                     # Clamp percent to transfer to be a percentage value
                     percentToTransfer = max(0, min(percentToTransfer, 1))
 
-                    unitsToTransfer = math.floor(supplyTerritory.getArmy() *
-                                                 percentToTransfer)
+                    unitsToTransfer = math.floor(supplyTerritory.getArmy() * percentToTransfer)
                     # Don't move all units, at least 1 must stay on the supplying territory
                     # Remember that a territory must have at least 2 units to perform a transfer:
                     #       1 unit to remain on the territory, and the 1 unit to transfer
@@ -476,13 +441,10 @@ class Agent:
         attackingArmies = attackingTerritory.getArmy() - 1  # Keep one remaining on the territory
         defendingArmies = defendingTerritory.getArmy()
 
-        minimumAmountRemaining = math.floor(
-            attackingArmies *
-            self.characteristics["Attack"]["Minimal Remaining Percent"].value)
+        minimumAmountRemaining = math.floor(attackingArmies * self.characteristics["Attack"]["Minimal Remaining Percent"].value)
 
         # Actually perform the attack
-        attackResult = atkSys.attack(attackingArmies, defendingArmies,
-                                     minimumAmountRemaining)
+        attackResult = atkSys.attack(attackingArmies, defendingArmies, minimumAmountRemaining)
 
         # rm print(f"Attacking ({defendingTerritory}) from ({attackingTerritory}) was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}")
 
@@ -521,10 +483,7 @@ class Agent:
         else:
             self.placeUnit(map)
 
-    def mutate(self,
-               recursiveChance=0.8,
-               majorMutationChance=0.6,
-               mutationMultiplier=1.0):
+    def mutate(self, recursiveChance=0.8, majorMutationChance=0.6, mutationMultiplier=1.0):
 
         recurse = True
         while (recurse):
@@ -541,20 +500,13 @@ class Agent:
             self.mutateCharacteristic(characteristicGroupName, isMajorMutation,
                                       mutationMultiplier)
 
-    def mutateCharacteristic(self,
-                             characteristicGroupName,
-                             isMajorMutation=False,
-                             mutationMultiplier=1.0):
+    def mutateCharacteristic(self, characteristicGroupName, isMajorMutation=False, mutationMultiplier=1.0):
         if (isMajorMutation):
-            for characteristic in self.characteristics[
-                    characteristicGroupName].values():
-                characteristic.adjust_random(characteristic.adjustmentAmt *
-                                             mutationMultiplier)
+            for characteristic in self.characteristics[characteristicGroupName].values():
+                characteristic.adjust_random(characteristic.adjustmentAmt * mutationMultiplier)
         else:
-            randomCharacteristic = random.choice(
-                list(self.characteristics[characteristicGroupName].values()))
-            randomCharacteristic.adjust_random(
-                randomCharacteristic.adjustmentAmt * mutationMultiplier)
+            randomCharacteristic = random.choice(list(self.characteristics[characteristicGroupName].values()))
+            randomCharacteristic.adjust_random(randomCharacteristic.adjustmentAmt * mutationMultiplier)
 
     #####################################################
     #                                                   #
