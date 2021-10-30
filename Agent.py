@@ -158,27 +158,17 @@ class Agent:
 
     def getTerritoryDataBorderAdjacent(self, territoryIndex, map):
         territoryData = map.territories[territoryIndex]
-        adjacentTerritoryData = [
-            map.territories[ti] for ti in territoryData.connections
-            if map.territories[ti].continent != territoryData.continent
-        ]
+        adjacentTerritoryData = [map.territories[ti] for ti in territoryData.connections if map.territories[ti].continent != territoryData.continent]
         return adjacentTerritoryData
 
     def getTerritoryDataEnemyAdjacent(self, territoryIndex, map):
         territoryData = map.territories[territoryIndex]
-        adjacentTerritoryData = [
-            map.territories[ti] for ti in territoryData.connections
-            if map.territories[ti].owner != self.name
-            and map.territories[ti].owner != ""
-        ]
+        adjacentTerritoryData = [map.territories[ti] for ti in territoryData.connections if map.territories[ti].owner != self.name and map.territories[ti].owner != "" ]
         return adjacentTerritoryData
 
     def getTerritoryDataAllyAdjacent(self, territoryIndex, map):
         territoryData = map.territories[territoryIndex]
-        adjacentTerritoryData = [
-            map.territories[ti] for ti in territoryData.connections
-            if map.territories[ti].owner == self.name
-        ]
+        adjacentTerritoryData = [map.territories[ti] for ti in territoryData.connections if map.territories[ti].owner == self.name]
         return adjacentTerritoryData
 
     def pickTerritoryForPlacement(self, possibleTerritoryData, map):
@@ -241,9 +231,7 @@ class Agent:
 
     def pickTerritoryForAttack(self, map, atkSys):
         controlledTerritories = map.getTerritoriesByPlayer(self.name)
-        controlledTerritoriesThatCanAttack = [
-            t for t in controlledTerritories if t.getArmy() > 1
-        ]
+        controlledTerritoriesThatCanAttack = [t for t in controlledTerritories if t.getArmy() > 1]
 
         score = -1
         bestScore = -1
@@ -251,20 +239,14 @@ class Agent:
         bestDefendingTerritory = None
         bestAttackEstimate = None
         for territory in controlledTerritoriesThatCanAttack:
-            enemyConnections = [
-                map.territories[index] for index in territory.connections
-                if map.territories[index].owner != self.name
-            ]
+            enemyConnections = [map.territories[index] for index in territory.connections if map.territories[index].owner != self.name]
 
             for enemyTerritory in enemyConnections:
                 # Get attack estimate
-                attackEstimate = atkSys.getAttackEstimate(
-                    territory.getArmy(), enemyTerritory.getArmy())
+                attackEstimate = atkSys.getAttackEstimate(territory.getArmy(), enemyTerritory.getArmy())
 
                 # Determine if the attack is viable
-                if (attackEstimate.attackSuccessChance <
-                        self.characteristics["Attack"]
-                    ["Minimal Success Chance"].value):
+                if (attackEstimate.attackSuccessChance < self.characteristics["Attack"]["Minimal Success Chance"].value):
                     # Don't bother calculating the score from this point onward
                     # rm print(f"Attacking ({enemyTerritory}) from ({territory}) is a non-viable strategy with only a {attackEstimate.attackSuccessChance * 100}% chance of success")
                     continue
@@ -277,10 +259,8 @@ class Agent:
                 score += self.characteristics["Attack"]["Remain Bias"].value * (territory.getArmy() - attackEstimate.attackers)
                 score += self.characteristics["Attack"]["Destroy Bias"].value * (enemyTerritory.getArmy() - attackEstimate.defenders)
 
-                score += self.characteristics["Preference"]["Risky"].value if \
-                    attackEstimate.attackSuccessChance < self.characteristics["Attack"]["Safe Threshold"].value else 0
-                score += self.characteristics["Preference"]["Safe"].value if  \
-                    attackEstimate.attackSuccessChance >= self.characteristics["Attack"]["Safe Threshold"].value else 0
+                score += self.characteristics["Preference"]["Risky"].value if attackEstimate.attackSuccessChance < self.characteristics["Attack"]["Safe Threshold"].value else 0
+                score += self.characteristics["Preference"]["Safe"].value if attackEstimate.attackSuccessChance >= self.characteristics["Attack"]["Safe Threshold"].value else 0
 
                 # Would capturing this territory give a continent bonus?
                 unitBonusBeforeCapture = map.getContinentBonus(self.name)
@@ -313,9 +293,7 @@ class Agent:
             return None
 
         # Return the best option found
-        return AttackSelection(bestAttackingTerritory.index,
-                               bestDefendingTerritory.index,
-                               bestAttackEstimate)
+        return AttackSelection(bestAttackingTerritory.index, bestDefendingTerritory.index, bestAttackEstimate)
 
     def pickTerritoryForMovement(self, map):
         controlledTerritories = map.getTerritoriesByPlayer(self.name)
@@ -423,9 +401,7 @@ class Agent:
         if (bestScore == -1):
             return None
         else:
-            return MoveSelection(bestSupplyingTerritory.index,
-                                 bestReceivingTerritory.index,
-                                 bestTransferAmount)
+            return MoveSelection(bestSupplyingTerritory.index, bestReceivingTerritory.index, bestTransferAmount)
 
     def attackTerritory(self, pickTerritoryResult, map, atkSys):
         return self.attackTerritory(pickTerritoryResult.attackIndex, pickTerritoryResult.defendIndex, map, atkSys)
@@ -570,8 +546,7 @@ class Agent:
 
             bestScore = float('-inf')
             bestTerritoryPlacement = None
-            eligableTerritoryIndices = self.getTerritoryIndicesEligableForPlacement(
-                map)
+            eligableTerritoryIndices = self.getTerritoryIndicesEligableForPlacement(map)
             # Mix up the ordering a bit to prevent armies from going to the same territory in the event of a tie
             random.shuffle(eligableTerritoryIndices)
             for eligableTerritoryIndex in eligableTerritoryIndices:
@@ -581,9 +556,7 @@ class Agent:
                 if (score > bestScore):
                     bestScore = score
                     bestTerritoryPlacement = eligableTerritoryIndex
-            placementOrder.append(
-                (bestTerritoryPlacement,
-                 groupSize))  # Tuple: (TerritoryId, armiesToPlace)
+            placementOrder.append((bestTerritoryPlacement, groupSize))  # Tuple: (TerritoryId, armiesToPlace)
         return placementOrder
 
     def getPreferredPlacementOrder(self, map, armiesToPlace):
@@ -659,21 +632,13 @@ class Agent:
                              bestMovementAmount)
 
     def getAllValidAttacks(self, map):
-        controlledTerritoryIndices = [
-            t.index for t in map.getTerritoriesByPlayer(self.name)
-        ]
-        controlledTerritoriesThatCanAttack = [
-            t for t in controlledTerritoryIndices
-            if map.territories[t].getArmy() > 1
-        ]
+        controlledTerritoryIndices = [t.index for t in map.getTerritoriesByPlayer(self.name)]
+        controlledTerritoriesThatCanAttack = [t for t in controlledTerritoryIndices if map.territories[t].getArmy() > 1]
 
         allValidAttacks = []
 
         for sourceId in controlledTerritoriesThatCanAttack:
-            possibleTargets = [
-                i for i in map.territories[sourceId].connections
-                if i not in controlledTerritoryIndices
-            ]
+            possibleTargets = [i for i in map.territories[sourceId].connections if i not in controlledTerritoryIndices]
             for targetId in possibleTargets:
                 allValidAttacks.append((sourceId, targetId))
         return allValidAttacks
@@ -699,11 +664,9 @@ class Agent:
             territory = tmp_map.territories[attack[0]]
             enemyTerritory = tmp_map.territories[attack[1]]
 
-            attackEstimate = atkSys.getAttackEstimate(territory.getArmy(),
-                                                      enemyTerritory.getArmy())
+            attackEstimate = atkSys.getAttackEstimate(territory.getArmy(), enemyTerritory.getArmy())
 
-            if (attackEstimate.attackers > 0
-                    and attackEstimate.attackSuccessChance > 0.1):
+            if (attackEstimate.attackers > 0 and attackEstimate.attackSuccessChance > 0.1):
                 territory.setArmy(attackEstimate.attackers)
                 if (attackEstimate.defenders <= 0):
                     enemyTerritory.owner = self.name
@@ -711,9 +674,7 @@ class Agent:
             else:
                 continue
 
-            score = math.ceil(
-                self.scoreGameState(tmp_map) *
-                attackEstimate.attackSuccessChance)
+            score = math.ceil(self.scoreGameState(tmp_map) * attackEstimate.attackSuccessChance)
 
             attacks.append((score, attack))
 
@@ -734,8 +695,7 @@ class Agent:
             territory = tmp_map.territories[attack[0]]
             enemyTerritory = tmp_map.territories[attack[1]]
 
-            attackEstimate = atkSys.getAttackEstimate(territory.getArmy(),
-                                                      enemyTerritory.getArmy())
+            attackEstimate = atkSys.getAttackEstimate(territory.getArmy(), enemyTerritory.getArmy())
 
             if (attackEstimate.attackers > 0):
                 enemyTerritory.owner = self.name
@@ -745,8 +705,7 @@ class Agent:
                 continue
 
             score = math.ceil(
-                self.scoreGameState(tmp_map) *
-                attackEstimate.attackSuccessChance)
+                self.scoreGameState(tmp_map) * attackEstimate.attackSuccessChance)
             if (score > bestScore):
                 bestScore = score
                 bestAttackId = territory.index
