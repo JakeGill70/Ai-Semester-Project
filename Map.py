@@ -3,6 +3,7 @@ from Territory import Territory
 from Continent import Continent
 import math
 import copy
+import hashlib
 
 
 class Map():
@@ -24,6 +25,9 @@ class Map():
 
     def getJson(self):
         return f'{{"continents": {[c.getJson() for c in self.continents.values()]},"territories":{[t.getJson() for t in self.territories.values()]}}}'
+
+    def getHash(self):
+        return hashlib.md5(self.getJson().encode()).hexdigest()
 
     def getCopy(self):
         cpy = Map()
