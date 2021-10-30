@@ -497,8 +497,7 @@ class Agent:
             # Determine how to mutate (Single attribute vs. entire group)
             isMajorMutation = random.random() < majorMutationChance
             # Perform mutation
-            self.mutateCharacteristic(characteristicGroupName, isMajorMutation,
-                                      mutationMultiplier)
+            self.mutateCharacteristic(characteristicGroupName, isMajorMutation, mutationMultiplier)
 
     def mutateCharacteristic(self, characteristicGroupName, isMajorMutation=False, mutationMultiplier=1.0):
         if (isMajorMutation):
@@ -524,9 +523,7 @@ class Agent:
         return groupSize
 
     def getTerritoryIndicesEligableForPlacement(self, map):
-        controlledTerritoryIndices = [
-            t.index for t in map.getTerritoriesByPlayer(self.name)
-        ]
+        controlledTerritoryIndices = [t.index for t in map.getTerritoriesByPlayer(self.name)]
         eligableTerritoryIndices = set()
         for tid in controlledTerritoryIndices:
             for connectionId in map.territories[tid].connections:
@@ -536,32 +533,26 @@ class Agent:
                         eligableTerritoryIndices.add(c)  # Add connections
                     break
         # Remove territories not controlled by self
-        eligableTerritoryIndices = [
-            i for i in eligableTerritoryIndices
-            if i in controlledTerritoryIndices
-        ]
+        eligableTerritoryIndices = [i for i in eligableTerritoryIndices if i in controlledTerritoryIndices]
         return eligableTerritoryIndices
 
     def getAllValidPlacements(self, map, armiesToPlace):
         # 1 Get territories connected to enemy territories
         # 2 Get territories connected to those territories
         # 3 Use union set of both to get territories eligable for placement
-        eligableTerritoryIndices = self.getTerritoryIndicesEligableForPlacement(
-            map)
+        eligableTerritoryIndices = self.getTerritoryIndicesEligableForPlacement(map)
 
         # Limit the amount of eligable territories to 15
         # If more than 15, then pick 15 at random
         # That still gives 1,961,256 choices at 15_C_10 with replacement
         if (len(eligableTerritoryIndices) > 15):
-            eligableTerritoryIndices = random.sample(eligableTerritoryIndices,
-                                                     15)
+            eligableTerritoryIndices = random.sample(eligableTerritoryIndices, 15)
 
         # 4 Determine group size for army placement
         groupSize = self.convertArmiesToPlaceToGroupSize(armiesToPlace)
 
         # 5 Generate all combinations with replacement
-        allPlacementCombinations = set(
-            combinations_with_replacement(eligableTerritoryIndices, groupSize))
+        allPlacementCombinations = set(combinations_with_replacement(eligableTerritoryIndices, groupSize))
 
         return allPlacementCombinations
 
