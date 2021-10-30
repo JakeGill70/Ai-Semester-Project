@@ -22,6 +22,9 @@ class Map():
 
         cpy.continentCount = copy.deepcopy(self.continentCount)
 
+    def getJson(self):
+        return f'{{"continents": {[c.getJson() for c in self.continents.values()]},"territories":{[t.getJson() for t in self.territories.values()]}}}'
+
     def getCopy(self):
         cpy = Map()
 

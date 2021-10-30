@@ -13,6 +13,9 @@ class Territory():
     def __str__(self):
         return f"#{self.index}:{self.owner}:{self.army}"
 
+    def getJson(self):
+        return f'{{"index": {self.index},"connections": {self.connections},"continent": "{self.continent}","position": {self.position},"owner": "{self.owner}","army": {self.army} }}'
+
     def getCopy(self):
         return Territory(self.index, self.connections, self.continent, self.position, self.owner, self.army)
 
