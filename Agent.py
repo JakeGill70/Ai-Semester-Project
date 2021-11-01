@@ -71,6 +71,9 @@ class AgentCharacteristic:
 class Agent:
     def __init__(self, name="Unnamed Agent"):
         self.name = name
+        self.bestMovementCache = {}
+        self.allValidAttackOrdersCache = {}
+        self.scoreGameStateCache = {}
         self.characteristics = {
             "Placement": {
                 "Anywhere":AgentCharacteristic(0, "Placing a unit anywhere"),
@@ -609,6 +612,11 @@ class Agent:
         return unitsToTransfer
 
     def pickBestMovement(self, map):
+        # Check if the bestmovement has already been cached for this map/game state
+        mapHash = map.getHash()
+        if mapHash in self.bestMovementCache:
+            return self.bestMovementCache[mapHash]
+        # If not cached, continue as normal
         validMovements = self.getAllValidMovements(map)
         transferPercentages = [0.25, 0.5, 0.75, 1]
         # Assume that the best score is not moving at all until proven otherwise
@@ -628,8 +636,10 @@ class Agent:
                     bestMovementSupplyId = movement[0]
                     bestMovementTargetId = movement[1]
                     bestMovementAmount = amount
-        return MoveSelection(bestMovementSupplyId, bestMovementTargetId,
-                             bestMovementAmount)
+        # Cache best movement before continuing
+        moveSelected = MoveSelection(bestMovementSupplyId, bestMovementTargetId,bestMovementAmount)
+        self.bestMovementCache[mapHash] = moveSelected
+        return moveSelected
 
     def getAllValidAttacks(self, map):
         controlledTerritoryIndices = [t.index for t in map.getTerritoriesByPlayer(self.name)]
@@ -644,6 +654,11 @@ class Agent:
         return allValidAttacks
 
     def getAllValidAttackOrders(self, map, atkSys, maxAttacks=5):
+        # Check if a cached version exist, and return it if so
+        mapHash = map.getHash()
+        if mapHash in self.allValidAttackOrdersCache:
+            return self.allValidAttackOrdersCache[mapHash]
+        # If not cached, continue as normal
         # Don't permute all valid attacks, only permute the top 10 good ones
         #rm allValidAttacks = self.getAllValidAttacks(map)
         allGoodAttacks = self.getBestAttacksRanked(map, atkSys)[:10]
@@ -653,6 +668,8 @@ class Agent:
             attackOrderings = permutations(allGoodAttacks, i)
             for attackOrder in attackOrderings:
                 allAttackOrderings.append(attackOrder)
+        # Cache allAttackOrderings before returning
+        self.allValidAttackOrdersCache[mapHash] = allAttackOrderings
         return allAttackOrderings
 
     def getBestAttacksRanked(self, map, atkSys):
@@ -715,6 +732,12 @@ class Agent:
         return AttackSelection(bestAttackId, bestTargetId, bestEstimateResult)
 
     def scoreGameState(self, map):
+        # Return cached score of map/game state if it exists
+        mapHash = map.getHash()
+        if mapHash in self.scoreGameStateCache:
+            return self.scoreGameStateCache[mapHash]
+        
+        # If a cached version doesn't exist, then continue as normal
         armyCount = 0
         playerControlledTerritories = map.getTerritoriesByPlayer(self.name)
         territoryCount = len(playerControlledTerritories)
@@ -750,4 +773,7 @@ class Agent:
         score += remainingPlayers * self.characteristics["Consideration"]["Remaining Players"].value
         score += enemyArmyAdjacent * self.characteristics["Consideration"]["Enemy Armies Adjacent"].value
         score += enemyTerritoryAdjacent * self.characteristics["Consideration"]["Enemy Territories Adjacent"].value
+        
+        # Cache the final score before returning
+        self.scoreGameStateCache[mapHash] = score
         return score

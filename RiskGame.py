@@ -214,13 +214,11 @@ class RiskGame():
                 Logger.message(MessageTypes.AttackStopNotice, "{agents[agentIndex].name} decided to stop attacking.")
             
             # Movement
-            # FIXME: The movement is invalid because the board state changed during the attack,
+            # The movement order is invalid because the board state changed during the attack,
             # Therefore the movement shouldn't be calculated until after the attack.
             realMovementOrder = agents[agentIndex].pickBestMovement(map.getCopy())
             if (realMovementOrder.transferAmount): # Don't automatically assume the agent is moving
-                map.moveArmies(realMovementOrder.supplyIndex,
-                               realMovementOrder.receiveIndex,
-                               realMovementOrder.transferAmount)
+                map.moveArmies(realMovementOrder.supplyIndex, realMovementOrder.receiveIndex, realMovementOrder.transferAmount)
                 if (showGame):
                     Logger.message(MessageTypes.UnitMovementNotice,
                         f"{agents[agentIndex].name} moved {realMovementOrder.transferAmount} units from #{realMovementOrder.supplyIndex} to #{realMovementOrder.receiveIndex}.")
@@ -478,12 +476,16 @@ class RiskGame():
         allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, min(5000, max(500, math.ceil(len(allValidAttackOrderings)*0.25))))
         allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
         if (multiThread):
-            executor = concurrent.futures.ProcessPoolExecutor(multiprocessing.cpu_count()+1)
-            futures = [ executor.submit(RiskGame.considerAttackOrder, agents, atkSys, tmp_map, depth, agentIndex, placementOrder, x) for x in allValidAttackOrderings]
-            concurrent.futures.wait(futures)
-            listOfResults = [future.result() for future in futures]
-            for result in listOfResults:
-                results.append(result)
+            try:
+                executor = concurrent.futures.ProcessPoolExecutor(multiprocessing.cpu_count()+1)
+                futures = [ executor.submit(RiskGame.considerAttackOrder, agents, atkSys, tmp_map, depth, agentIndex, placementOrder, x) for x in allValidAttackOrderings]
+                concurrent.futures.wait(futures)
+                listOfResults = [future.result() for future in futures]
+                for result in listOfResults:
+                    results.append(result)
+            except RuntimeError:
+                # Something went wrong with the threading pool, just run it again without multi-processing
+                return RiskGame.maxPlayerMove(agents, atkSys, map, depth, agentIndex, False)
         else:            
             for validAttackOrder in allValidAttackOrderings:
                 results.append(RiskGame.considerAttackOrder(agents, atkSys, tmp_map, depth, agentIndex, placementOrder, validAttackOrder))
