@@ -757,6 +757,7 @@ class Agent:
             return
         
         self.cacheNeedsUpdating = 0
+        # TODO: Most of this shouldn't be handled in this class
         # Connect to DB
         cacheDb_conn = sqlite3.connect(connectionAddr, timeout=30)
         cacheDb_curr = cacheDb_conn.cursor()
