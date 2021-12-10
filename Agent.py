@@ -72,6 +72,7 @@ class AgentCharacteristic:
 class Agent:
     def __init__(self, name="Unnamed Agent"):
         self.name = name
+        self.cacheNeedsUpdating = 0
         self.bestMovementCache = {}
         self.allValidAttackOrdersCache = {}
         self.scoreGameStateCache = {}
@@ -738,12 +739,24 @@ class Agent:
 
         return AttackSelection(bestAttackId, bestTargetId, bestEstimateResult)
 
+    def getScoreFromCache(self, mapHash, playerHash):
+        score = None
+        try: 
+            score = self.scoreGameStateCache[mapHash]
+        except KeyError:
+            score = None
+        return score
+
+    def addScoreToCache(self, mapHash, playerHash, score):
+        self.cacheNeedsUpdating += 1
+        self.scoreGameStateCache[mapHash] = score
     def scoreGameState(self, map):
         # Return cached score of map/game state if it exists
         mapHash = map.getHash()
         playerHash = self.getHash_ConsiderationOnly()
-        if mapHash in self.scoreGameStateCache:
-            return self.scoreGameStateCache[mapHash]
+        score = self.getScoreFromCache(mapHash, playerHash)
+        if(score):
+            return score
         
         # If a cached version doesn't exist, then continue as normal
         armyCount = 0
@@ -783,5 +796,5 @@ class Agent:
         score += enemyTerritoryAdjacent * self.characteristics["Consideration"]["Enemy Territories Adjacent"].value
         
         # Cache the final score before returning
-        self.scoreGameStateCache[mapHash] = score
+        self.addScoreToCache(mapHash, playerHash, score)
         return score
