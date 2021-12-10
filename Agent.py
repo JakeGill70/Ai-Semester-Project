@@ -4,6 +4,7 @@ import random
 import copy
 import json
 from itertools import combinations_with_replacement, permutations
+import hashlib
 
 AttackSelection = namedtuple('AttackSelection',
                              'attackIndex defendIndex estimateResult')
@@ -139,6 +140,13 @@ class Agent:
         s = s[:-1]
         s += "} }"
         return s
+
+    def getHash(self):
+        return hashlib.md5(self.toJSON().encode()).hexdigest()
+
+    def getHash_ConsiderationOnly(self):
+        considerationValuesAsText = "|".join(str(c.value) for c in self.characteristics["Consideration"].values())
+        return hashlib.md5(considerationValuesAsText.encode()).hexdigest()
 
     def stats(self):
         output = ""
@@ -734,6 +742,7 @@ class Agent:
     def scoreGameState(self, map):
         # Return cached score of map/game state if it exists
         mapHash = map.getHash()
+        playerHash = self.getHash_ConsiderationOnly()
         if mapHash in self.scoreGameStateCache:
             return self.scoreGameStateCache[mapHash]
         
