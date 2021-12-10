@@ -420,8 +420,7 @@ class RiskGame():
                 if (enemyTerritory.owner == agent.name):
                     continue
 
-                attackEstimate = atkSys.getAttackEstimate(
-                    territory.getArmy(), enemyTerritory.getArmy())
+                attackEstimate = atkSys.getAttackEstimate(territory.getArmy(), enemyTerritory.getArmy())
 
                 # Capture or weaken territories
                 if (attackEstimate.defenders <= 0):

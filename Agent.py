@@ -729,8 +729,7 @@ class Agent:
             else:
                 continue
 
-            score = math.ceil(
-                self.scoreGameState(tmp_map) * attackEstimate.attackSuccessChance)
+            score = math.ceil(self.scoreGameState(tmp_map) * attackEstimate.attackSuccessChance)
             if (score > bestScore):
                 bestScore = score
                 bestAttackId = territory.index
