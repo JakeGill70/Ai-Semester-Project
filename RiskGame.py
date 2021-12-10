@@ -184,7 +184,7 @@ class RiskGame():
             # Move
             depth = 2
             startTime = datetime.datetime.now()
-            bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(agents, atkSys, map, depth, agentIndex, True)
+            bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(agents, atkSys, map, depth, agentIndex, True, 1)
             endTime = datetime.datetime.now()
             runTime = endTime - startTime
             print(runTime.total_seconds())
@@ -449,7 +449,7 @@ class RiskGame():
         return (tmp_map_final, bestMovementResult)
 
     @staticmethod
-    def maxPlayerMove(agents, atkSys, map, depth, agentIndex, multiThread=False):
+    def maxPlayerMove(agents, atkSys, map, depth, agentIndex, multiThread=False, synchronizationDepth=0):
         agentIndex = (agentIndex) % len(agents)
         bestPlayerMoves = [None] * len(agents)
         bestScores = [float('-inf')] * len(agents)
@@ -457,6 +457,9 @@ class RiskGame():
         MAX_ATTACK_COUNT = 5
         results = []
         tmp_map = map.getCopy()
+
+        if(depth == synchronizationDepth):
+            agent.synchronizeCacheDb("RiskCache.db")
 
         # If depth had gone as low as possible or the agent has no territories left,
         # then declare a leaf node.
