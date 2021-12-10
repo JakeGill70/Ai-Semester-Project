@@ -5,3 +5,4 @@ __pycache__/
 Writings/The Historical Development of Computer Chess and its Impact on AI.pdf
 Average Agents/
 TmpSpace.py
+RiskCache.db
