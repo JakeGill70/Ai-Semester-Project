@@ -5,6 +5,7 @@ import copy
 import json
 from itertools import combinations_with_replacement, permutations
 import hashlib
+import sqlite3
 
 AttackSelection = namedtuple('AttackSelection',
                              'attackIndex defendIndex estimateResult')
@@ -750,6 +751,30 @@ class Agent:
     def addScoreToCache(self, mapHash, playerHash, score):
         self.cacheNeedsUpdating += 1
         self.scoreGameStateCache[mapHash] = score
+            
+    def synchronizeCacheDb(self, connectionAddr):
+        if(self.cacheNeedsUpdating == 0):
+            return
+        
+        self.cacheNeedsUpdating = 0
+        # Connect to DB
+        cacheDb_conn = sqlite3.connect(connectionAddr, timeout=30)
+        cacheDb_curr = cacheDb_conn.cursor()
+        # Get player hash
+        playerHash = self.getHash_ConsiderationOnly()
+        # Add local cache to DB 
+        cacheList = [(mapHash, playerHash, score) for (mapHash,score) in self.scoreGameStateCache.items()]
+        cacheDb_curr.executemany("INSERT OR IGNORE INTO MapCache VALUES (?, ?, ?)", cacheList)
+        cacheDb_conn.commit()
+        # Update local cache from DB
+        cacheDb_curr.execute("SELECT mapHash, score FROM MapCache WHERE playerHash = ?", [playerHash])
+        rows = cacheDb_curr.fetchall()
+        for row in rows:
+            self.scoreGameStateCache[row[0]] = row[1]
+        # Disconnect from DB
+        cacheDb_curr.close()
+        cacheDb_conn.close()
+
     def scoreGameState(self, map):
         # Return cached score of map/game state if it exists
         mapHash = map.getHash()
