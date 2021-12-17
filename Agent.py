@@ -6,6 +6,7 @@ import json
 from itertools import combinations_with_replacement, permutations
 import hashlib
 import sqlite3
+from sqlite3.dbapi2 import OperationalError
 
 AttackSelection = namedtuple('AttackSelection',
                              'attackIndex defendIndex estimateResult')
@@ -752,29 +753,37 @@ class Agent:
         self.cacheNeedsUpdating += 1
         self.scoreGameStateCache[mapHash] = score
             
-    def synchronizeCacheDb(self, connectionAddr):
+    def synchronizeCacheDb(self, connectionAddr, attempts=3):
         if(self.cacheNeedsUpdating >= 2):
             return
         
-        self.cacheNeedsUpdating = 0
-        # TODO: Most of this shouldn't be handled in this class
-        # Connect to DB
-        cacheDb_conn = sqlite3.connect(connectionAddr, timeout=30)
-        cacheDb_curr = cacheDb_conn.cursor()
-        # Get player hash
-        playerHash = self.getHash_ConsiderationOnly()
-        # Add local cache to DB 
-        cacheList = [(mapHash, playerHash, score) for (mapHash,score) in self.scoreGameStateCache.items()]
-        cacheDb_curr.executemany("INSERT OR IGNORE INTO MapCache VALUES (?, ?, ?)", cacheList)
-        cacheDb_conn.commit()
-        # Update local cache from DB
-        cacheDb_curr.execute("SELECT mapHash, score FROM MapCache WHERE playerHash = ?", [playerHash])
-        rows = cacheDb_curr.fetchall()
-        for row in rows:
-            self.scoreGameStateCache[row[0]] = row[1]
-        # Disconnect from DB
-        cacheDb_curr.close()
-        cacheDb_conn.close()
+        for _ in range(attempts):
+            try:
+                self.cacheNeedsUpdating = 0
+                # TODO: Most of this shouldn't be handled in this class
+                # Connect to DB
+                cacheDb_conn = sqlite3.connect(connectionAddr, timeout=90)
+                cacheDb_curr = cacheDb_conn.cursor()
+                # Get player hash
+                playerHash = self.getHash_ConsiderationOnly()
+                # Add local cache to DB 
+                cacheList = [(mapHash, playerHash, score) for (mapHash,score) in self.scoreGameStateCache.items()]
+                cacheDb_curr.executemany("INSERT OR IGNORE INTO MapCache VALUES (?, ?, ?)", cacheList)
+                cacheDb_conn.commit()
+                # Update local cache from DB
+                cacheDb_curr.execute("SELECT mapHash, score FROM MapCache WHERE playerHash = ?", [playerHash])
+                rows = cacheDb_curr.fetchall()
+                for row in rows:
+                    self.scoreGameStateCache[row[0]] = row[1]
+                # Disconnect from DB
+                cacheDb_curr.close()
+                cacheDb_conn.close()
+                # Exit the loop
+                break
+            except OperationalError:
+                # If error occurs with database, try again
+                pass
+        # If database error on all attempts, then just don't synchronize to DB
 
     def scoreGameState(self, map):
         # Return cached score of map/game state if it exists
