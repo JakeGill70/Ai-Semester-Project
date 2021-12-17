@@ -753,7 +753,7 @@ class Agent:
         self.scoreGameStateCache[mapHash] = score
             
     def synchronizeCacheDb(self, connectionAddr):
-        if(self.cacheNeedsUpdating == 0):
+        if(self.cacheNeedsUpdating >= 2):
             return
         
         self.cacheNeedsUpdating = 0
