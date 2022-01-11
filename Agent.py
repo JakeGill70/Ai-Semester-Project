@@ -754,12 +754,11 @@ class Agent:
         self.scoreGameStateCache[mapHash] = score
             
     def synchronizeCacheDb(self, connectionAddr, attempts=3):
-        if(self.cacheNeedsUpdating >= 2):
+        if(self.cacheNeedsUpdating >= 3):
             return
         
         for _ in range(attempts):
             try:
-                self.cacheNeedsUpdating = 0
                 # TODO: Most of this shouldn't be handled in this class
                 # Connect to DB
                 cacheDb_conn = sqlite3.connect(connectionAddr, timeout=90)
@@ -778,6 +777,8 @@ class Agent:
                 # Disconnect from DB
                 cacheDb_curr.close()
                 cacheDb_conn.close()
+                # Reset flag
+                self.cacheNeedsUpdating = 0
                 # Exit the loop
                 break
             except OperationalError:
