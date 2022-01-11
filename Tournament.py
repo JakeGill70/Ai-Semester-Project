@@ -13,6 +13,7 @@ from Logger import Logger, MessageTypes
 from AgentReader import AgentReader
 from RiskGame import RiskGame
 import sqlite3
+import sys
 
 
 class Tournament():
@@ -173,11 +174,24 @@ class Tournament():
             generalPopulation.generateNextGeneration(mutationMultiplier)
 
             # Empty cache
-            # TODO: This really shouldn't be handled in this class
             if(generationCount % 10 == 0):
+                clearCache(3)
+            
+
+    @staticmethod
+    def clearCache(attempts=3):
+        # TODO: This really shouldn't be handled in this class
+        for a in range(attempts):
+            try:
                 cacheDb_conn = sqlite3.connect("RiskCache.db", timeout=90)
                 cacheDb_curr = cacheDb_conn.cursor()
                 cacheDb_curr.execute("DELETE FROM MapCache")
                 cacheDb_conn.commit()
                 cacheDb_curr.close()
                 cacheDb_conn.close()
+                return
+            except:
+                print(f"Failed to clear cache DB - Attempt {a}", file=sys.stderr)
+                continue
+        print("Failed to clear cache.", file=sys.stderr)
+        
