@@ -175,7 +175,7 @@ class Tournament():
 
             # Empty cache
             if(generationCount % 10 == 0):
-                clearCache(3)
+                Tournament.clearCache(3)
             
 
     @staticmethod
