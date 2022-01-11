@@ -761,7 +761,7 @@ class Agent:
             try:
                 # TODO: Most of this shouldn't be handled in this class
                 # Connect to DB
-                cacheDb_conn = sqlite3.connect(connectionAddr, timeout=90)
+                cacheDb_conn = sqlite3.connect(connectionAddr, timeout=30)
                 cacheDb_curr = cacheDb_conn.cursor()
                 # Get player hash
                 playerHash = self.getHash_ConsiderationOnly()
