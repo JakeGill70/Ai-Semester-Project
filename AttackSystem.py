@@ -4,9 +4,9 @@ import time
 import math
 from collections import namedtuple
 
-
 AttackResult = namedtuple('AttackResult', 'attackers defenders')
-AttackEstimateResult = namedtuple('AttackEstimateResult', 'attackers defenders attackSuccessChance')
+AttackEstimateResult = namedtuple('AttackEstimateResult',
+                                  'attackers defenders attackSuccessChance')
 
 
 class AttackSystem:
@@ -74,21 +74,28 @@ class AttackSystem:
         self.knownAttackSuccessEstimates = data
 
     def getAttackEstimate(self, attackCount, defendCount):
-        if(attackCount < 1 or defendCount < 1):
-            raise Exception(f"Error: attackCount/defendCount is is not valid: {attackCount},{defendCount}")
+        attackCount = int(attackCount)
+        defendCount = int(defendCount)
+        if (attackCount < 1 or defendCount < 1):
+            raise Exception(
+                f"Error: attackCount/defendCount is is not valid: {attackCount},{defendCount}"
+            )
 
         originalAttackCount = attackCount
         originalDefendCount = defendCount
         estimateSuccess = 0
         # Get the estimate if it exist
         if (attackCount < 30 and defendCount < 30):
-            estimateSuccess = self.knownAttackSuccessEstimates[defendCount][attackCount]
-            estimateAttackRemaining = self.knownAttackRemainingEstimates[defendCount][attackCount]
-            estimateDefendRemaining = self.knownDefendRemainingEstimates[defendCount][attackCount]
+            estimateSuccess = self.knownAttackSuccessEstimates[defendCount][
+                attackCount]
+            estimateAttackRemaining = self.knownAttackRemainingEstimates[
+                defendCount][attackCount]
+            estimateDefendRemaining = self.knownDefendRemainingEstimates[
+                defendCount][attackCount]
         else:
             # Determine a proportional estimate
             reducedEstimateFound = False
-            while(not reducedEstimateFound):
+            while (not reducedEstimateFound):
                 # Consider the ratio of attackingCount to defendCount
                 x = Fraction(attackCount, defendCount)
                 # Use the reduced fraction of that ratio
@@ -96,40 +103,43 @@ class AttackSystem:
                 defendCount = x.denominator
                 # If that reduced ratio exist, then use that to make an estimate
                 if (x.numerator < 30 and x.denominator < 30):
-                    estimateSuccess = self.knownAttackSuccessEstimates[defendCount][attackCount]
+                    estimateSuccess = self.knownAttackSuccessEstimates[
+                        defendCount][attackCount]
                     estimateAttackRemaining = math.floor(
-                        (self.knownAttackRemainingEstimates[defendCount][attackCount] / attackCount) *
-                        originalAttackCount)
+                        (self.knownAttackRemainingEstimates[defendCount]
+                         [attackCount] / attackCount) * originalAttackCount)
                     estimateDefendRemaining = math.floor(
-                        (self.knownDefendRemainingEstimates[defendCount][attackCount] / defendCount) *
-                        originalDefendCount)
+                        (self.knownDefendRemainingEstimates[defendCount]
+                         [attackCount] / defendCount) * originalDefendCount)
                     reducedEstimateFound = True
                 else:
                     # If the reduced ratio doesn't exist, then subtract 1 from both
                     attackCount -= 1
                     defendCount -= 1
                 # If the attacker runs out of units first, then assume that the attack has a 100% failure rate
-                if(attackCount == 0):
+                if (attackCount == 0):
                     estimateSuccess = 0
                     estimateAttackRemaining = 0
                     estimateDefendRemaining = defendCount
                     reducedEstimateFound = True
-          # If defender runs out of units first, then assume that the attack has a 100% success rate
-                if(defendCount == 0):
+        # If defender runs out of units first, then assume that the attack has a 100% success rate
+                if (defendCount == 0):
                     estimateSuccess = 1
                     estimateAttackRemaining = attackCount
                     estimateDefendRemaining = 0
                     reducedEstimateFound = True
 
-        return AttackEstimateResult(estimateAttackRemaining, estimateDefendRemaining, estimateSuccess)
+        return AttackEstimateResult(estimateAttackRemaining,
+                                    estimateDefendRemaining, estimateSuccess)
 
     def attack(self, attackCount, defendCount, maxAttackLoses):
         isAttackOver = False
-        while(not isAttackOver):
+        while (not isAttackOver):
             result = self.battle(attackCount, defendCount)
             attackCount = result[0]
             defendCount = result[1]
-            if(attackCount == 0 or defendCount == 0 or attackCount <= maxAttackLoses):
+            if (attackCount == 0 or defendCount == 0
+                    or attackCount <= maxAttackLoses):
                 isAttackOver = True
         return AttackResult(attackCount, defendCount)
 
@@ -142,10 +152,10 @@ class AttackSystem:
         attackRolls.sort()
         defendRolls.sort()
 
-        while(len(defendRolls) > 0 and len(attackRolls) > 0):
+        while (len(defendRolls) > 0 and len(attackRolls) > 0):
             attackValue = attackRolls.pop()
             defendValue = defendRolls.pop()
-            if(attackValue <= defendValue):
+            if (attackValue <= defendValue):
                 attackCount -= 1
             else:
                 defendCount -= 1
@@ -157,11 +167,11 @@ class AttackSystem:
 
     def getDiceRolls(self, amount):
         rolls = []
-        if(amount >= 1):
+        if (amount >= 1):
             rolls.append(self.rollDice())
-        if(amount >= 2):
+        if (amount >= 2):
             rolls.append(self.rollDice())
-        if(amount >= 3):
+        if (amount >= 3):
             rolls.append(self.rollDice())
         return rolls
 

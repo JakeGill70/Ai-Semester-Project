@@ -3,6 +3,7 @@ from Territory import Territory
 from Continent import Continent
 import math
 import copy
+import hashlib
 
 
 class Map():
@@ -10,6 +11,7 @@ class Map():
         super().__init__()
         self.territories = {}
         self.continents = {}
+        self.territoryContinentCache = None
 
     def __deepcopy__(self):
         cpy = Map()
@@ -21,14 +23,20 @@ class Map():
 
         cpy.continentCount = copy.deepcopy(self.continentCount)
 
+    def getJson(self):
+        return f'{{"continents": {[c.getJson() for c in self.continents.values()]},"territories":{[t.getJson() for t in self.territories.values()]}}}'
+
+    def getHash(self):
+        return hashlib.md5(self.getJson().encode()).hexdigest()
+
     def getCopy(self):
         cpy = Map()
 
         for tk in self.territories.keys():
             cpy.territories[tk] = self.territories[tk].getCopy()
 
-        for ck in self.continents.keys():
-            cpy.continents[ck] = self.continents[ck]
+        cpy.continents = self.continents
+        cpy.territoryContinentCache = self.territoryContinentCache
 
         return cpy
 
@@ -42,7 +50,8 @@ class Map():
         return positions
 
     def getTotalArmiesByPlayer(self, playerName):
-        return sum([x.getArmy() for x in self.getTerritoriesByPlayer(playerName)])
+        return sum(
+            [x.getArmy() for x in self.getTerritoriesByPlayer(playerName)])
 
     def getTerritoriesByPlayer(self, playerName):
         return [x for x in self.territories.values() if x.owner == playerName]
@@ -57,30 +66,46 @@ class Map():
     def getPlayerTerritories(self):
         players = {}
         for territoryIndex, territoryData in self.territories.items():
-            if(territoryData.owner not in players):
+            if (territoryData.owner not in players):
                 players[territoryData.owner] = []
             players[territoryData.owner].append(territoryIndex)
         return players
 
+    def getPlayerCount(self):
+        return len(
+            set([
+                territoryData.owner
+                for territoryData in self.territories.values()
+            ]))
+
     def placeArmy(self, playerName, amount, territoryId):
-        if(territoryId < 0 or territoryId > len(self.territories)):
-            raise Exception(f"The territory id {territoryId} is not a valid id.")
+        if (territoryId < 0 or territoryId > len(self.territories)):
+            raise Exception(
+                f"The territory id {territoryId} is not a valid id.")
         territory = self.territories[territoryId]
-        if(territory.owner and territory.owner != playerName):
+        if (territory.owner and territory.owner != playerName):
             raise Exception(f"Player '{playerName}' is \
                         trying to place {amount} armies \
                         at {territoryId} controlled by \
-                        {self.owners[territoryId]}")
+                        {territory.owner}")
         else:
             territory.addArmy(amount)
             territory.owner = playerName
+
+    def getCountOfContinentsControlledByPlayer(self, playerName):
+        continentCount = 0
+        for continent in self.continents.values():
+            continentCount += 1 if self.isContinentControlledByPlayer(continent.name, playerName) else 0
+        return continentCount
+
+    def isContinentControlledByPlayer(self, continentName, playerName):
+        return all(x.owner == playerName for x in self.getTerritoriesByContinent(continentName))
 
     def getContinentBonus(self, playerName):
         unitCount = 0
 
         for continent in self.continents.values():
-            unitCount += continent.unitBonus if all(x.owner == playerName
-                                                    for x in self.getTerritoriesByContinent(continent.name)) else 0
+            unitCount += continent.unitBonus if self.isContinentControlledByPlayer(continent.name, playerName) else 0
 
         return unitCount
 
@@ -97,7 +122,14 @@ class Map():
         return unitCount
 
     def getTerritoriesByContinent(self, continentName):
-        return [x for x in self.territories.values() if x.continent == continentName]
+        if (self.territoryContinentCache == None):
+            self.territoryContinentCache = {}
+            for continent in self.continents.values():
+                self.territoryContinentCache[continent.name] = []
+            for territory in self.territories.values():
+                self.territoryContinentCache[territory.continent].append(
+                    territory)
+        return self.territoryContinentCache[continentName]
 
     def moveArmies(self, supplyIndex, receiveIndex, amount):
         self.territories[supplyIndex].addArmy(-amount)
