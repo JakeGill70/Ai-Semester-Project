@@ -6,19 +6,12 @@ import math
 import time
 from collections import deque
 from Interpolation import Interpolation
+from GameGraphics import GameGraphics
 
 
-class Game():
+class Game(GameGraphics):
     def __init__(self):
-        self.width = 800
-        self.height = 600
-        self.font = None
-
-    def drawCircle(self, screen, color, x, y, radius=20):
-        pygame.draw.circle(screen, color, (x, y), radius)
-
-    def drawLine(self, screen, color, posA, posB, width=3):
-        pygame.draw.line(screen, color, posA, posB, width)
+        GameGraphics.__init__(self)
 
     def drawLine_blended(self, screen, colorA, colorB, posA, posB, interpolationSteps=10, thickness=2):
         for x in range(1, interpolationSteps):
@@ -67,15 +60,11 @@ class Game():
 
         pygame.display.update()
 
-    def showWindow(self, map, autoCloseTimer=None, windowName="RISK"):
-
+    def showWindow(self, map, windowName="RISK", autoCloseTimer=None):
         screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption(windowName)
 
-        if(not self.font):
-            pygame.font.init()  # you have to call this at the start,
-            # if you want to use this module.
-            self.font = pygame.font.SysFont('monospace', 14)
+        self.initializeFont()
 
         self.drawMap(screen, map)
 
