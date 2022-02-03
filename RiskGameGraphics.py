@@ -9,7 +9,7 @@ from Interpolation import Interpolation
 from GameGraphics import GameGraphics
 
 
-class Game(GameGraphics):
+class RiskGameGraphics(GameGraphics):
     def __init__(self):
         GameGraphics.__init__(self)
 
@@ -61,6 +61,7 @@ class Game(GameGraphics):
         pygame.display.update()
 
     def showWindow(self, map, windowName="RISK", autoCloseTimer=None):
+        return None #TODO: Delete this line - just allows for faster runtimes/debugging because no graphics rendering
         screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption(windowName)
 

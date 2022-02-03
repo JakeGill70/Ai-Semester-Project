@@ -1,6 +1,7 @@
 from Map import Map
 import random
-from Game import Game
+from RiskGameGraphics import RiskGameGraphics
+from StrategyGame import StrategyGame
 from Territory import Territory
 from Agent import Agent
 from AttackSystem import AttackSystem
@@ -20,9 +21,8 @@ import sys
 PlayerMove = namedtuple('PlayerMove', 'placementOrder attackOrder movement')
 
 
-class RiskGame():
-    @staticmethod
-    def setupGameBoard(agentList, initialUnits, map):
+class RiskGame(StrategyGame):
+    def setupGameBoard(self, agentList, initialUnits, map):
         agentListSize = len(agentList)
         initialUnits *= agentListSize
         agentIndex = 0
@@ -40,8 +40,7 @@ class RiskGame():
             agentIndex += 1
             agentIndex = agentIndex % agentListSize
 
-    @staticmethod
-    def attackUntilUnfavorable(agent, map, atkSys, showGame=True):
+    def attackUntilUnfavorable(self, agent, map, atkSys, showGame=True):
         while (True):
             pickTerritoryResult = agent.pickTerritoryForAttack(map, atkSys)
             attackResult = agent.attackTerritory(pickTerritoryResult, map, atkSys)
@@ -54,8 +53,7 @@ class RiskGame():
                     Logger.message(MessageTypes.AttackStopNotice, "{agent.name} decided to stop attacking.")
                     break
 
-    @staticmethod
-    def getLosingPlayers(agents, currentAgentTurn, map, game, showGame=True):
+    def getLosingPlayers(self, agents, currentAgentTurn, map, game, showGame=True):
         agentsToRemove = []
         for agent in agents:
             if (len(map.getTerritoriesByPlayer(agent.name)) == 0):
@@ -70,8 +68,7 @@ class RiskGame():
                     ))
         return agentsToRemove
 
-    @staticmethod
-    def getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame=True):
+    def getWinningPlayers(self, agents, map, turnCount, maxTurnCount, showGame=True):
         winners = []
         losers = []
         # Only 1 winner left, so they must be it
@@ -134,9 +131,8 @@ class RiskGame():
 
         return (winners, losers)
 
-    @staticmethod
-    def playGameMax(agents, map, showGame=True, windowName="RISK"):
-        game = Game()
+    def playGameMax(self, agents, map, showGame=True, windowName="RISK"):
+        game = RiskGameGraphics()
         map = map.getCopy()
         atkSys = AttackSystem()
         winners = []
@@ -153,7 +149,7 @@ class RiskGame():
             return ([], [])
 
         # Place initial armies on map
-        RiskGame.setupGameBoard(agents, 30, map)
+        self.setupGameBoard(agents, 30, map)
 
         # Initial game message
         if (showGame):
@@ -184,7 +180,7 @@ class RiskGame():
             # Move
             depth = 2
             startTime = datetime.datetime.now()
-            bestScores, bestPlayerMoves = RiskGame.maxPlayerMove(agents, atkSys, map, depth, agentIndex, True, 1)
+            bestScores, bestPlayerMoves = self.maxPlayerMove(agents, atkSys, map, depth, agentIndex, True, 1)
             endTime = datetime.datetime.now()
             runTime = endTime - startTime
             print(runTime.total_seconds())
@@ -228,7 +224,7 @@ class RiskGame():
                 game.showWindow(map, 0.01, tmpWindowName)
 
             # Remove defeated players
-            agentsToRemove = RiskGame.getLosingPlayers(agents, agents[agentIndex], map, game, showGame)
+            agentsToRemove = self.getLosingPlayers(agents, agents[agentIndex], map, game, showGame)
 
             for agent in agentsToRemove:
                 # TODO: Remove that player agent's remaining turns
@@ -237,12 +233,12 @@ class RiskGame():
                 agents.remove(agent)
 
             # Check for winners
-            gameWinners, gameLosers = RiskGame.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
+            gameWinners, gameLosers = self.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
             winners += gameWinners
             losers += gameLosers
 
         # Check for winners
-        gameWinners, gameLosers = RiskGame.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
+        gameWinners, gameLosers = self.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
         winners += gameWinners
         losers += gameLosers
 
@@ -256,9 +252,8 @@ class RiskGame():
 
         return (winners, losers, turnCount)
 
-    @staticmethod
-    def playGame(agents, map, showGame=True, windowName="RISK"):
-        game = Game()
+    def playGame(self, agents, map, showGame=True, windowName="RISK"):
+        game = RiskGameGraphics()
         map = map.getCopy()
         atkSys = AttackSystem()
         winners = []
@@ -275,7 +270,7 @@ class RiskGame():
             return ([], [])
 
         # Place initial armies on map
-        RiskGame.setupGameBoard(agents, 30, map)
+        self.setupGameBoard(agents, 30, map)
 
         # Initial game message
         if (showGame):
@@ -311,7 +306,7 @@ class RiskGame():
                     )
 
             # Attack
-            RiskGame.attackUntilUnfavorable(agents[agentIndex], map, atkSys,
+            self.attackUntilUnfavorable(agents[agentIndex], map, atkSys,
                                             showGame)
 
             # Move
@@ -331,7 +326,7 @@ class RiskGame():
                 game.showWindow(map, 0.01, tmpWindowName)
 
             # Remove defeated players
-            agentsToRemove = RiskGame.getLosingPlayers(agents,
+            agentsToRemove = self.getLosingPlayers(agents,
                                                        agents[agentIndex], map,
                                                        game, showGame)
 
@@ -342,13 +337,12 @@ class RiskGame():
                 agents.remove(agent)
 
             # Check for winners
-            gameWinners, gameLosers = RiskGame.getWinningPlayers(
-                agents, map, turnCount, maxTurnCount, showGame)
+            gameWinners, gameLosers = self.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
             winners += gameWinners
             losers += gameLosers
 
         # Check for winners
-        gameWinners, gameLosers = RiskGame.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
+        gameWinners, gameLosers = self.getWinningPlayers(agents, map, turnCount, maxTurnCount, showGame)
         winners += gameWinners
         losers += gameLosers
 
@@ -362,27 +356,24 @@ class RiskGame():
 
         return (winners, losers, turnCount)
 
-    @staticmethod
-    def downSampleList(myList, maxSampleSize):
+    def downSampleList(self, myList, maxSampleSize):
         if (len(myList) > maxSampleSize):
             myList = random.sample(myList, maxSampleSize)
         return myList
 
-    @staticmethod
-    def considerAttackOrder(agents, atkSys, map, depth, agentIndex, placementOrder, attackOrder):
+    def considerAttackOrder(self, agents, atkSys, map, depth, agentIndex, placementOrder, attackOrder):
         agent = agents[agentIndex]
 
         tmp_map_attack = map.getCopy()
         # This LOC below was written after removing the line below
-        tmp_map_final = RiskGame.processAttackOrder(tmp_map_attack, atkSys, agent, attackOrder)
+        tmp_map_final = self.processAttackOrder(tmp_map_attack, atkSys, agent, attackOrder)
         #rm tmp_map_final, bestMovementResult = RiskGame.processAttackAndMovementOrder(tmp_map_attack, atkSys, agent, attackOrder)
         
         # Map Scoring
-        tmpScores, _ = RiskGame.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
+        tmpScores, _ = self.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
         return (tmpScores[agentIndex], PlayerMove(placementOrder, attackOrder, None))
 
-    @staticmethod
-    def considerPlacement(agents, atkSys, map, depth, agentIndex, validPlacement, availableArmies):
+    def considerPlacement(self, agents, atkSys, map, depth, agentIndex, validPlacement, availableArmies):
         agent = agents[agentIndex]
         MAX_ATTACK_COUNT = 5
         results = []
@@ -393,20 +384,19 @@ class RiskGame():
         # Attack Phase
         allValidAttackOrderings = agent.getAllValidAttackOrders(tmp_map_placement, atkSys, MAX_ATTACK_COUNT)
         # Get random sample of 100 possible attacks
-        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, 500)
+        allValidAttackOrderings = self.downSampleList( allValidAttackOrderings, 500)
         allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
         for validAttackOrder in allValidAttackOrderings:
             tmp_map_attack = tmp_map_placement.getCopy()
-            tmp_map_final, bestMovementResult = RiskGame.processAttackAndMovementOrder(tmp_map_attack, atkSys, agent, validAttackOrder)
+            tmp_map_final, bestMovementResult = self.processAttackAndMovementOrder(tmp_map_attack, atkSys, agent, validAttackOrder)
             
             # Map Scoring
-            tmpScores, _ = RiskGame.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
+            tmpScores, _ = self.maxPlayerMove(agents, atkSys, tmp_map_final, depth - 1, agentIndex + 1)
             results.append((tmpScores[agentIndex], PlayerMove( validPlacement, validAttackOrder, bestMovementResult)))
 
         return results
 
-    @staticmethod
-    def processAttackOrder(map, atkSys, agent, validAttackOrder):
+    def processAttackOrder(self, map, atkSys, agent, validAttackOrder):
         # Always keep not attacking an option
         if (validAttackOrder != None):
             # Simulate each attack in the attack order
@@ -431,25 +421,22 @@ class RiskGame():
                     enemyTerritory.setArmy(attackEstimate.defenders)
         return map
 
-    @staticmethod
-    def processMovementOrder(map, bestMovementResult):
+    def processMovementOrder(self, map, bestMovementResult):
         if (bestMovementResult.transferAmount != None):
             map.moveArmies(bestMovementResult.supplyIndex, bestMovementResult.receiveIndex, bestMovementResult.transferAmount)
         return map
 
-    @ staticmethod
-    def processAttackAndMovementOrder(map, atkSys, agent, validAttackOrder):
-        tmp_map_movement = RiskGame.processAttackOrder(map, atkSys, agent, validAttackOrder)
+    def processAttackAndMovementOrder(self, map, atkSys, agent, validAttackOrder):
+        tmp_map_movement = self.processAttackOrder(map, atkSys, agent, validAttackOrder)
         # Movement Phase
         # A player can only move once person, so whatever is best once is best overall.
         # Pick best movement already considers different amounts of armies to move (25%, 50%, 75%, 100%),
         # therefore calling pickBestMovement() with the current map will always provide the best movement.
         bestMovementResult = agent.pickBestMovement(tmp_map_movement)
-        tmp_map_final = RiskGame.processMovementOrder(tmp_map_movement, bestMovementResult)
+        tmp_map_final = self.processMovementOrder(tmp_map_movement, bestMovementResult)
         return (tmp_map_final, bestMovementResult)
 
-    @staticmethod
-    def maxPlayerMove(agents, atkSys, map, depth, agentIndex, multiThread=False, synchronizationDepth=0):
+    def maxPlayerMove(self, agents, atkSys, map, depth, agentIndex, multiThread=False, synchronizationDepth=0):
         agentIndex = (agentIndex) % len(agents)
         bestPlayerMoves = [None] * len(agents)
         bestScores = [float('-inf')] * len(agents)
@@ -475,22 +462,22 @@ class RiskGame():
         # Attack Phase
         allValidAttackOrderings = agent.getAllValidAttackOrders(tmp_map, atkSys, MAX_ATTACK_COUNT)
         # Get random sample of 100 possible attacks
-        allValidAttackOrderings = RiskGame.downSampleList( allValidAttackOrderings, min(5000, max(500, math.ceil(len(allValidAttackOrderings)*0.25))))
+        allValidAttackOrderings = self.downSampleList( allValidAttackOrderings, min(5000, max(500, math.ceil(len(allValidAttackOrderings)*0.25))))
         allValidAttackOrderings.append(None)  # Allow not attacking as a valid option
         if (multiThread):
             try:
                 executor = concurrent.futures.ProcessPoolExecutor(multiprocessing.cpu_count()+1)
-                futures = [ executor.submit(RiskGame.considerAttackOrder, agents, atkSys, tmp_map, depth, agentIndex, placementOrder, x) for x in allValidAttackOrderings]
+                futures = [ executor.submit(self.considerAttackOrder, agents, atkSys, tmp_map, depth, agentIndex, placementOrder, x) for x in allValidAttackOrderings]
                 concurrent.futures.wait(futures)
                 listOfResults = [future.result() for future in futures]
                 for result in listOfResults:
                     results.append(result)
             except RuntimeError:
                 # Something went wrong with the threading pool, just run it again without multi-processing
-                return RiskGame.maxPlayerMove(agents, atkSys, map, depth, agentIndex, False)
+                return self.maxPlayerMove(agents, atkSys, map, depth, agentIndex, False)
         else:            
             for validAttackOrder in allValidAttackOrderings:
-                results.append(RiskGame.considerAttackOrder(agents, atkSys, tmp_map, depth, agentIndex, placementOrder, validAttackOrder))
+                results.append(self.considerAttackOrder(agents, atkSys, tmp_map, depth, agentIndex, placementOrder, validAttackOrder))
 
         results.sort(key=lambda y: y[0],reverse=True)
         bestResults = results[0] # Get tuple from list

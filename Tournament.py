@@ -1,6 +1,6 @@
 from Map import Map
 import random
-from Game import Game
+from RiskGameGraphics import RiskGameGraphics
 from Territory import Territory
 from Agent import Agent
 from AttackSystem import AttackSystem
@@ -36,7 +36,8 @@ class Tournament():
                 m += 1
                 Logger.message(MessageTypes.MatchStartNotice, f"Gen {generationCount}, Tier {t}, Match {m}")
                 windowName = f"RISK: Gen {generationCount}, Tier {t}, Match {m}"
-                matchWinners, matchLosers, turnCount = RiskGame.playGame(match, map, True, windowName)
+                riskGame = RiskGame()
+                matchWinners, matchLosers, turnCount = riskGame.playGame(match, map, True, windowName)
                 winnerList += matchWinners
                 loserList += matchLosers
                 turnCountList.append(turnCount)
@@ -74,7 +75,8 @@ class Tournament():
                 m += 1
                 Logger.message(MessageTypes.MatchStartNotice, f"Gen {generationCount}, Tier {t}, Match {m}")
                 windowName = f"RISK: Gen {generationCount}, Tier {t}, Match {m}"
-                matchWinners, matchLosers, turnCount = RiskGame.playGameMax(match, map, True, windowName)
+                riskGame = RiskGame()
+                matchWinners, matchLosers, turnCount = riskGame.playGameMax(match, map, True, windowName)
                 winnerList += matchWinners
                 loserList += matchLosers
                 turnCountList.append(turnCount)

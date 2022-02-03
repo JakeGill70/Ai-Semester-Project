@@ -32,13 +32,14 @@ if __name__ == '__main__':
                                            TURN_COUNT_FILE_NAME)
 
     elif (EXAMPLE == 2):
-        RiskGame.playGame(AgentReader.readSampleAgents(), map.getCopy())
+        riskGame = RiskGame()
+        riskGame.playGame(AgentReader.readSampleAgents(), map.getCopy())
 
     elif (EXAMPLE == 3):
         winCounts = {"Jacob": 0, "Sabrina": 0, "Jamey": 0, "Rusty": 0}
         for i in range(100):
-            winners, losers, turnCount = RiskGame.playGame(
-                AgentReader.readSampleAgents(), map.getCopy())
+            riskGame = RiskGame()
+            winners, losers, turnCount = riskGame.playGame(AgentReader.readSampleAgents(), map.getCopy())
             for winner in winners:
                 winCounts[winner.name] += 1
 
@@ -46,7 +47,8 @@ if __name__ == '__main__':
             print(f"{player}'s Wins: {winCounts[player]}")
 
     elif (EXAMPLE == 4):
-        RiskGame.playGameMax(AgentReader.readSampleAgents(), map.getCopy())
+        riskGame = RiskGame()
+        riskGame.playGameMax(AgentReader.readSampleAgents(), map.getCopy())
 
     elif (EXAMPLE == 5):
         Tournament.playMultipleTournamentsMax(map.getCopy(), POPULATION_SIZE,
