@@ -2,7 +2,7 @@ from Map import Map
 import random
 from RiskGameGraphics import RiskGameGraphics
 from Territory import Territory
-from Agent import Agent
+from RiskAgent import RiskAgent
 from AttackSystem import AttackSystem
 from Population import Population
 from MapReader import MapReader

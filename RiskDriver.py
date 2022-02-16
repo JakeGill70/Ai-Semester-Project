@@ -1,6 +1,6 @@
 from Map import Map
 from MapReader import MapReader
-from Agent import Agent
+from RiskAgent import RiskAgent
 from AgentReader import AgentReader
 from Logger import Logger, MessageTypes
 from Tournament import Tournament
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     from os import environ
     environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
-    EXAMPLE = 5
+    EXAMPLE = 1
 
     GENERATION_COUNT = 1500
     POPULATION_SIZE = 256

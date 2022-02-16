@@ -3,7 +3,7 @@ import random
 from RiskGameGraphics import RiskGameGraphics
 from StrategyGame import StrategyGame
 from Territory import Territory
-from Agent import Agent
+from RiskAgent import RiskAgent
 from AttackSystem import AttackSystem
 from Population import Population
 from MapReader import MapReader
@@ -40,10 +40,10 @@ class RiskGame(StrategyGame):
             agentIndex += 1
             agentIndex = agentIndex % agentListSize
 
-    def attackUntilUnfavorable(self, agent, map, atkSys, showGame=True):
+    def attackUntilUnfavorable(self, agent:RiskAgent, map, atkSys, showGame=True):
         while (True):
             pickTerritoryResult = agent.pickTerritoryForAttack(map, atkSys)
-            attackResult = agent.attackTerritory(pickTerritoryResult, map, atkSys)
+            attackResult = agent.attackTerritory(pickTerritoryResult.attackIndex, pickTerritoryResult.defendIndex, map, atkSys)
             if (showGame):
                 if (attackResult):
                     Logger.message(
@@ -110,6 +110,7 @@ class RiskGame(StrategyGame):
                         == map.getTotalArmiesByPlayer(agents[0].name)
                     ]
                     # Return all winners that are tied
+                    #TODO: Add another tie-breaking layer, determine winner by who will gain the most armies at the start of their next turn.
                     winners = agents
                 else:
                     # There is not still a tie

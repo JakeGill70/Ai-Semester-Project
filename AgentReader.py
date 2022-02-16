@@ -1,8 +1,8 @@
 import sys
 import json
 import os.path
-from Agent import Agent
-from Agent import AgentCharacteristic
+from RiskAgent import RiskAgent
+from RiskAgent import AgentCharacteristic
 
 
 class AgentReader():
@@ -19,7 +19,7 @@ class AgentReader():
         data = json.loads(rawData)
         # f.close()
 
-        agent = Agent()
+        agent = RiskAgent()
 
         agent.name = data["name"]
         agentCharacteristicCategories = data["characteristics"].keys()

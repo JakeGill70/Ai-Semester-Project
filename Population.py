@@ -1,5 +1,5 @@
 import random
-from Agent import Agent
+from RiskAgent import RiskAgent
 import math
 import copy
 
@@ -26,7 +26,7 @@ class Population:
         for i in range(self.popSize):
             name = self.getNameSymbols()
             name = name + "+" + name
-            agent = Agent(name)
+            agent = RiskAgent(name)
             for _ in range(initialMutations):
                 for characteristicGroupName in agent.characteristics.keys():
                     agent.mutateCharacteristic(characteristicGroupName, True, mutationMultiplier)
@@ -58,7 +58,7 @@ class Population:
 
     def getAverageAgent(self, name="Average Agent"):
         # Creates a new agent with characteristics set to the average characteristic value of the population
-        avgAgent = Agent(name)
+        avgAgent = RiskAgent(name)
         # Reset avgAgent's values back to zero
         for categoryName, characteristicCategory in avgAgent.characteristics.items():
             for characteristicName, characteristic in avgAgent.characteristics[categoryName].items():

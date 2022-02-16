@@ -1,6 +1,6 @@
 import os
-from Agent import Agent
-from Agent import AgentCharacteristic
+from RiskAgent import RiskAgent
+from RiskAgent import AgentCharacteristic
 from AgentReader import AgentReader
 import matplotlib.pyplot as plt
 import math
