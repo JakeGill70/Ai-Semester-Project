@@ -1,8 +1,10 @@
 import math
 import random
 
+from IHashable import IHashable
 
-class AgentCharacteristic:
+
+class AgentCharacteristic(IHashable):
     def __init__(self,
                  value,
                  description,
@@ -22,7 +24,7 @@ class AgentCharacteristic:
         cpy = AgentCharacteristic(self.value, self.description, self.adjustmentAmt, self.lowerLimit, self.upperLimit)
         return cpy
 
-    def toJSON(self):
+    def getJSON(self):
         return f"{{\"value\" : {self.value}, \"adjustmentAmount\" : {self.adjustmentAmt}, \"lowerLimit\" : {self.lowerLimit}, \"upperLimit\" : {self.upperLimit}, \"description\" : \"{self.description}\"}}"
 
     def adjust(self, amt=None):

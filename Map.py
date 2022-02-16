@@ -1,4 +1,5 @@
 import sys
+from IHashable import IHashable
 from Territory import Territory
 from Continent import Continent
 import math
@@ -6,7 +7,7 @@ import copy
 import hashlib
 
 
-class Map():
+class Map(IHashable):
     def __init__(self):
         super().__init__()
         self.territories = {}
@@ -19,15 +20,8 @@ class Map():
         for k in self.territories.keys():
             cpy.territories[k] = copy.deepcopy(cpy.territories[k])
 
-        cpy.continentColors = copy.deepcopy(self.continentColors)
-
-        cpy.continentCount = copy.deepcopy(self.continentCount)
-
     def getJson(self):
         return f'{{"continents": {[c.getJson() for c in self.continents.values()]},"territories":{[t.getJson() for t in self.territories.values()]}}}'
-
-    def getHash(self):
-        return hashlib.md5(self.getJson().encode()).hexdigest()
 
     def getCopy(self):
         cpy = Map()

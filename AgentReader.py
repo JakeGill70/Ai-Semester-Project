@@ -58,7 +58,7 @@ class AgentReader():
     @staticmethod
     def writeAgent(filePathName, agent):
         f = open(filePathName, "wt+")
-        f.write(agent.toJSON())
+        f.write(agent.getJSON())
         f.close()
 
     @staticmethod

@@ -3,27 +3,26 @@ from argparse import ArgumentError
 import hashlib
 import random
 
-class Agent(ABC):
+from IHashable import IHashable
+
+class Agent(IHashable, ABC):
     def __init__(self, name="Unnamed Agent"):
         self.name = name
         self.characteristics = {}
 
-    def toJSON(self):
+    def getJSON(self):
         s = f"{{\"name\": \"{self.name}\", \"characteristics\": {{ "
         for groupKey, groupDict in self.characteristics.items():
             s += f"\"{groupKey}\" : {{"
             for characteristicName, characteristicObject in groupDict.items():
                 s += (
-                    f"\"{characteristicName}\" : {characteristicObject.toJSON()},"
+                    f"\"{characteristicName}\" : {characteristicObject.getJSON()},"
                 )
             s = s[:-1]
             s += "},"
         s = s[:-1]
         s += "} }"
         return s
-
-    def getHash(self):
-        return hashlib.md5(self.toJSON().encode()).hexdigest()
 
     def clone(self, cpyType=None):
         if(cpyType is None):
