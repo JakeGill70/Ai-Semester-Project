@@ -27,8 +27,7 @@ class AgentReader():
             agent.characteristics[categoryName] = {}
             characteristicsInCategory = data["characteristics"][categoryName]
             for characteristicName, characteristicData in characteristicsInCategory.items():
-                agent.characteristics[categoryName][characteristicName] = AgentReader.dictionaryToCharacteristic(
-                    characteristicData)
+                agent.characteristics[categoryName][characteristicName] = AgentReader.dictionaryToCharacteristic(characteristicData)
         return agent
 
     @staticmethod

@@ -10,12 +10,9 @@ from sqlite3.dbapi2 import OperationalError
 from AgentCharacteristic import AgentCharacteristic
 from Agent import Agent
 
-AttackSelection = namedtuple('AttackSelection',
-                             'attackIndex defendIndex estimateResult')
-AttackSelectionMaxn = namedtuple(
-    'AttackSelection', 'attackIndex defendIndex estimateResult mapScore')
-MoveSelection = namedtuple('MoveSelection',
-                           'supplyIndex receiveIndex transferAmount')
+AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
+AttackSelectionMaxn = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult mapScore')
+MoveSelection = namedtuple('MoveSelection', 'supplyIndex receiveIndex transferAmount')
 
 class RiskAgent(Agent):
     def __init__(self, name="Unnamed Agent"):
