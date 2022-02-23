@@ -1,7 +1,9 @@
 import copy
 
+from IJsonable import IJsonable
 
-class Territory():
+
+class Territory(IJsonable):
     def __init__(self, index, connections, continent, position, owner="", army=0):
         self.index = index
         self.connections = connections
@@ -22,6 +24,12 @@ class Territory():
     def getArmy(self):
         return self.army
 
+    def getOwner(self):
+        return self.owner
+
+    def setOwner(self, owner):
+        self.owner = owner
+
     def setArmy(self, value):
         if(value < 1):
             raise Exception("Error: Army value cannot be less than 1")
@@ -32,13 +40,3 @@ class Territory():
         self.army += value
         if(self.army < 1):
             raise Exception("Error: Army value cannot be less than 1")
-
-    def __deepcopy__(self):
-        cpy = Territory
-        cpy.index = self.index
-        cpy.connections = copy.deepcopy(self.connections)
-        cpy.continent = self.continent
-        cpy.position = self.position
-        cpy.owner = self.owner
-        cpy.army = self.army
-        return cpy
