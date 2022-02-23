@@ -44,8 +44,7 @@ class Map(IHashable):
         return positions
 
     def getTotalArmiesByPlayer(self, playerName):
-        return sum(
-            [x.getArmy() for x in self.getTerritoriesByPlayer(playerName)])
+        return sum([x.getArmy() for x in self.getTerritoriesByPlayer(playerName)])
 
     def getTerritoriesByPlayer(self, playerName):
         return [x for x in self.territories.values() if x.owner == playerName]
@@ -121,8 +120,7 @@ class Map(IHashable):
             for continent in self.continents.values():
                 self.territoryContinentCache[continent.name] = []
             for territory in self.territories.values():
-                self.territoryContinentCache[territory.continent].append(
-                    territory)
+                self.territoryContinentCache[territory.continent].append(territory)
         return self.territoryContinentCache[continentName]
 
     def moveArmies(self, supplyIndex, receiveIndex, amount):
