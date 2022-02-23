@@ -1,4 +1,7 @@
-class Continent():
+from IJsonable import IJsonable
+
+
+class Continent(IJsonable):
     def __init__(self, name, unitBonus, color):
         self.name = name
         self.unitBonus = unitBonus
