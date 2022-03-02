@@ -128,7 +128,7 @@ class RiskAgent(Agent):
                 # ! that the best territory found so far is also enemy adjacent
                 bestEnemyAdjacentData = self.getTerritoryDataEnemyAdjacent(bestIndex, map) if bestIndex != -1 else []
                 bestEnemySize = 0
-                # FIXME: Is this really the best way to determine enemy size?
+                # Compare the army size of the best and current territories
                 bestEnemySize = max([td.getArmy() for td in bestEnemyAdjacentData]) if (bestEnemyAdjacentData) else 0
                 currEnemySize = max([td.getArmy() for td in enemyAdjacentsData])
                 # Assume the placement is riskier move if it is more risky to place
@@ -139,8 +139,8 @@ class RiskAgent(Agent):
                 # than the biggest adjacent enemy army found so far
                 bestEnemyPlayers = set([td.owner for td in bestEnemyAdjacentData]) if (bestEnemyAdjacentData) else set()
                 currEnemyPlayers = set([td.owner for td in enemyAdjacentsData])
-                bestEnemyPlayerSize = max([len(map.getTerritoriesByPlayer(x)) for x in bestEnemyPlayers]) if bestEnemyPlayers else 0
-                currEnemyPlayerSize = max([len(map.getTerritoriesByPlayer(x)) for x in currEnemyPlayers])
+                bestEnemyPlayerSize = max([map.getPlayerSize(x) for x in bestEnemyPlayers]) if bestEnemyPlayers else 0
+                currEnemyPlayerSize = max([map.getPlayerSize(x) for x in currEnemyPlayers])
                 if (currEnemyPlayerSize > bestEnemyPlayerSize):
                     score += self.characteristics["Preference"]["Larger"].value
                 if (currEnemyPlayerSize < bestEnemyPlayerSize):
