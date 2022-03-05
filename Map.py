@@ -126,3 +126,37 @@ class Map(IHashable):
     def moveArmies(self, supplyIndex, receiveIndex, amount):
         self.territories[supplyIndex].addArmy(-amount)
         self.territories[receiveIndex].addArmy(amount)
+
+    def attackTerritory(self, attackIndex, defendIndex, minimumRemainingPercent, atkSys):
+        if (attackIndex == None or defendIndex == None):
+            # rm print(f"{self.name} chose not to attack this turn")
+            return None
+
+        attackingTerritory = self.territories[attackIndex]
+        defendingTerritory = self.territories[defendIndex]
+
+        attackingArmies = attackingTerritory.getArmy() - 1  # Keep one remaining on the territory
+        defendingArmies = defendingTerritory.getArmy()
+
+        minimumAmountRemaining = math.floor(attackingArmies * minimumRemainingPercent)
+
+        # Actually perform the attack
+        attackResult = atkSys.attack(attackingArmies, defendingArmies, minimumAmountRemaining)
+
+        # If the attack was successful, change ownership
+        attackSuccessful = (attackResult.defenders == 0)
+        if (attackSuccessful):
+            defendingTerritory.owner = attackingTerritory.owner
+
+            # Keep any remaining armies
+            attackingTerritory.setArmy(attackResult.attackers)
+            # Take an attacking army and place it on the new territory
+            defendingTerritory.setArmy(1)
+        else:
+            # Keep any remaining armies
+            # Don't forget about the 1 that wasn't allowed to leave
+            attackingTerritory.setArmy(attackResult.attackers + 1)
+            # Let the defenders keep their remaining armies
+            defendingTerritory.setArmy(attackResult.defenders)
+        return attackResult
+
