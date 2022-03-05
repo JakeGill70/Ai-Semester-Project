@@ -144,7 +144,8 @@ class AttackSystem:
         return AttackResult(attackCount, defendCount)
 
     def battle(self, attackCount, defendCount):
-        attackRolls = self.getDiceRolls(attackCount)
+        # Only let the attacker roll three times
+        attackRolls = self.getDiceRolls(attackCount, quick=True)[:3]
         # Only let the defender roll twice
         defendRolls = self.getDiceRolls(defendCount)[:2]
 
@@ -165,14 +166,26 @@ class AttackSystem:
     def rollDice(self):
         return random.randint(1, 6)
 
-    def getDiceRolls(self, amount):
+    def getDiceRolls(self, amount, quick=False):
         rolls = []
-        if (amount >= 1):
-            rolls.append(self.rollDice())
-        if (amount >= 2):
-            rolls.append(self.rollDice())
-        if (amount >= 3):
-            rolls.append(self.rollDice())
+        # Quick getDiceRolls Explained:
+        # The normal method iterates for each item in the amount, for programming ease, this is 
+        # simply the total number of available armies on a territory. This requires the code to 
+        # generate an excessive number of rolls that will simply be truncated upon return
+        # because RISK uses at most sets of 3. To use this to our advantage, we only need to 
+        # worry about the cases were the amount is 1, 2, 3 or more. This prevents unnecessary
+        # iterations that produces a large set that will need to be truncated.
+        # TODO: Remember to note this as an optimization in the write-up
+        if(quick):
+            if (amount >= 1):
+                rolls.append(self.rollDice())
+            if (amount >= 2):
+                rolls.append(self.rollDice())
+            if (amount >= 3):
+                rolls.append(self.rollDice())
+        else:
+            for _ in range(amount):
+                rolls.append(self.rollDice())
         return rolls
 
 
