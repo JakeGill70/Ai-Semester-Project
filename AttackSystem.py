@@ -77,21 +77,16 @@ class AttackSystem:
         attackCount = int(attackCount)
         defendCount = int(defendCount)
         if (attackCount < 1 or defendCount < 1):
-            raise Exception(
-                f"Error: attackCount/defendCount is is not valid: {attackCount},{defendCount}"
-            )
+            raise Exception(f"Error: attackCount/defendCount is is not valid: {attackCount},{defendCount}")
 
         originalAttackCount = attackCount
         originalDefendCount = defendCount
         estimateSuccess = 0
         # Get the estimate if it exist
         if (attackCount < 30 and defendCount < 30):
-            estimateSuccess = self.knownAttackSuccessEstimates[defendCount][
-                attackCount]
-            estimateAttackRemaining = self.knownAttackRemainingEstimates[
-                defendCount][attackCount]
-            estimateDefendRemaining = self.knownDefendRemainingEstimates[
-                defendCount][attackCount]
+            estimateSuccess = self.knownAttackSuccessEstimates[defendCount][attackCount]
+            estimateAttackRemaining = self.knownAttackRemainingEstimates[defendCount][attackCount]
+            estimateDefendRemaining = self.knownDefendRemainingEstimates[defendCount][attackCount]
         else:
             # Determine a proportional estimate
             reducedEstimateFound = False
@@ -103,14 +98,9 @@ class AttackSystem:
                 defendCount = x.denominator
                 # If that reduced ratio exist, then use that to make an estimate
                 if (x.numerator < 30 and x.denominator < 30):
-                    estimateSuccess = self.knownAttackSuccessEstimates[
-                        defendCount][attackCount]
-                    estimateAttackRemaining = math.floor(
-                        (self.knownAttackRemainingEstimates[defendCount]
-                         [attackCount] / attackCount) * originalAttackCount)
-                    estimateDefendRemaining = math.floor(
-                        (self.knownDefendRemainingEstimates[defendCount]
-                         [attackCount] / defendCount) * originalDefendCount)
+                    estimateSuccess = self.knownAttackSuccessEstimates[defendCount][attackCount]
+                    estimateAttackRemaining = math.floor((self.knownAttackRemainingEstimates[defendCount][attackCount] / attackCount) * originalAttackCount)
+                    estimateDefendRemaining = math.floor((self.knownDefendRemainingEstimates[defendCount][attackCount] / defendCount) * originalDefendCount)
                     reducedEstimateFound = True
                 else:
                     # If the reduced ratio doesn't exist, then subtract 1 from both
@@ -129,8 +119,7 @@ class AttackSystem:
                     estimateDefendRemaining = 0
                     reducedEstimateFound = True
 
-        return AttackEstimateResult(estimateAttackRemaining,
-                                    estimateDefendRemaining, estimateSuccess)
+        return AttackEstimateResult(estimateAttackRemaining, estimateDefendRemaining, estimateSuccess)
 
     def attack(self, attackCount, defendCount, maxAttackLoses):
         isAttackOver = False
@@ -138,8 +127,7 @@ class AttackSystem:
             result = self.battle(attackCount, defendCount)
             attackCount = result[0]
             defendCount = result[1]
-            if (attackCount == 0 or defendCount == 0
-                    or attackCount <= maxAttackLoses):
+            if (attackCount == 0 or defendCount == 0 or attackCount <= maxAttackLoses):
                 isAttackOver = True
         return AttackResult(attackCount, defendCount)
 
