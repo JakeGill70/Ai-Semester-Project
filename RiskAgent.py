@@ -334,40 +334,10 @@ class RiskAgent(Agent):
             return MoveSelection(bestSupplyingTerritory.index, bestReceivingTerritory.index, bestTransferAmount)
 
     def attackTerritory(self, attackIndex, defendIndex, map, atkSys):
-        if (attackIndex == None or defendIndex == None):
-            # rm print(f"{self.name} chose not to attack this turn")
-            return None
 
-        attackingTerritory = map.territories[attackIndex]
-        defendingTerritory = map.territories[defendIndex]
+        # Ask the map to attack for us
+        attackResult = map.attackTerritory(attackIndex, defendIndex, self.characteristics["Attack"]["Minimal Remaining Percent"].value, atkSys)
 
-        attackingArmies = attackingTerritory.getArmy() - 1  # Keep one remaining on the territory
-        defendingArmies = defendingTerritory.getArmy()
-
-        minimumAmountRemaining = math.floor(attackingArmies * self.characteristics["Attack"]["Minimal Remaining Percent"].value)
-
-        # Actually perform the attack
-        attackResult = atkSys.attack(attackingArmies, defendingArmies, minimumAmountRemaining)
-
-        # rm print(f"Attacking ({defendingTerritory}) from ({attackingTerritory}) was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}")
-
-        # FIXME: Shouldn't this really be handled by the map object, not the agent?
-
-        # If the attack was successful, change ownership
-        attackSuccessful = (attackResult.defenders == 0)
-        if (attackSuccessful):
-            defendingTerritory.owner = self.name
-
-            # Keep any remaining armies
-            attackingTerritory.setArmy(attackResult.attackers)
-            # Take an attacking army and place it on the new territory
-            defendingTerritory.setArmy(1)
-        else:
-            # Keep any remaining armies
-            # Don't forget about the 1 that wasn't allowed to leave
-            attackingTerritory.setArmy(attackResult.attackers + 1)
-            # Let the defenders keep their remaining armies
-            defendingTerritory.setArmy(attackResult.defenders)
         return attackResult
 
     def placeUnit(self, map):
