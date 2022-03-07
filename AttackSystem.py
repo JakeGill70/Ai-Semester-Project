@@ -82,6 +82,8 @@ class AttackSystem:
         originalAttackCount = attackCount
         originalDefendCount = defendCount
         estimateSuccess = 0
+        estimateAttackRemaining = 0
+        estimateDefendRemaining = 0
         # Get the estimate if it exist
         if (attackCount < 30 and defendCount < 30):
             estimateSuccess = self.knownAttackSuccessEstimates[defendCount][attackCount]
@@ -96,6 +98,7 @@ class AttackSystem:
                 # Use the reduced fraction of that ratio
                 attackCount = x.numerator
                 defendCount = x.denominator
+                
                 # If that reduced ratio exist, then use that to make an estimate
                 if (x.numerator < 30 and x.denominator < 30):
                     estimateSuccess = self.knownAttackSuccessEstimates[defendCount][attackCount]
