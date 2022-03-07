@@ -10,6 +10,13 @@
             "request": "launch",
             "program": "RiskDriver.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: AttackSystem.py",
+            "type": "python",
+            "request": "launch",
+            "program": "AttackSystem.py",
+            "console": "integratedTerminal"
         }
     ]
 }
