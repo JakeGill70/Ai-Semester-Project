@@ -180,6 +180,28 @@ class AttackSystem:
         return rolls
 
 
+    def getAttackStatistics(self, attackCount, defendCount, runs):
+        atkrRemainingCount = 0
+        dfdrRemainingCount = 0
+        successfulAtkCount = 0
+        for r in range(0, runs):
+            result = self.attack(attackCount, defendCount, -1)
+            atkrRemainingCount += result.attackers
+            dfdrRemainingCount += result.defenders
+            successfulAtkCount += int(result.defenders <= 0)
+        atkrRemainingAvg = math.floor(atkrRemainingCount/runs)
+        dfdrRemainingAvg = math.floor(dfdrRemainingCount/runs)
+        successfulAtkPercent = successfulAtkCount/runs
+        return (atkrRemainingAvg, dfdrRemainingAvg, round(successfulAtkPercent, 3), round(1-successfulAtkPercent, 3))
+
+# ! Uncomment code to generate new attack statistics
+# atkSys = AttackSystem()
+# runs = 5000
+# for atkrs in range(1,31):
+#     for dfdrs in range(1,31):
+#         stat = atkSys.getAttackStatistics(atkrs, dfdrs, runs)
+#         print(f"Atk:{atkrs}, dfd:{dfdrs}, AtkRemAvg:{stat[0]}, DfdRemAvg:{stat[1]}, AtkSucAvg:{stat[2]}, DfdSucAvg:{stat[3]}")
+
 # atkSys = AttackSystem()
 # runs = 1000
 # avgDef = 0
