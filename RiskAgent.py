@@ -167,7 +167,7 @@ class RiskAgent(Agent):
         controlledTerritoriesThatCanAttack = [t for t in controlledTerritories if t.getArmy() > 1]
 
         score = -1
-        bestScore = -1
+        bestScore = -500
         bestAttackingTerritory = None
         bestDefendingTerritory = None
         bestAttackEstimate = None
@@ -186,11 +186,12 @@ class RiskAgent(Agent):
 
                 score = 0
                 score += self.characteristics["Attack"]["Anywhere"].value
-                score += self.characteristics["Attack"]["Ally Adjacent"].value if self.getTerritoryDataEnemyAdjacent(territory.index, map) else 0
+                # Must use len>1 here because it will always have at least 1 or else an army couldn't attack to it
+                score += self.characteristics["Attack"]["Ally Adjacent"].value if len(self.getTerritoryDataAllyAdjacent(territory.index, map))>1 else 0
                 score += self.characteristics["Attack"]["Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(enemyTerritory.index, map) else 0
 
-                score += self.characteristics["Attack"]["Remain Bias"].value * (territory.getArmy() - attackEstimate.attackers)
-                score += self.characteristics["Attack"]["Destroy Bias"].value * (enemyTerritory.getArmy() - attackEstimate.defenders)
+                score += self.characteristics["Attack"]["Survivorship Bias"].value * attackEstimate.attackers
+                score += self.characteristics["Attack"]["Targets Destroyed Bias"].value * (enemyTerritory.getArmy() - attackEstimate.defenders)
 
                 score += self.characteristics["Preference"]["Risky"].value if attackEstimate.attackSuccessChance < self.characteristics["Attack"]["Safe Threshold"].value else 0
                 score += self.characteristics["Preference"]["Safe"].value if attackEstimate.attackSuccessChance >= self.characteristics["Attack"]["Safe Threshold"].value else 0
@@ -205,7 +206,7 @@ class RiskAgent(Agent):
                     score += self.characteristics["Attack"]["Capture Continent"].value
 
                 # If there is a best value to compare to
-                if (bestScore != -1):
+                if (bestScore != -500):
                     currEnemySize = map.getPlayerSize(enemyTerritory.owner)
                     bestEnemySize = map.getPlayerSize(bestDefendingTerritory.owner)
                     if (currEnemySize > bestEnemySize):
@@ -222,7 +223,11 @@ class RiskAgent(Agent):
                 # rm print(f"Attacking ({enemyTerritory}) from ({territory}) scored {score}, and has a {attackEstimate.attackSuccessChance * 100}% chance of success. Best Score: {bestScore}")
 
         # Return 'None' if there are no viable attack options
-        if (bestScore == -1):
+        if (bestScore == -500):
+            return None
+
+        # Return 'None' if the best attack is worse than not attacking at all
+        if(bestScore <= self.characteristics["Attack"]["Minimum Impact Score"].value):
             return None
 
         # Return the best option found
@@ -233,7 +238,7 @@ class RiskAgent(Agent):
         controlledTerritoriesThatCanMove = [t for t in controlledTerritories if t.getArmy() > 1]
 
         score = -1
-        bestScore = -1
+        bestScore = -500
         bestSupplyingTerritory = None
         bestReceivingTerritory = None
         bestTransferAmount = None
@@ -254,7 +259,8 @@ class RiskAgent(Agent):
                 # Calculate movement score based on movement settings
                 score += self.characteristics["Movement"]["Anywhere"].value
                 score += self.characteristics["Movement"]["Enemy Adjacent"].value if self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map) else 0
-                score += self.characteristics["Movement"]["Ally Adjacent"].value if self.getTerritoryDataAllyAdjacent(receiveTerritory.index, map) else 0
+                # Must use len>1 here because it will always have at least 1 or else an army couldn't move to it
+                score += self.characteristics["Movement"]["Ally Adjacent"].value if len(self.getTerritoryDataAllyAdjacent(receiveTerritory.index, map))>1 else 0 
                 score += self.characteristics["Movement"]["Border Adjacent"].value if self.getTerritoryDataBorderAdjacent(receiveTerritory.index, map) else 0
                 score += self.characteristics["Movement"]["Connection Bias"].value * len(receiveTerritory.connections)
                 score += self.characteristics["Movement"]["Bigger Territory"].value if receiveTerritory.getArmy() > supplyTerritory.getArmy() else 0
@@ -274,14 +280,12 @@ class RiskAgent(Agent):
                 # ! 2.) The current receiver is connected to an enemy territory
                 # ! 3.) That any territory is connected to a single enemy
 
-                # FIXME: Is this the best way to compare enemy size?
                 # TODO: Add more comments and simplify this logic - it smells bad!
 
                 currTotalEnemySize = 0
                 try:
                     currEnemyData = self.getTerritoryDataEnemyAdjacent(receiveTerritory.index, map)
                     currConnectedEnemyNames = [x.owner for x in currEnemyData]
-                    # FIXME: Is this the best way to compare enemy size?
                     currConnectedEnemySize = [map.getPlayerSize(x) for x in currConnectedEnemyNames]
                     currTotalEnemySize = sum(currConnectedEnemySize)
                 except:
@@ -291,7 +295,6 @@ class RiskAgent(Agent):
                 try:
                     currBestEnemyData = self.getTerritoryDataEnemyAdjacent(bestReceivingTerritory.index, map)
                     currBestConnectedEnemyNames = [x.owner for x in currBestEnemyData]
-
                     currBestConnectedEnemySize = [map.getPlayerSize(x) for x in currBestConnectedEnemyNames]
                     currBestTotalEnemySize = sum(currBestConnectedEnemySize)
                 except:
@@ -305,7 +308,7 @@ class RiskAgent(Agent):
                 # Determine if this is the best movement
                 if (score > bestScore):
                     # Determine how many armies to transfer over
-                    percentToTransfer = self.characteristics["Movement"]["Base Transfer Rate"].value
+                    percentToTransfer = 0.5
                     if (isRisky):
                         percentToTransfer = self.characteristics["Movement"]["Risky Transfer Rate"].value
                     if (isSafe):
@@ -318,7 +321,7 @@ class RiskAgent(Agent):
                     # Don't move all units, at least 1 must stay on the supplying territory
                     # Remember that a territory must have at least 2 units to perform a transfer:
                     #       1 unit to remain on the territory, and the 1 unit to transfer
-                    if (supplyTerritory.getArmy() - unitsToTransfer < 2):
+                    if (unitsToTransfer >= supplyTerritory.getArmy()):
                         unitsToTransfer = supplyTerritory.getArmy() - 1
 
                     if (unitsToTransfer > 0):
@@ -331,10 +334,8 @@ class RiskAgent(Agent):
 
         # ! Don't assume that the agent CAN move an army
 
-        if (bestScore == -1):
+        if (bestScore == -500):
             return None
-        else:
-            return MoveSelection(bestSupplyingTerritory.index, bestReceivingTerritory.index, bestTransferAmount)
 
     def attackTerritory(self, attackIndex, defendIndex, map, atkSys):
 
