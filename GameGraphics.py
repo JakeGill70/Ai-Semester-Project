@@ -30,5 +30,5 @@ class GameGraphics(ABC):
         pygame.draw.line(screen, color, posA, posB, width)
 
     @abstractmethod
-    def showWindow(self, map, windowName):
+    def showWindow(self, map, windowName, autoCloseTimer):
         pass
