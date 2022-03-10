@@ -337,10 +337,15 @@ class RiskAgent(Agent):
         if (bestScore == -500):
             return None
 
-    def attackTerritory(self, attackIndex, defendIndex, map, atkSys):
+        if(bestScore <= self.characteristics["Movement"]["Minimum Impact Score"].value):
+            return None
+
+        return MoveSelection(bestSupplyingTerritory.index, bestReceivingTerritory.index, bestTransferAmount)
+
+    def attackTerritory(self, attackIndex, defendIndex, defendAgent, map, atkSys):
 
         # Ask the map to attack for us
-        attackResult = map.attackTerritory(attackIndex, defendIndex, self.characteristics["Attack"]["Minimal Remaining Percent"].value, atkSys)
+        attackResult = map.attackTerritory(attackIndex, defendIndex, self.characteristics["Attack"]["Minimal Remaining Percent"].value, self.characteristics["Attack"]["Attack Dice Count"], defendAgent.characteristics["Attack"]["Defend Dice Count"], atkSys)
 
         return attackResult
 

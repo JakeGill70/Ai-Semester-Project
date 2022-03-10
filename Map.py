@@ -127,7 +127,7 @@ class Map(IHashable):
         self.territories[supplyIndex].addArmy(-amount)
         self.territories[receiveIndex].addArmy(amount)
 
-    def attackTerritory(self, attackIndex, defendIndex, minimumRemainingPercent, atkSys):
+    def attackTerritory(self, attackIndex, defendIndex, minimumRemainingPercent, attackArmyMax, defendArmyMax atkSys):
         if (attackIndex == None or defendIndex == None):
             # rm print(f"{self.name} chose not to attack this turn")
             return None
@@ -139,9 +139,13 @@ class Map(IHashable):
         defendingArmies = defendingTerritory.getArmy()
 
         minimumAmountRemaining = math.floor(attackingArmies * minimumRemainingPercent)
+        attackArmyMax = round(attackArmyMax)
+        defendArmyMax = round(defendArmyMax)
+        attackArmyMax = max(1, min(attackArmyMax, 3)) # Clamp value from 1-3
+        defendArmyMax = max(1, min(defendArmyMax, 2)) # Clamp value from 1-3
 
         # Actually perform the attack
-        attackResult = atkSys.attack(attackingArmies, defendingArmies, minimumAmountRemaining)
+        attackResult = atkSys.attack(attackingArmies, defendingArmies, minimumAmountRemaining, attackArmyMax, defendArmyMax)
 
         # If the attack was successful, change ownership
         attackSuccessful = (attackResult.defenders == 0)

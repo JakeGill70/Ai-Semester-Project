@@ -124,25 +124,25 @@ class AttackSystem:
 
         return AttackEstimateResult(estimateAttackRemaining, estimateDefendRemaining, estimateSuccess)
 
-    def attack(self, attackCount, defendCount, maxAttackLoses):
+    def attack(self, attackCount, defendCount, maxAttackLoses, attackArmyMax, defendArmyMax):
         isAttackOver = False
         while (not isAttackOver):
-            result = self.battle(attackCount, defendCount)
+            result = self.battle(attackCount, defendCount, attackArmyMax, defendArmyMax)
             attackCount = result[0]
             defendCount = result[1]
             if (attackCount == 0 or defendCount == 0 or attackCount <= maxAttackLoses):
                 isAttackOver = True
         return AttackResult(attackCount, defendCount)
 
-    def battle(self, attackCount, defendCount):
+    def battle(self, attackCount, defendCount, attackArmyMax, defendArmyMax):
         # Only let the attacker roll three times
-        attackRolls = self.getDiceRolls(attackCount, quick=True)[:3]
+        attackRolls = self.getDiceRolls(attackCount, quick=True)[:attackArmyMax]
         # Only let the defender roll twice
-        defendRolls = self.getDiceRolls(defendCount)[:2]
+        defendRolls = self.getDiceRolls(defendCount, quick=True)[:defendArmyMax]
 
         # Get best rolls
-        attackRolls.sort()
-        defendRolls.sort()
+        attackRolls.sort(reverse=True)
+        defendRolls.sort(reverse=True)
 
         while (len(defendRolls) > 0 and len(attackRolls) > 0):
             attackValue = attackRolls.pop()
