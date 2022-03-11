@@ -184,8 +184,10 @@ class AttackSystem:
         atkrRemainingCount = 0
         dfdrRemainingCount = 0
         successfulAtkCount = 0
+        attackers = 3
+        defenders = 2
         for r in range(0, runs):
-            result = self.attack(attackCount, defendCount, -1)
+            result = self.attack(attackCount, defendCount, -1, attackers, defenders)
             atkrRemainingCount += result.attackers
             dfdrRemainingCount += result.defenders
             successfulAtkCount += int(result.defenders <= 0)
