@@ -127,7 +127,7 @@ class Map(IHashable):
         self.territories[supplyIndex].addArmy(-amount)
         self.territories[receiveIndex].addArmy(amount)
 
-    def attackTerritory(self, attackIndex, defendIndex, minimumRemainingPercent, attackArmyMax, defendArmyMax atkSys):
+    def attackTerritory(self, attackIndex, defendIndex, minimumRemainingPercent, attackArmyMax, defendArmyMax, atkSys):
         if (attackIndex == None or defendIndex == None):
             # rm print(f"{self.name} chose not to attack this turn")
             return None
