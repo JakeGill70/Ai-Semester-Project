@@ -21,15 +21,16 @@ class Tournament():
     def playTournament(population, map, generationCount=0, turnCountFilePathName=""):
         populationSize = len(population)
         remainingPercent = 0.25
+        winnerList = []
         loserList = []
         master_loserList = []
         t = 0
         windowName = ""
         while(len(population) > populationSize * remainingPercent):
             matchUps = population.getMatchGroups(4)
-            winnerList = []
-            loserList = []
-            turnCountList = []
+            winnerList:list[RiskAgent] = []
+            loserList:list[RiskAgent] = []
+            turnCountList:list[int] = []
             m = 0
             t += 1
             for match in matchUps:
