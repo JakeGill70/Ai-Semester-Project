@@ -42,49 +42,46 @@ class RiskGame(StrategyGame):
             agentIndex += 1
             agentIndex = agentIndex % agentListSize
 
-    def attackUntilUnfavorable(self, agent:RiskAgent, map, atkSys, showGame=True):
+    def attackUntilUnfavorable(self, agentList:list[RiskAgent], agent:RiskAgent, map:Map, atkSys:AttackSystem, showGame:bool=True):
         while (True):
-            pickTerritoryResult = agent.pickTerritoryForAttack(map, atkSys)
-            attackResult = agent.attackTerritory(pickTerritoryResult.attackIndex, pickTerritoryResult.defendIndex, map, atkSys)
-            if (showGame):
-                if (attackResult):
-                    Logger.message(
-                        MessageTypes.AttackResult,
+            pickTerritoryResult:Union[AttackSelection, None] = agent.pickTerritoryForAttack(map, atkSys)
+            #self, attackIndex, defendIndex, defendAgent, map, atkSys
+            attackResult = None
+            if(pickTerritoryResult):
+                defendAgent = [a for a in agentList if a.name == map.territories[pickTerritoryResult.defendIndex].owner][0]
+                attackResult = agent.attackTerritory(pickTerritoryResult.attackIndex, pickTerritoryResult.defendIndex, defendAgent, map, atkSys)
+                if (showGame and attackResult):
+                    Logger.message( MessageTypes.AttackResult,
                         f"{agent.name}'s attack from #{pickTerritoryResult.attackIndex} to #{pickTerritoryResult.defendIndex} was {'successful' if (attackResult.defenders == 0) else 'unsuccessful'}.")
-                else:
-                    Logger.message(MessageTypes.AttackStopNotice, "{agent.name} decided to stop attacking.")
-                    break
+            if(showGame and not pickTerritoryResult):
+                Logger.message(MessageTypes.AttackStopNotice, "{agent.name} decided to stop attacking.")
+                break
 
-    def getLosingPlayers(self, agents, currentAgentTurn, map, game, showGame=True):
+    def getLosingPlayers(self, agents:list[RiskAgent], currentAgentTurn:RiskAgent, map:Map, game:GameGraphics, showGame=True):
         agentsToRemove = []
         for agent in agents:
             if (len(map.getTerritoriesByPlayer(agent.name)) == 0):
                 agentsToRemove.append(agent)
                 if (showGame):
-                    Logger.message(
-                        MessageTypes.PlayerDefeatedNotice,
+                    Logger.message(MessageTypes.PlayerDefeatedNotice,
                         f"{agent.name} has been defeated by {currentAgentTurn.name}!"
                     )
-                    game.showWindow(map, 0.1, (
-                        f"RISK: {agent.name} has been defeated by {currentAgentTurn.name}!"
-                    ))
+                    game.showWindow(map, 0.1, (f"RISK: {agent.name} has been defeated by {currentAgentTurn.name}!"))
         return agentsToRemove
 
-    def getWinningPlayers(self, agents, map, turnCount, maxTurnCount, showGame=True):
+    def getWinningPlayers(self, agents:list[RiskAgent], map:Map, turnCount, maxTurnCount, showGame=True):
         winners = []
         losers = []
         # Only 1 winner left, so they must be it
         if (len(agents) == 1):
             if (showGame):
-                Logger.message(MessageTypes.PlayerVictoryNotice,
-                               f"{agents[0].name} is the winner!")
+                Logger.message(MessageTypes.PlayerVictoryNotice, f"{agents[0].name} is the winner!")
             winners.append(agents[0])
 
         if (turnCount >= maxTurnCount and len(agents) > 1):
 
             if (showGame):
-                Logger.message(
-                    MessageTypes.TurnLimitReachedNotice,
+                Logger.message( MessageTypes.TurnLimitReachedNotice,
                     f"Max turn limit reached, determining winner based on territory, using army count as tie breaker."
                 )
 
@@ -92,20 +89,13 @@ class RiskGame(StrategyGame):
             agents.sort(key=lambda x: len(map.getTerritoriesByPlayer(x.name)))
 
             # if there is a tie...
-            if (len(map.getTerritoriesByPlayer(agents[0].name)) == len(
-                    map.getTerritoriesByPlayer(agents[1].name))):
+            if (len(map.getTerritoriesByPlayer(agents[0].name)) == len(map.getTerritoriesByPlayer(agents[1].name))):
                 # Reduce agents to just those with the same number of territories
-                agents = [
-                    x for x in agents
-                    if len(map.getTerritoriesByPlayer(x.name)) == len(
-                        map.getTerritoriesByPlayer(agents[0].name))
-                ]
+                agents = [ x for x in agents if len(map.getTerritoriesByPlayer(x.name)) == len(map.getTerritoriesByPlayer(agents[0].name))]
                 # Sort remaining agents by number of armies
                 agents.sort(key=lambda x: map.getTotalArmiesByPlayer(x.name))
                 # if there is still a tie...
-                if (map.getTotalArmiesByPlayer(
-                        agents[0].name) == map.getTotalArmiesByPlayer(
-                            agents[1].name)):
+                if (map.getTotalArmiesByPlayer(agents[0].name) == map.getTotalArmiesByPlayer(agents[1].name)):
                     # Reduce agents to just those with the same number of armies
                     agents = [x for x in agents if map.getTotalArmiesByPlayer(x.name)== map.getTotalArmiesByPlayer(agents[0].name)]
                     # Sort remaining agents by number of armies they will gain at the start of their next turn
@@ -132,8 +122,7 @@ class RiskGame(StrategyGame):
                     losers.append(a)
 
             if (showGame):
-                Logger.message(
-                    MessageTypes.GameResults,
+                Logger.message(MessageTypes.GameResults,
                     f"Winner(s): {[x.name for x in winners]}\nLosers: {[x.name for x in losers]}"
                 )
 
@@ -151,8 +140,7 @@ class RiskGame(StrategyGame):
                        f"Playing Game: {[agent.name for agent in agents]}")
         # Exit if multiple agents with the same name
         if (len(agents) != len(set([agent.name for agent in agents]))):
-            Logger.message(
-                MessageTypes.DuplicatePlayerWarning,
+            Logger.message(MessageTypes.DuplicatePlayerWarning,
                 f"Error: Duplicate player names: {[agent.name for agent in agents]}")
             return ([], [])
 
@@ -261,20 +249,19 @@ class RiskGame(StrategyGame):
 
         return (winners, losers, turnCount)
 
-    def playGame(self, agents, map, showGame=True, windowName="RISK"):
+    def playGame(self, agents:list[RiskAgent], map:Map, showGame:bool=True, windowName:str="RISK"):
         game = RiskGameGraphics()
         map = map.getCopy()
         atkSys = AttackSystem()
-        winners = []
-        losers = []
+        winners:list[RiskAgent] = []
+        losers:list[RiskAgent] = []
 
         # Game start message
         Logger.message(MessageTypes.GameStartNotice,
                        f"Playing Game: {[agent.name for agent in agents]}")
         # Exit if multiple agents with the same name
         if (len(agents) != len(set([agent.name for agent in agents]))):
-            Logger.message(
-                MessageTypes.DuplicatePlayerWarning,
+            Logger.message(MessageTypes.DuplicatePlayerWarning,
                 f"Error: Duplicate player names: {[agent.name for agent in agents]}")
             return ([], [])
 
@@ -300,8 +287,7 @@ class RiskGame(StrategyGame):
             agentIndex = (agentIndex + 1) % len(agents)
             tmpWindowName = windowName + f", turn {turnCount}"
             if (showGame):
-                Logger.message(
-                    MessageTypes.TurnStartNotice,
+                Logger.message(MessageTypes.TurnStartNotice,
                     f"=====================\nTurn: {turnCount} : {agents[agentIndex].name}\n====================="
                 )
 
@@ -310,24 +296,19 @@ class RiskGame(StrategyGame):
             for i in range(newUnits):
                 placementIndex = agents[agentIndex].placeUnit(map)
                 if (showGame):
-                    Logger.message(
-                        MessageTypes.UnitPlacementNotice,
+                    Logger.message(MessageTypes.UnitPlacementNotice,
                         f"{agents[agentIndex].name} placed a unit at #{placementIndex}."
                     )
 
             # Attack
-            self.attackUntilUnfavorable(agents[agentIndex], map, atkSys,
-                                            showGame)
+            self.attackUntilUnfavorable(agents, agents[agentIndex], map, atkSys, showGame)
 
             # Move
-            pickMovementResult = agents[agentIndex].pickTerritoryForMovement( map)
+            pickMovementResult = agents[agentIndex].pickTerritoryForMovement(map)
             if (pickMovementResult):
-                map.moveArmies(pickMovementResult.supplyIndex,
-                               pickMovementResult.receiveIndex,
-                               pickMovementResult.transferAmount)
+                agents[agentIndex].moveUnit(pickMovementResult, map)
                 if (showGame):
-                    Logger.message(
-                        MessageTypes.UnitMovementNotice,
+                    Logger.message(MessageTypes.UnitMovementNotice,
                         f"{agents[agentIndex].name} moved {pickMovementResult.transferAmount} units from #{pickMovementResult.supplyIndex} to #{pickMovementResult.receiveIndex}."
                     )
 
