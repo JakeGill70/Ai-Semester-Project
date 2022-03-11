@@ -1,10 +1,11 @@
+from GameGraphics import GameGraphics
 from Map import Map
 import random
 from RiskGameGraphics import RiskGameGraphics
 from StrategyGame import StrategyGame
 from Territory import Territory
-from RiskAgent import RiskAgent
-from AttackSystem import AttackSystem
+from RiskAgent import AttackSelection, RiskAgent
+from AttackSystem import AttackResult, AttackSystem
 from Population import Population
 from MapReader import MapReader
 import datetime
@@ -17,6 +18,7 @@ import datetime
 import multiprocessing
 import concurrent.futures
 import sys
+from typing import Union
 
 PlayerMove = namedtuple('PlayerMove', 'placementOrder attackOrder movement')
 
@@ -105,13 +107,18 @@ class RiskGame(StrategyGame):
                         agents[0].name) == map.getTotalArmiesByPlayer(
                             agents[1].name)):
                     # Reduce agents to just those with the same number of armies
-                    agents = [
-                        x for x in agents if map.getTotalArmiesByPlayer(x.name)
-                        == map.getTotalArmiesByPlayer(agents[0].name)
-                    ]
-                    # Return all winners that are tied
-                    #TODO: Add another tie-breaking layer, determine winner by who will gain the most armies at the start of their next turn.
-                    winners = agents
+                    agents = [x for x in agents if map.getTotalArmiesByPlayer(x.name)== map.getTotalArmiesByPlayer(agents[0].name)]
+                    # Sort remaining agents by number of armies they will gain at the start of their next turn
+                    agents.sort(key=lambda x: map.getNewUnitCountForPlayer(x.name))
+                    # if there is even still a tie...
+                    if (map.getNewUnitCountForPlayer(agents[0].name) == map.getNewUnitCountForPlayer(agents[1].name)):
+                        # Reduce agents to just those with the same number of new armies at the start of their next turn
+                        agents = [ x for x in agents if map.getNewUnitCountForPlayer(x.name) == map.getNewUnitCountForPlayer(agents[0].name)]
+                        # Return all winners that are tied
+                        winners = agents
+                    else:
+                        # There is not even still a tie
+                        winners.append(agents[0])
                 else:
                     # There is not still a tie
                     winners.append(agents[0])
