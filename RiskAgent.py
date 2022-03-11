@@ -7,8 +7,12 @@ from itertools import combinations_with_replacement, permutations
 import hashlib
 import sqlite3
 from sqlite3.dbapi2 import OperationalError
+from typing import Union
 from AgentCharacteristic import AgentCharacteristic
 from Agent import Agent
+from AttackSystem import AttackEstimateResult, AttackSystem
+from Map import Map
+from Territory import Territory
 
 AttackSelection = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult')
 AttackSelectionMaxn = namedtuple('AttackSelection', 'attackIndex defendIndex estimateResult mapScore')
@@ -168,11 +172,11 @@ class RiskAgent(Agent):
 
         score = -1
         bestScore = -500
-        bestAttackingTerritory = None
-        bestDefendingTerritory = None
-        bestAttackEstimate = None
+        bestAttackingTerritory:Union[Territory, None] = None
+        bestDefendingTerritory:Union[Territory, None] = None
+        bestAttackEstimate:Union[AttackEstimateResult, None] = None
         for territory in controlledTerritoriesThatCanAttack:
-            enemyConnections = [map.territories[index] for index in territory.connections if map.territories[index].owner != self.name]
+            enemyConnections:list[Territory] = [map.territories[index] for index in territory.connections if map.territories[index].owner != self.name]
 
             for enemyTerritory in enemyConnections:
                 # Get attack estimate
@@ -206,7 +210,7 @@ class RiskAgent(Agent):
                     score += self.characteristics["Attack"]["Capture Continent"].value
 
                 # If there is a best value to compare to
-                if (bestScore != -500):
+                if (bestScore != -500 and bestDefendingTerritory):
                     currEnemySize = map.getPlayerSize(enemyTerritory.owner)
                     bestEnemySize = map.getPlayerSize(bestDefendingTerritory.owner)
                     if (currEnemySize > bestEnemySize):
@@ -231,7 +235,11 @@ class RiskAgent(Agent):
             return None
 
         # Return the best option found
-        return AttackSelection(bestAttackingTerritory.index, bestDefendingTerritory.index, bestAttackEstimate)
+        if(bestAttackingTerritory and bestDefendingTerritory):
+            return AttackSelection(bestAttackingTerritory.index, bestDefendingTerritory.index, bestAttackEstimate)
+
+        # Something has gone wrong, just don't return anything
+        return None
 
     def pickTerritoryForMovement(self, map):
         controlledTerritories = map.getTerritoriesByPlayer(self.name)
@@ -239,8 +247,8 @@ class RiskAgent(Agent):
 
         score = -1
         bestScore = -500
-        bestSupplyingTerritory = None
-        bestReceivingTerritory = None
+        bestSupplyingTerritory:Union[Territory, None] = None
+        bestReceivingTerritory:Union[Territory, None] = None
         bestTransferAmount = None
 
         for supplyTerritory in controlledTerritoriesThatCanMove:
@@ -293,10 +301,11 @@ class RiskAgent(Agent):
 
                 currBestTotalEnemySize = 0
                 try:
-                    currBestEnemyData = self.getTerritoryDataEnemyAdjacent(bestReceivingTerritory.index, map)
-                    currBestConnectedEnemyNames = [x.owner for x in currBestEnemyData]
-                    currBestConnectedEnemySize = [map.getPlayerSize(x) for x in currBestConnectedEnemyNames]
-                    currBestTotalEnemySize = sum(currBestConnectedEnemySize)
+                    if(bestReceivingTerritory):
+                        currBestEnemyData = self.getTerritoryDataEnemyAdjacent(bestReceivingTerritory.index, map)
+                        currBestConnectedEnemyNames = [x.owner for x in currBestEnemyData]
+                        currBestConnectedEnemySize = [map.getPlayerSize(x) for x in currBestConnectedEnemyNames]
+                        currBestTotalEnemySize = sum(currBestConnectedEnemySize)
                 except:
                     pass
 
@@ -340,7 +349,11 @@ class RiskAgent(Agent):
         if(bestScore <= self.characteristics["Movement"]["Minimum Impact Score"].value):
             return None
 
-        return MoveSelection(bestSupplyingTerritory.index, bestReceivingTerritory.index, bestTransferAmount)
+        if(bestSupplyingTerritory and bestReceivingTerritory and bestTransferAmount):
+            return MoveSelection(bestSupplyingTerritory.index, bestReceivingTerritory.index, bestTransferAmount)
+
+        # Something has gone wrong, just don't return anything
+        return None
 
     def attackTerritory(self, attackIndex, defendIndex, defendAgent, map, atkSys):
 
@@ -348,6 +361,11 @@ class RiskAgent(Agent):
         attackResult = map.attackTerritory(attackIndex, defendIndex, self.characteristics["Attack"]["Minimal Remaining Percent"].value, self.characteristics["Attack"]["Attack Dice Count"], defendAgent.characteristics["Attack"]["Defend Dice Count"], atkSys)
 
         return attackResult
+
+    def moveUnit(self, pickMovementResult:MoveSelection, map:Map):
+        map.moveArmies(pickMovementResult.supplyIndex,
+                               pickMovementResult.receiveIndex,
+                               pickMovementResult.transferAmount)
 
     def placeUnit(self, map):
         controlledTerritoryIndices = map.getTerritoriesByPlayer(self.name)
