@@ -108,9 +108,7 @@ class Tournament():
         f.close()
 
     @staticmethod
-    def playMultipleTournaments(
-            map, populationSize, generationCount, lowMutationMod, highMutationMod, agentOutputDirectory,
-            turnCountFilePathName):
+    def playMultipleTournaments(map, populationSize, generationCount, lowMutationMod, highMutationMod, agentOutputDirectory, turnCountFilePathName):
         # Define inner function to interpolate between the low & high mutation modifiers
         def interpolate(x, y, t):
             return x*(1-t) + y*t
