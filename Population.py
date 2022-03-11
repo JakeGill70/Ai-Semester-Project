@@ -42,7 +42,7 @@ class Population:
             newAgent.mutate(mutationMultiplier=mutationMultiplier)
             self.allAgents.append(newAgent)
 
-    def getMatchGroups(self, groupSize=2):
+    def getMatchGroups(self, groupSize=4):
         matchUps = []
         for i in range(0, len(self.allAgents), groupSize):
             matchUp = self.allAgents[i: i+groupSize]
