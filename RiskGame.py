@@ -157,7 +157,8 @@ class RiskGame(StrategyGame):
             return ([], [])
 
         # Place initial armies on map
-        self.setupGameBoard(agents, 30, map)
+        initialArmies = 50 - (len(agents) * 5)
+        self.setupGameBoard(agents, initialArmies, map)
 
         # Initial game message
         if (showGame):
@@ -278,7 +279,8 @@ class RiskGame(StrategyGame):
             return ([], [])
 
         # Place initial armies on map
-        self.setupGameBoard(agents, 30, map)
+        initialArmies = 50 - (len(agents) * 5)
+        self.setupGameBoard(agents, initialArmies, map)
 
         # Initial game message
         if (showGame):
