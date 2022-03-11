@@ -140,9 +140,7 @@ class Tournament():
             generalPopulation.generateNextGeneration(mutationMultiplier)
 
     @staticmethod
-    def playMultipleTournamentsMax(
-            map, populationSize, generationCount, lowMutationMod, highMutationMod, agentOutputDirectory,
-            turnCountFilePathName):
+    def playMultipleTournamentsMax(map, populationSize, generationCount, lowMutationMod, highMutationMod, agentOutputDirectory, turnCountFilePathName):
         # Define inner function to interpolate between the low & high mutation modifiers
         def interpolate(x, y, t):
             return x*(1-t) + y*t
@@ -177,7 +175,6 @@ class Tournament():
             if(generationCount % 10 == 0):
                 Tournament.clearCache(3)
             
-
     @staticmethod
     def clearCache(attempts=3):
         # TODO: This really shouldn't be handled in this class
