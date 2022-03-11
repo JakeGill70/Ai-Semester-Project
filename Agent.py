@@ -1,11 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, ABCMeta
 from argparse import ArgumentError
 import hashlib
 import random
 
 from IHashable import IHashable
 
-class Agent(IHashable, ABC):
+class Agent(IHashable, metaclass=ABCMeta):
     def __init__(self, name="Unnamed Agent"):
         self.name = name
         self.characteristics = {}
@@ -47,8 +47,7 @@ class Agent(IHashable, ABC):
             recursiveChance = recursiveChance / 2
 
             # Determine what to mutate
-            characteristicGroupName = random.choice(
-                list(self.characteristics.keys()))
+            characteristicGroupName = random.choice(list(self.characteristics.keys()))
             # Determine how to mutate (Single attribute vs. entire group)
             isMajorMutation = random.random() < majorMutationChance
             # Perform mutation
