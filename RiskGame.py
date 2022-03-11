@@ -263,7 +263,7 @@ class RiskGame(StrategyGame):
         if (len(agents) != len(set([agent.name for agent in agents]))):
             Logger.message(MessageTypes.DuplicatePlayerWarning,
                 f"Error: Duplicate player names: {[agent.name for agent in agents]}")
-            return ([], [])
+            return ([], [], 0)
 
         # Place initial armies on map
         initialArmies = 50 - (len(agents) * 5)
